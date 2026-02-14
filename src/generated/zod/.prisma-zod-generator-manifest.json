@@ -1,0 +1,35 @@
+{
+	"version": "1.0",
+	"generatorVersion": "unknown",
+	"generatedAt": "2026-02-12T21:15:24.979Z",
+	"outputPath": "/home/oliver/development/code/HOBBY/crowdsec-dashboard/src/generated/zod",
+	"files": [
+		"schemas/enums/TransactionIsolationLevel.schema.ts",
+		"schemas/enums/UserScalarFieldEnum.schema.ts",
+		"schemas/enums/SessionScalarFieldEnum.schema.ts",
+		"schemas/enums/AccountScalarFieldEnum.schema.ts",
+		"schemas/enums/VerificationScalarFieldEnum.schema.ts",
+		"schemas/enums/HostScalarFieldEnum.schema.ts",
+		"schemas/enums/DecisionScalarFieldEnum.schema.ts",
+		"schemas/enums/SortOrder.schema.ts",
+		"schemas/enums/NullsOrder.schema.ts",
+		"schemas/enums/DecisionType.schema.ts",
+		"schemas/enums/DecisionOrigin.schema.ts",
+		"schemas/variants/pure/User.pure.ts",
+		"schemas/variants/pure/Session.pure.ts",
+		"schemas/variants/pure/Account.pure.ts",
+		"schemas/variants/pure/Verification.pure.ts",
+		"schemas/variants/pure/Host.pure.ts",
+		"schemas/variants/pure/Decision.pure.ts",
+		"schemas/variants/pure/index.ts",
+		"schemas/variants/index.ts",
+		"schemas/index.ts"
+	],
+	"directories": [
+		"schemas/enums",
+		"schemas/variants/pure",
+		"schemas/variants",
+		"schemas"
+	],
+	"singleFileMode": false
+}

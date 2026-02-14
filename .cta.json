@@ -1,0 +1,27 @@
+{
+  "projectName": "crowdsec-dashboard",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "npm",
+  "tailwind": true,
+  "addOnOptions": {
+    "prisma": {
+      "database": "sqlite"
+    }
+  },
+  "git": true,
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "biome",
+    "nitro",
+    "start",
+    "prisma",
+    "compiler",
+    "form",
+    "shadcn",
+    "t3env",
+    "better-auth",
+    "tanstack-query"
+  ]
+}

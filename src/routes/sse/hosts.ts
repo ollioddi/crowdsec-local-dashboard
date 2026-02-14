@@ -1,0 +1,39 @@
+import { createFileRoute } from "@tanstack/react-router";
+import {
+	registerSSEConnection,
+	unregisterSSEConnection,
+} from "@/lib/sse.server";
+
+const CHANNEL = "hosts";
+
+export const Route = createFileRoute("/sse/hosts")({
+	server: {
+		handlers: {
+			GET: async ({ request }) => {
+				const connectionId = crypto.randomUUID();
+
+				const stream = new ReadableStream({
+					start(controller) {
+						registerSSEConnection(connectionId, controller, CHANNEL);
+					},
+					cancel() {
+						unregisterSSEConnection(connectionId, CHANNEL);
+					},
+				});
+
+				request.signal.addEventListener("abort", () => {
+					unregisterSSEConnection(connectionId, CHANNEL);
+				});
+
+				return new Response(stream, {
+					headers: {
+						"Content-Type": "text/event-stream",
+						"Cache-Control": "no-cache",
+						Connection: "keep-alive",
+						"X-Accel-Buffering": "no",
+					},
+				});
+			},
+		},
+	},
+});

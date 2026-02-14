@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+generator zod {
+  provider = "prisma-zod-generator"
+  output   = "../src/generated/zod"
+  config   = "./zod-generator.config.json"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum DecisionType {
+  ban
+  captcha
+  whitelist
+}
+
+enum DecisionOrigin {
+  crowdsec
+  cscli
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  username      String?   @unique
+  displayUsername String?
+  sessions      Session[]
+  accounts      Account[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Host {
+  id        String   @id @default(cuid())
+  ip        String   @unique
+  scope     String   @default("Ip") // Ip, Range, etc.
+  firstSeen DateTime @default(now())
+  lastSeen  DateTime @updatedAt
+  totalBans Int      @default(0)
+
+  // GeoIP enrichment (from alerts API source data)
+  country   String?
+  asNumber  String?
+  asName    String?
+  latitude  Float?
+  longitude Float?
+
+  decisions Decision[]
+}
+
+model Decision {
+  id         Int      @id // CrowdSec decision ID
+  hostIp     String
+  host       Host     @relation(fields: [hostIp], references: [ip])
+
+  type       DecisionType    // ban, captcha
+  origin     DecisionOrigin  // crowdsec, cscli
+  scenario   String
+  duration   String   // original duration (e.g. "4h")
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime? // calculated: createdAt + duration
+  active     Boolean  @default(true)
+
+  @@index([hostIp])
+  @@index([active])
+  @@index([expiresAt])
+}
