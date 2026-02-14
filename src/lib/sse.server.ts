@@ -19,6 +19,9 @@ export function registerSSEConnection(
 		channels.set(channel, new Map());
 	}
 	channels.get(channel)?.set(id, controller);
+
+	// Send a comment to keep the connection alive in case the client is behind a proxy that buffers small responses
+	controller.enqueue(encoder.encode(": connected\n\n"));
 }
 
 export function unregisterSSEConnection(id: string, channel: string) {
