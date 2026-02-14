@@ -15,7 +15,14 @@ const config = defineConfig({
 	},
 	plugins: [
 		devtools(),
-		nitro(),
+		nitro({
+			// geoip-country is CJS-only; bundling it into an ESM chunk causes
+			// ERR_AMBIGUOUS_MODULE_SYNTAX at runtime. Externalize it so Node.js
+			// loads it from node_modules with the correct CJS format.
+			rollupConfig: {
+				external: ["geoip-country"],
+			},
+		}),
 		// this is the plugin that enables path aliases
 		viteTsConfigPaths({
 			projects: ["./tsconfig.json"],
