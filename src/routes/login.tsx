@@ -4,7 +4,6 @@ import {
 	useLoaderData,
 	useRouter,
 } from "@tanstack/react-router";
-import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -20,12 +19,11 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ensureAdminAndSignInFn, isFirstSetupFn } from "@/lib/auth.functions";
-
-export const loginSchema = z.object({
-	username: z.string().min(1, "Username is required"),
-	password: z.string().min(4, "Password is required"),
-});
+import {
+	ensureAdminAndSignInFn,
+	isFirstSetupFn,
+	loginSchema,
+} from "@/lib/auth.functions";
 
 const LoginPage = () => {
 	const router = useRouter();

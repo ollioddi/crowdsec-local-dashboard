@@ -1,7 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
+import z from "zod";
 import type { Session } from "@/lib/auth.server";
-import { loginSchema } from "@/routes/login";
+
+export const loginSchema = z.object({
+	username: z.string().min(1, "Username is required"),
+	password: z.string().min(4, "Password is required"),
+});
 
 /**
  * Server function to get the current session.

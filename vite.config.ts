@@ -16,11 +16,18 @@ const config = defineConfig({
 	plugins: [
 		devtools(),
 		nitro({
-			// geoip-country is CJS-only; bundling it into an ESM chunk causes
-			// ERR_AMBIGUOUS_MODULE_SYNTAX at runtime. Externalize it so Node.js
-			// loads it from node_modules with the correct CJS format.
 			rollupConfig: {
-				external: ["geoip-country"],
+				// Packages that must not be bundled into the server output:
+				// - geoip-country: CJS-only, causes ERR_AMBIGUOUS_MODULE_SYNTAX
+				// - better-sqlite3: native .node addon, needs real node_modules path
+				// - @prisma/adapter-better-sqlite3: instantiates better-sqlite3
+				// - bindings: resolves native addon paths relative to package dir
+				external: [
+					"geoip-country",
+					"better-sqlite3",
+					"@prisma/adapter-better-sqlite3",
+					"bindings",
+				],
 			},
 		}),
 		// this is the plugin that enables path aliases
