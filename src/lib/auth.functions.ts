@@ -37,9 +37,8 @@ export const ensureAdminAndSignInFn = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const { auth } = await import("@/lib/auth.server");
 		const { prisma } = await import("@/db");
-		const { createUserAccount, SETUP_EMAIL_DOMAIN } = await import(
-			"@/lib/users.functions"
-		);
+		const { createUserAccount } = await import("@/lib/users.server");
+		const { SETUP_EMAIL_DOMAIN } = await import("@/lib/users.functions");
 
 		const headers = getRequestHeaders();
 		const { username, password } = data;

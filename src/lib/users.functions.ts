@@ -31,48 +31,11 @@ export const createUserSchema = z.object({
 	email: z.union([z.email("Invalid email address"), z.literal("")]),
 });
 
-/**
- * Creates a user record and its associated credential account.
- * Callers are responsible for resolving the email fallback and
- * normalising the username before calling this.
- */
-export async function createUserAccount(
-	username: string,
-	password: string,
-	email: string,
-): Promise<void> {
-	const { prisma } = await import("@/db");
-	const { auth } = await import("@/lib/auth.server");
-
-	const ctx = await auth.$context;
-	const hash = await ctx.password.hash(password);
-	const userId = globalThis.crypto.randomUUID();
-
-	await prisma.user.create({
-		data: {
-			id: userId,
-			name: username,
-			email,
-			username,
-			displayUsername: username,
-		},
-	});
-
-	await prisma.account.create({
-		data: {
-			id: globalThis.crypto.randomUUID(),
-			userId,
-			accountId: userId,
-			providerId: "credential",
-			password: hash,
-		},
-	});
-}
-
 export const createUserFn = createServerFn({ method: "POST" })
 	.inputValidator(createUserSchema)
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
+		const { createUserAccount } = await import("@/lib/users.server");
 		const { username, password, email } = data;
 		const usernameLower = username.toLowerCase();
 
