@@ -29,14 +29,17 @@ RUN pnpm run build
 # ─── Stage 4: Runtime ────────────────────────────────────────────────────────
 # Lean image: no build tools, no devDependencies, no source files.
 FROM node:22-slim AS runner
+RUN apt-get update && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Production node_modules (includes pre-compiled better-sqlite3 binary)
 COPY --from=prod-deps /app/node_modules ./node_modules
 # Built server bundle + static assets
 COPY --from=builder /app/.output ./.output
-# Prisma schema — required by `prisma db push` at startup
+# Prisma schema + config — required by `prisma db push` at startup
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 # SQLite database is stored here; mount a volume to persist it.
 VOLUME /data
@@ -48,4 +51,4 @@ ENV NODE_ENV=production
 ENV DATABASE_URL=file:/data/app.db
 
 # On every start: apply any pending schema changes, then launch the server.
-CMD ["sh", "-c", "node_modules/.bin/prisma db push --skip-generate && node .output/server/index.mjs"]
+CMD ["sh", "-c", "node_modules/.bin/prisma db push && node .output/server/index.mjs"]
