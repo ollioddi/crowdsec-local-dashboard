@@ -19,8 +19,10 @@ FROM base AS builder
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
-# Generate Prisma client into src/generated/prisma (bundled by Nitro)
-RUN pnpm exec prisma generate
+# Generate Prisma client into src/generated/prisma (bundled by Nitro).
+# DATABASE_URL is not used by generate but prisma.config.ts calls env() at
+# config-load time, so we provide a placeholder to satisfy the resolver.
+RUN DATABASE_URL=file:/tmp/build.db pnpm exec prisma generate
 # Produce the server bundle at .output/server/index.mjs
 RUN pnpm run build
 
