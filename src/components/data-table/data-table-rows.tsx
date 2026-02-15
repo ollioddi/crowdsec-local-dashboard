@@ -13,7 +13,7 @@ interface DataTableRowsProps<TData> {
 	table: ReactTableType<TData>;
 	isLoading: boolean;
 	emptyState?: ReactNode;
-	renderSubComponent?: (props: { row: Row<TData> }) => ReactElement;
+	renderSubComponent?: (row: Row<TData>) => ReactElement;
 }
 
 const VIRTUALIZATION_THRESHOLD = 100;
@@ -77,7 +77,7 @@ const VirtualizedRows = <TData,>({
 }: {
 	rows: Row<TData>[];
 	hydrated: boolean;
-	renderSubComponent?: (props: { row: Row<TData> }) => ReactElement;
+	renderSubComponent?: (row: Row<TData>) => ReactElement;
 }) => {
 	const rowVirtualizer = useWindowVirtualizer({
 		count: rows.length,
@@ -139,7 +139,7 @@ const TableRowWithExpansion = <TData,>({
 	renderSubComponent,
 }: {
 	row: Row<TData>;
-	renderSubComponent?: (props: { row: Row<TData> }) => ReactElement;
+	renderSubComponent?: (row: Row<TData>) => ReactElement;
 }) => {
 	const visibleCells = row.getVisibleCells();
 	const isExpanded = row.getIsExpanded();
@@ -157,7 +157,7 @@ const TableRowWithExpansion = <TData,>({
 			{isExpanded && renderSubComponent && (
 				<TableRow>
 					<TableCell colSpan={visibleCells.length}>
-						{renderSubComponent({ row })}
+						{renderSubComponent(row)}
 					</TableCell>
 				</TableRow>
 			)}

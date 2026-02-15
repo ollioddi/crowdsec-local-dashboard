@@ -24,8 +24,8 @@ interface DecisionExpandedRowProps {
 export function DecisionExpandedRow({
 	row,
 	onDelete,
-}: DecisionExpandedRowProps) {
-	const d = row.original;
+}: Readonly<DecisionExpandedRowProps>) {
+	const decision = row.original;
 
 	return (
 		<div className="px-1 py-2 space-y-4">
@@ -35,41 +35,43 @@ export function DecisionExpandedRow({
 						Scenario
 					</p>
 					<span className="font-medium break-all">
-						{d.scenario.replace("crowdsecurity/", "")}
+						{decision.scenario.replace("crowdsecurity/", "")}
 					</span>
 				</div>
 				<div>
 					<p className="text-xs font-medium text-muted-foreground mb-0.5">
 						Origin
 					</p>
-					<Badge variant={originVariant(d.origin)}>{d.origin}</Badge>
+					<Badge variant={originVariant(decision.origin)}>
+						{decision.origin}
+					</Badge>
 				</div>
 				<div>
 					<p className="text-xs font-medium text-muted-foreground mb-0.5">
 						Country
 					</p>
-					<span>{d.host.country ?? "-"}</span>
+					<span>{decision.host.country ?? "-"}</span>
 				</div>
 				<div>
 					<p className="text-xs font-medium text-muted-foreground mb-0.5">
 						Duration
 					</p>
-					<span>{d.duration}</span>
+					<span>{decision.duration}</span>
 				</div>
 				<div>
 					<p className="text-xs font-medium text-muted-foreground mb-0.5">
 						Expires
 					</p>
-					<RelativeTime date={d.expiresAt} />
+					<RelativeTime date={decision.expiresAt} />
 				</div>
 			</div>
 			<div className="flex gap-2">
-				{d.active && (
+				{decision.active && (
 					<Button
 						variant="destructive"
 						size="sm"
 						className="flex-1"
-						onClick={() => onDelete(d.id)}
+						onClick={() => onDelete(decision.id)}
 					>
 						<Trash2 className="mr-1.5 size-4" />
 						Delete
@@ -80,7 +82,10 @@ export function DecisionExpandedRow({
 					size="sm"
 					className="flex-1"
 					onClick={() =>
-						window.open(`https://app.crowdsec.net/cti/${d.hostIp}`, "_blank")
+						window.open(
+							`https://app.crowdsec.net/cti/${decision.hostIp}`,
+							"_blank",
+						)
 					}
 				>
 					<ExternalLink className="mr-1.5 size-4" />

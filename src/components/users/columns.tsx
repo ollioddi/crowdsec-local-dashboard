@@ -18,7 +18,7 @@ export function createColumns(
 		{
 			accessorKey: "displayUsername",
 			header: "Username",
-			meta: { sortable: true, globalFilter: true },
+			meta: { sortable: true, globalFilter: true, visibleByDefault: true },
 			cell: ({ row }) => (
 				<div className="flex items-center gap-2">
 					<span className="font-medium">
@@ -33,7 +33,11 @@ export function createColumns(
 		{
 			accessorKey: "email",
 			header: "Email",
-			meta: { hideOnMobile: true, expandedLabel: "Email", globalFilter: true },
+			meta: {
+				visibleByDefault: { desktop: true, mobile: false },
+				expandedLabel: "Email",
+				globalFilter: true,
+			},
 			cell: ({ row }) => {
 				const email = row.getValue<string>("email");
 				if (
@@ -48,13 +52,17 @@ export function createColumns(
 		{
 			accessorKey: "createdAt",
 			header: "Created",
-			meta: { sortable: true },
+			meta: {
+				sortable: true,
+				visibleByDefault: true,
+			},
 			cell: ({ row }) => (
 				<RelativeTime date={row.getValue<string>("createdAt")} />
 			),
 		},
 		{
 			id: "actions",
+			meta: { visibleByDefault: true },
 			cell: ({ row }) => {
 				const isMobile = useIsMobile();
 				if (row.original.id === firstUserId) return null;

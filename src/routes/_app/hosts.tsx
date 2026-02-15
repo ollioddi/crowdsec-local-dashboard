@@ -72,7 +72,7 @@ function HostsPage() {
 				initialSorting={[{ id: "activeDecisions", desc: true }]}
 				initialGlobalFilter={hostIp}
 				emptyState="No hosts discovered yet."
-				mobileExpandedRow={(row) => <HostExpandedRow row={row} />}
+				renderSubComponent={(row) => <HostExpandedRow row={row} />}
 				header={(table) => (
 					<DataDisplayToolbar
 						table={table}

@@ -13,7 +13,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { FacetedFilter } from "./faceted-filter";
+import { getDefaultColumnVisibility } from "./table-utils";
 
 export interface DataDisplayToolbarProps<TData> {
 	/** TanStack Table instance */
@@ -64,6 +66,14 @@ const ColumnVisibility = <TData,>({
 }: {
 	columns: Column<TData>[];
 }) => {
+	const isMobile = useIsMobile();
+	const defaults = getDefaultColumnVisibility(
+		columns.map((c) => c.columnDef),
+		isMobile,
+	);
+	const isAtDefault = columns.every(
+		(col) => col.getIsVisible() === (defaults[col.id] ?? true),
+	);
 	const visibleColumns = columns.filter((col) => col.getIsVisible());
 	const hiddenCount = columns.length - visibleColumns.length;
 
@@ -73,7 +83,7 @@ const ColumnVisibility = <TData,>({
 
 	const resetVisibility = () => {
 		for (const col of columns) {
-			col.toggleVisibility(true);
+			col.toggleVisibility(defaults[col.id] ?? true);
 		}
 	};
 
@@ -81,7 +91,7 @@ const ColumnVisibility = <TData,>({
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Button
-					className="hidden gap-2 bg-transparent lg:flex"
+					className="gap-2 bg-transparent lg:flex"
 					size="sm"
 					variant="outline"
 				>
@@ -99,7 +109,7 @@ const ColumnVisibility = <TData,>({
 					<span>Hide columns</span>
 					<Button
 						className="ml-2 h-auto p-1 text-muted-foreground text-xs hover:text-foreground"
-						disabled={hiddenCount === 0}
+						disabled={isAtDefault}
 						onClick={resetVisibility}
 						size="sm"
 						variant="ghost"
@@ -192,10 +202,10 @@ const DataDisplayToolbar = <TData,>({
 				</Button>
 			)}
 
-			{/* Right section */}
-			<div className="ml-auto flex shrink-0 items-center gap-3">
-				{extra}
+			{/* Right section — forced to its own row on mobile */}
+			<div className="flex basis-full items-center justify-between gap-3 sm:basis-auto sm:ml-auto sm:shrink-0 sm:justify-end">
 				{showColumnToggler && <ColumnVisibility columns={toggleableColumns} />}
+				{extra}
 			</div>
 		</div>
 	);

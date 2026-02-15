@@ -35,7 +35,7 @@ export function createColumns(
 		{
 			accessorKey: "hostIp",
 			header: "IP",
-			meta: { sortable: true, globalFilter: true },
+			meta: { sortable: true, globalFilter: true, visibleByDefault: true },
 			filterFn: "arrIncludesSome",
 			cell: ({ row }) => {
 				const ip = row.getValue<string>("hostIp");
@@ -47,7 +47,7 @@ export function createColumns(
 			header: "Scenario",
 			meta: {
 				globalFilter: true,
-				hideOnMobile: true,
+				visibleByDefault: { desktop: true, mobile: false },
 				expandedLabel: "Scenario",
 			},
 			cell: ({ row }) => {
@@ -64,7 +64,7 @@ export function createColumns(
 			accessorKey: "type",
 			header: "Type",
 			size: 80,
-			meta: { filterVariant: "select" },
+			meta: { filterVariant: "select", visibleByDefault: true },
 			filterFn: "arrIncludesSome",
 			cell: ({ row }) => {
 				const type = row.getValue<string>("type");
@@ -75,7 +75,7 @@ export function createColumns(
 			accessorKey: "origin",
 			header: "Origin",
 			meta: {
-				hideOnMobile: true,
+				visibleByDefault: { desktop: true, mobile: false },
 				expandedLabel: "Origin",
 				filterVariant: "select",
 			},
@@ -92,7 +92,7 @@ export function createColumns(
 			accessorFn: (row) => row.host.country,
 			meta: {
 				sortable: true,
-				hideOnMobile: true,
+				visibleByDefault: { desktop: true, mobile: false },
 				expandedLabel: "Country",
 				filterVariant: "select",
 			},
@@ -104,7 +104,7 @@ export function createColumns(
 			header: "Status",
 			size: 80,
 			accessorFn: (row) => (row.active ? "Active" : "Expired"),
-			meta: { sortable: true, filterVariant: "select" },
+			meta: { sortable: true, filterVariant: "select", visibleByDefault: true },
 			filterFn: "arrIncludesSome",
 			cell: ({ row }) => {
 				const status = row.getValue<string>("status");
@@ -118,19 +118,29 @@ export function createColumns(
 		{
 			accessorKey: "duration",
 			header: "Duration",
-			meta: { hideOnMobile: true, expandedLabel: "Duration" },
+			meta: {
+				visibleByDefault: { desktop: true, mobile: false },
+				expandedLabel: "Duration",
+			},
 		},
 		{
 			accessorKey: "expiresAt",
 			header: "Expires",
-			meta: { sortable: true, hideOnMobile: true, expandedLabel: "Expires" },
+			meta: {
+				sortable: true,
+				visibleByDefault: { desktop: true, mobile: false },
+				expandedLabel: "Expires",
+			},
 			cell: ({ row }) => (
 				<RelativeTime date={row.getValue<string>("expiresAt")} />
 			),
 		},
 		{
 			id: "delete",
-			meta: { hideOnMobile: true, expandedLabel: "" },
+			meta: {
+				visibleByDefault: { desktop: true, mobile: false },
+				expandedLabel: "",
+			},
 			cell: ({ row }) => {
 				const decision = row.original;
 				if (!decision.active) return null;
@@ -148,7 +158,10 @@ export function createColumns(
 		},
 		{
 			id: "viewInCrowdsec",
-			meta: { hideOnMobile: true, expandedLabel: "" },
+			meta: {
+				visibleByDefault: { desktop: true, mobile: false },
+				expandedLabel: "",
+			},
 			cell: ({ row }) => {
 				const ip = row.original.hostIp;
 				return (

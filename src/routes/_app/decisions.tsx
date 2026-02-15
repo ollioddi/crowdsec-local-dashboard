@@ -123,7 +123,7 @@ function DecisionsPage() {
 				initialSorting={[{ id: "status", desc: false }]}
 				initialGlobalFilter={hostIp}
 				emptyState="No decisions."
-				mobileExpandedRow={(row) => (
+				renderSubComponent={(row) => (
 					<DecisionExpandedRow row={row} onDelete={handleDelete} />
 				)}
 				header={(table) => (

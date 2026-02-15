@@ -7,64 +7,6 @@ import type {
 
 export type PageElement = number | "...";
 
-/**
- * Returns column visibility state that hides columns marked with `hideOnMobile`.
- * On desktop (isMobile=false) all columns are visible.
- */
-export function getMobileColumnVisibility<TData, TValue>(
-	columns: ColumnDef<TData, TValue>[],
-	isMobile: boolean,
-): VisibilityState {
-	if (!isMobile) return {};
-
-	return columns.reduce<VisibilityState>((acc, col) => {
-		const columnId =
-			col.id ??
-			(typeof (col as { accessorKey?: unknown }).accessorKey === "string"
-				? (col as { accessorKey: string }).accessorKey
-				: undefined);
-		if (columnId == null) return acc;
-
-		if (col.meta?.hideOnMobile) {
-			acc[columnId] = false;
-		}
-		return acc;
-	}, {});
-}
-
-/**
- * Custom global filter that only searches columns whose meta has `globalFilter: true`.
- */
-export const globalFilterFn: FilterFn<unknown> = <TData>(
-	row: Row<TData>,
-	_columnId: string,
-	filterValue: string,
-): boolean => {
-	if (!filterValue) return true;
-	const search = filterValue.toLowerCase();
-
-	const table = (
-		row as unknown as {
-			_getAllCellsByColumnId: () => Record<
-				string,
-				{
-					column: { columnDef: { meta?: { globalFilter?: boolean } } };
-					getValue: () => unknown;
-				}
-			>;
-		}
-	)._getAllCellsByColumnId();
-
-	for (const [, cell] of Object.entries(table)) {
-		if (!cell.column.columnDef.meta?.globalFilter) continue;
-		const value = cell.getValue();
-		if (value != null && String(value).toLowerCase().includes(search)) {
-			return true;
-		}
-	}
-	return false;
-};
-
 export const calculatePages = (
 	currentPage: number,
 	totalPages: number,
@@ -105,9 +47,43 @@ export const calculatePages = (
 	return pages;
 };
 
+/**
+ * Custom global filter that only searches columns whose meta has `globalFilter: true`.
+ */
+export const globalFilterFn: FilterFn<unknown> = <TData>(
+	row: Row<TData>,
+	_columnId: string,
+	filterValue: string,
+): boolean => {
+	if (!filterValue) return true;
+	const search = filterValue.toLowerCase();
+
+	const table = (
+		row as unknown as {
+			_getAllCellsByColumnId: () => Record<
+				string,
+				{
+					column: { columnDef: { meta?: { globalFilter?: boolean } } };
+					getValue: () => unknown;
+				}
+			>;
+		}
+	)._getAllCellsByColumnId();
+
+	for (const [, cell] of Object.entries(table)) {
+		if (!cell.column.columnDef.meta?.globalFilter) continue;
+		const value = cell.getValue();
+		if (value != null && String(value).toLowerCase().includes(search)) {
+			return true;
+		}
+	}
+	return false;
+};
+
 /** Function to get the default visibility state of columns as defined by the extended column meta */
 export function getDefaultColumnVisibility<TData, TValue>(
 	columns: ColumnDef<TData, TValue>[],
+	isMobile = false,
 ): VisibilityState {
 	return columns.reduce<VisibilityState>((acc, col) => {
 		// TanStack Table uses either `id` or `accessorKey` as the column identifier
@@ -120,8 +96,16 @@ export function getDefaultColumnVisibility<TData, TValue>(
 			return acc;
 		}
 
-		const visible = col.meta?.visibleByDefault ?? true;
-		acc[columnId] = visible;
+		const vbd = col.meta?.visibleByDefault;
+		const isObj = typeof vbd === "object" && vbd !== null;
+		const visibleDesktop = isObj ? vbd.desktop : vbd;
+		const visibleMobile = isObj ? vbd.mobile : vbd;
+
+		const showColumn = isMobile
+			? (visibleMobile ?? true)
+			: (visibleDesktop ?? true);
+
+		acc[columnId] = showColumn;
 		return acc;
 	}, {});
 }

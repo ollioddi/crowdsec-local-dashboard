@@ -11,14 +11,19 @@ export const columns: ColumnDef<HostWithCount>[] = [
 	{
 		accessorKey: "ip",
 		header: "IP Address",
-		meta: { sortable: true, globalFilter: true, mobileHeader: "IP" },
+		meta: {
+			sortable: true,
+			globalFilter: true,
+			mobileHeader: "IP",
+			visibleByDefault: true,
+		},
 		cell: ({ row }) => <IPCopyBadge ip={row.getValue("ip")} />,
 	},
 	{
 		id: "activeDecisions",
 		header: "Active",
 		size: 70,
-		meta: { sortable: true, mobileHeader: "#" },
+		meta: { sortable: true, mobileHeader: "#", visibleByDefault: true },
 		accessorFn: (row) => row._count.decisions,
 		cell: ({ row }) => {
 			const count = row.getValue<number>("activeDecisions");
@@ -31,7 +36,11 @@ export const columns: ColumnDef<HostWithCount>[] = [
 		accessorKey: "totalBans",
 		header: "Total Bans",
 		size: 70,
-		meta: { sortable: true, hideOnMobile: true, expandedLabel: "Total Bans" },
+		meta: {
+			sortable: true,
+			visibleByDefault: { desktop: true, mobile: false },
+			expandedLabel: "Total Bans",
+		},
 	},
 	{
 		accessorKey: "country",
@@ -42,6 +51,7 @@ export const columns: ColumnDef<HostWithCount>[] = [
 			globalFilter: true,
 			filterVariant: "select",
 			mobileHeader: "Co.",
+			visibleByDefault: true,
 		},
 		filterFn: "arrIncludesSome",
 		cell: ({ row }) => row.getValue("country") ?? "-",
@@ -49,7 +59,11 @@ export const columns: ColumnDef<HostWithCount>[] = [
 	{
 		accessorKey: "firstSeen",
 		header: "First Seen",
-		meta: { sortable: true, hideOnMobile: true, expandedLabel: "First Seen" },
+		meta: {
+			sortable: true,
+			visibleByDefault: { desktop: true, mobile: false },
+			expandedLabel: "First Seen",
+		},
 		cell: ({ row }) => (
 			<RelativeTime date={row.getValue<string>("firstSeen")} />
 		),
@@ -57,12 +71,19 @@ export const columns: ColumnDef<HostWithCount>[] = [
 	{
 		accessorKey: "lastSeen",
 		header: "Last Seen",
-		meta: { sortable: true, hideOnMobile: true, expandedLabel: "Last Seen" },
+		meta: {
+			sortable: true,
+			visibleByDefault: { desktop: true, mobile: false },
+			expandedLabel: "Last Seen",
+		},
 		cell: ({ row }) => <RelativeTime date={row.getValue<string>("lastSeen")} />,
 	},
 	{
 		id: "actions",
-		meta: { hideOnMobile: true, expandedLabel: "" },
+		meta: {
+			visibleByDefault: { desktop: true, mobile: false },
+			expandedLabel: "",
+		},
 		cell: ({ row }) => {
 			const host = row.original;
 			return (

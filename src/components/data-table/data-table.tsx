@@ -3,7 +3,6 @@ import {
 	type ColumnDef,
 	type ColumnFiltersState,
 	type FilterFn,
-	flexRender,
 	getCoreRowModel,
 	getExpandedRowModel,
 	getFacetedRowModel,
@@ -32,11 +31,7 @@ import { cn } from "@/lib/utils";
 import DataTableHeaderCell from "./data-table-header-cell";
 import DataTableRows from "./data-table-rows";
 import PaginationBar from "./pagination-bar";
-import {
-	getDefaultColumnVisibility,
-	getMobileColumnVisibility,
-	globalFilterFn,
-} from "./table-utils";
+import { getDefaultColumnVisibility, globalFilterFn } from "./table-utils";
 
 const EMPTY_FILTERS: ColumnFiltersState = [];
 const EMPTY_SORTING: SortingState = [];
@@ -51,13 +46,7 @@ interface DataTableProps<TData> {
 	/** Render extra content above the table (e.g. toolbar, search) */
 	header?: (table: ReactTableType<TData>) => ReactNode;
 	/** Custom sub-component for expandable rows (desktop) */
-	renderSubComponent?: (props: { row: Row<TData> }) => ReactElement;
-	/**
-	 * Custom mobile expanded row renderer.
-	 * When provided, replaces the auto-generated hidden-column list.
-	 * Receives the full row object so you have access to all values and original data.
-	 */
-	mobileExpandedRow?: (row: Row<TData>) => ReactElement;
+	renderSubComponent?: (row: Row<TData>) => ReactElement;
 	/** Initial column filter state (e.g. from URL search params) */
 	initialColumnFilters?: ColumnFiltersState;
 	/** Initial sorting state */
@@ -74,7 +63,6 @@ export function DataTable<TData>({
 	emptyState,
 	header,
 	renderSubComponent,
-	mobileExpandedRow,
 	initialColumnFilters = EMPTY_FILTERS,
 	initialSorting = EMPTY_SORTING,
 	initialGlobalFilter = EMPTY_GLOBAL_FILTER,
@@ -86,7 +74,7 @@ export function DataTable<TData>({
 		useState<ColumnFiltersState>(initialColumnFilters);
 	const [globalFilter, setGlobalFilter] = useState(initialGlobalFilter);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-		getDefaultColumnVisibility(columns),
+		() => getDefaultColumnVisibility(columns, isMobile),
 	);
 	const [pagination, setPagination] = useState({
 		pageIndex: 0,
@@ -98,80 +86,14 @@ export function DataTable<TData>({
 		setColumnFilters(initialColumnFilters);
 	}, [initialColumnFilters]);
 
-	const hasMobileHiddenCols = useMemo(
-		() => columns.some((c) => c.meta?.hideOnMobile),
-		[columns],
-	);
-
-	// On mobile, hide columns marked with hideOnMobile and enable row expansion
-	// On desktop, show all columns
+	// Re-apply default visibility when viewport changes between mobile/desktop
 	useEffect(() => {
-		const mobileVisibility = getMobileColumnVisibility(columns, isMobile);
-		setColumnVisibility((prev) => ({
-			...getDefaultColumnVisibility(columns),
-			...prev,
-			...mobileVisibility,
-		}));
+		setColumnVisibility(getDefaultColumnVisibility(columns, isMobile));
 	}, [isMobile, columns]);
-
-	// Build the mobile expansion sub-component.
-	// If mobileExpandedRow is provided, delegate to it for full custom rendering.
-	// Otherwise, auto-render any columns marked hideOnMobile.
-	const mobileSubComponent = useMemo(() => {
-		if (!isMobile) return renderSubComponent;
-
-		if (mobileExpandedRow) {
-			return ({ row }: { row: Row<TData> }) => mobileExpandedRow(row);
-		}
-
-		const hiddenCols = columns.filter((col) => col.meta?.hideOnMobile);
-		if (hiddenCols.length === 0) return renderSubComponent;
-
-		return ({ row }: { row: Row<TData> }) => (
-			<div className="space-y-4 py-3 text-sm">
-				{hiddenCols.map((col) => {
-					const columnId =
-						col.id ??
-						(typeof (col as { accessorKey?: unknown }).accessorKey === "string"
-							? (col as { accessorKey: string }).accessorKey
-							: undefined);
-					if (!columnId) return null;
-
-					const label =
-						col.meta?.expandedLabel ??
-						(typeof col.header === "string" ? col.header : columnId);
-
-					const cell = row.getAllCells().find((c) => c.column.id === columnId);
-					if (!cell) return null;
-
-					// No label → render cell content full-width (e.g. action buttons)
-					if (!label) {
-						return (
-							<div key={columnId}>
-								{flexRender(cell.column.columnDef.cell, cell.getContext())}
-							</div>
-						);
-					}
-
-					return (
-						<div key={columnId} className="flex flex-col gap-1">
-							<span className="text-xs font-medium text-muted-foreground">
-								{label}
-							</span>
-							<span>
-								{flexRender(cell.column.columnDef.cell, cell.getContext())}
-							</span>
-						</div>
-					);
-				})}
-				{renderSubComponent?.({ row })}
-			</div>
-		);
-	}, [isMobile, columns, renderSubComponent, mobileExpandedRow]);
 
 	// On mobile, prepend a dedicated chevron expand button column
 	const effectiveColumns = useMemo((): ColumnDef<TData, unknown>[] => {
-		if (!isMobile || !hasMobileHiddenCols) return columns;
+		if (!isMobile) return columns;
 
 		const expandCol: ColumnDef<TData, unknown> = {
 			id: "_expand",
@@ -200,7 +122,7 @@ export function DataTable<TData>({
 		};
 
 		return [expandCol, ...columns];
-	}, [isMobile, hasMobileHiddenCols, columns]);
+	}, [isMobile, columns]);
 
 	const table = useReactTable({
 		data,
@@ -225,7 +147,7 @@ export function DataTable<TData>({
 			globalFilter,
 			pagination,
 		},
-		getRowCanExpand: () => isMobile && hasMobileHiddenCols,
+		getRowCanExpand: () => isMobile,
 	});
 
 	const totalItemsPreFiltered = table.getPreFilteredRowModel().rows.length;
@@ -261,7 +183,7 @@ export function DataTable<TData>({
 						<DataTableRows
 							emptyState={emptyState}
 							isLoading={isLoading}
-							renderSubComponent={mobileSubComponent}
+							renderSubComponent={renderSubComponent}
 							table={table}
 						/>
 					</TableBody>

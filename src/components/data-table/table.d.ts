@@ -7,11 +7,14 @@ declare module "@tanstack/react-table" {
 	interface ColumnMeta<_TData extends object, _TValue> {
 		sortable?: boolean;
 		filterable?: boolean;
-		visibleByDefault?: boolean;
+		visibleByDefault?:
+			| {
+					desktop?: boolean;
+					mobile?: boolean;
+			  }
+			| boolean;
 		/** Include this column's value in the global text filter */
 		globalFilter?: boolean;
-		/** Hide this column on mobile viewports (< 768px) */
-		hideOnMobile?: boolean;
 		/** Human-readable label shown in the expanded mobile row */
 		expandedLabel?: string;
 		/** Shorter column header text used on mobile to avoid overflow */
