@@ -48,6 +48,7 @@ This dashboard replaces all of that with a filterable table and a delete button.
 - **User management** - local username/password accounts; the first registered user becomes admin
 - **Mobile-friendly** - responsive tables that collapse gracefully on small screens
 - **Dark mode** - follows system preference
+- **PWA support** - installable on desktop and mobile;
 
 ---
 

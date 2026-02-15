@@ -5,6 +5,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 
 const config = defineConfig({
@@ -39,6 +40,24 @@ const config = defineConfig({
 		viteReact({
 			babel: {
 				plugins: ["babel-plugin-react-compiler"],
+			},
+		}),
+		VitePWA({
+			registerType: "autoUpdate",
+			manifest: false, // use public/manifest.json
+			workbox: {
+				globPatterns: ["**/*.{js,css,html,png,svg,ico,woff,woff2}"],
+				navigateFallbackDenylist: [/^\/api/, /^\/sse/],
+				runtimeCaching: [
+					{
+						urlPattern: /^https?.*/,
+						handler: "NetworkFirst",
+						options: {
+							cacheName: "network-first-cache",
+							networkTimeoutSeconds: 10,
+						},
+					},
+				],
 			},
 		}),
 	],

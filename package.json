@@ -61,7 +61,10 @@
     "onlyBuiltDependencies": [
       "better-sqlite3",
       "esbuild"
-    ]
+    ],
+    "overrides": {
+      "vite": "$vite"
+    }
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
@@ -79,6 +82,7 @@
     "tsx": "^4.20.6",
     "typescript": "^5.7.2",
     "vite": "^7.1.7",
+    "vite-plugin-pwa": "^1.2.0",
     "vitest": "^3.0.5",
     "web-vitals": "^5.1.0"
   }
