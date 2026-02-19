@@ -1,9 +1,15 @@
+import { useQuery } from "@tanstack/react-query";
 import type { Row } from "@tanstack/react-table";
 import { ExternalLink, Trash2 } from "lucide-react";
 import { RelativeTime } from "@/components/relative-dates";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { DecisionWithHost } from "@/lib/decisions.functions";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+	type DecisionAlertDetail,
+	type DecisionWithHost,
+	getDecisionAlertsFn,
+} from "@/lib/decisions.functions";
 
 function originVariant(origin: string) {
 	switch (origin.toLowerCase()) {
@@ -16,6 +22,95 @@ function originVariant(origin: string) {
 	}
 }
 
+function verbColor(verb: string | undefined): string {
+	switch (verb?.toUpperCase()) {
+		case "GET":
+			return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+		case "POST":
+			return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
+		case "PUT":
+			return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
+		case "DELETE":
+			return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+		case "PATCH":
+			return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
+		default:
+			return "bg-muted text-muted-foreground";
+	}
+}
+
+function statusColor(status: number | undefined): string {
+	if (!status) return "text-muted-foreground";
+	if (status < 300) return "text-green-600 dark:text-green-400";
+	if (status < 400) return "text-blue-600 dark:text-blue-400";
+	if (status < 500) return "text-amber-600 dark:text-amber-400";
+	return "text-red-600 dark:text-red-400";
+}
+
+interface AlertEvidenceProps {
+	alert: DecisionAlertDetail;
+}
+
+function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
+	const httpEvents = alert.events.filter((e) => e.httpVerb ?? e.httpPath);
+	const firstEvent = alert.events[0];
+
+	return (
+		<div className="space-y-2">
+			<div className="flex items-center gap-2">
+				<span className="text-xs font-semibold">
+					{alert.scenario.replace("crowdsecurity/", "")}
+				</span>
+				<span className="text-xs text-muted-foreground">
+					· {alert.events.length} event{alert.events.length === 1 ? "" : "s"}
+				</span>
+			</div>
+
+			{firstEvent &&
+				(firstEvent.asnNumber ?? firstEvent.asnOrg ?? firstEvent.isoCode) && (
+					<div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+						{firstEvent.asnNumber && <span>ASN {firstEvent.asnNumber}</span>}
+						{firstEvent.asnOrg && <span>{firstEvent.asnOrg}</span>}
+						{firstEvent.isoCode && <span>{firstEvent.isoCode}</span>}
+						{firstEvent.sourceRange && <span>{firstEvent.sourceRange}</span>}
+					</div>
+				)}
+
+			{httpEvents.length > 0 && (
+				<div className="max-h-48 overflow-y-auto space-y-0.5 rounded border p-1">
+					{httpEvents.map((event, idx) => (
+						<div
+							key={`${idx}-${event.httpVerb}${event.httpPath}${event.httpStatus}`}
+							className="flex items-center gap-2 text-xs py-0.5"
+						>
+							{event.httpVerb && (
+								<span
+									className={`shrink-0 rounded px-1 py-0.5 font-mono text-[10px] font-bold ${verbColor(event.httpVerb)}`}
+								>
+									{event.httpVerb}
+								</span>
+							)}
+							<span
+								className="font-mono flex-1 truncate"
+								title={event.httpPath}
+							>
+								{event.httpPath ?? "—"}
+							</span>
+							{event.httpStatus && (
+								<span
+									className={`shrink-0 font-mono ${statusColor(event.httpStatus)}`}
+								>
+									{event.httpStatus}
+								</span>
+							)}
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
 interface DecisionExpandedRowProps {
 	row: Row<DecisionWithHost>;
 	onDelete: (id: number) => void;
@@ -26,6 +121,13 @@ export function DecisionExpandedRow({
 	onDelete,
 }: Readonly<DecisionExpandedRowProps>) {
 	const decision = row.original;
+
+	const { data: alerts = [], isLoading } = useQuery({
+		queryKey: ["decision-alerts", decision.id],
+		queryFn: () => getDecisionAlertsFn({ data: { decisionId: decision.id } }),
+		enabled: decision.alerts.length > 0,
+		staleTime: Infinity,
+	});
 
 	return (
 		<div className="px-1 py-2 space-y-4">
@@ -50,8 +152,19 @@ export function DecisionExpandedRow({
 					<p className="text-xs font-medium text-muted-foreground mb-0.5">
 						Country
 					</p>
-					<span>{decision.host.country ?? "-"}</span>
+					<span>{decision.host.country ?? "—"}</span>
 				</div>
+				{decision.host.asNumber && (
+					<div className="col-span-2">
+						<p className="text-xs font-medium text-muted-foreground mb-0.5">
+							AS
+						</p>
+						<span>
+							{decision.host.asNumber}
+							{decision.host.asName && ` — ${decision.host.asName}`}
+						</span>
+					</div>
+				)}
 				<div>
 					<p className="text-xs font-medium text-muted-foreground mb-0.5">
 						Duration
@@ -65,6 +178,26 @@ export function DecisionExpandedRow({
 					<RelativeTime date={decision.expiresAt} />
 				</div>
 			</div>
+
+			{decision.alerts.length > 0 && (
+				<div className="space-y-3">
+					<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+						Alert Evidence
+					</p>
+					{isLoading ? (
+						<div className="space-y-2">
+							<Skeleton className="h-4 w-32" />
+							<Skeleton className="h-4 w-24" />
+							<Skeleton className="h-16 w-full" />
+						</div>
+					) : (
+						alerts.map((alert) => (
+							<AlertEvidence key={alert.id} alert={alert} />
+						))
+					)}
+				</div>
+			)}
+
 			<div className="flex gap-2">
 				{decision.active && (
 					<Button

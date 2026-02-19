@@ -12,15 +12,60 @@ import {
 export const getDecisionsFn = createServerFn({ method: "GET" }).handler(
 	async () => {
 		const { prisma } = await import("@/db");
-		return prisma.decision.findMany({
-			include: { host: true },
+		const rows = await prisma.decision.findMany({
+			include: {
+				host: true,
+				alerts: { select: { id: true, paths: true, scenario: true } },
+			},
 			orderBy: { createdAt: "desc" },
 		});
+		return rows.map((d) => ({
+			...d,
+			alerts: d.alerts.map((a) => ({
+				id: a.id,
+				scenario: a.scenario,
+				paths: JSON.parse(a.paths) as string[],
+			})),
+		}));
 	},
 );
 
 export type DecisionWithHost = Awaited<
 	ReturnType<typeof getDecisionsFn>
+>[number];
+
+/**
+ * Fetch full alert data (including parsed events) for a single decision.
+ * Intended for the expanded row — fetched lazily on expand.
+ */
+export const getDecisionAlertsFn = createServerFn({ method: "GET" })
+	.inputValidator(z.object({ decisionId: z.number() }))
+	.handler(async ({ data }) => {
+		const { prisma } = await import("@/db");
+		const { parseAlertEvent } = await import("@/lib/parse-alert-event");
+
+		const decision = await prisma.decision.findUnique({
+			where: { id: data.decisionId },
+			include: { alerts: true },
+		});
+		if (!decision?.alerts.length) return [];
+
+		type AlertEventRaw = import("@/lib/crowdsec-lapi/types").AlertEvent;
+
+		return decision.alerts.map((alert) => ({
+			id: alert.id,
+			scenario: alert.scenario,
+			message: alert.message,
+			createdAt: alert.createdAt,
+			paths: JSON.parse(alert.paths) as string[],
+			events: (JSON.parse(alert.events) as AlertEventRaw[]).map(
+				parseAlertEvent,
+			),
+		}));
+	});
+
+export type DecisionAlertDetail = Awaited<
+	ReturnType<typeof getDecisionAlertsFn>
 >[number];
 
 /**

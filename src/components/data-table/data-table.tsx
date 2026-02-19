@@ -91,9 +91,9 @@ export function DataTable<TData>({
 		setColumnVisibility(getDefaultColumnVisibility(columns, isMobile));
 	}, [isMobile, columns]);
 
-	// On mobile, prepend a dedicated chevron expand button column
+	// Prepend a dedicated chevron expand button column when rows are expandable
 	const effectiveColumns = useMemo((): ColumnDef<TData, unknown>[] => {
-		if (!isMobile) return columns;
+		if (!renderSubComponent) return columns;
 
 		const expandCol: ColumnDef<TData, unknown> = {
 			id: "_expand",
@@ -122,7 +122,7 @@ export function DataTable<TData>({
 		};
 
 		return [expandCol, ...columns];
-	}, [isMobile, columns]);
+	}, [renderSubComponent, columns]);
 
 	const table = useReactTable({
 		data,
@@ -147,7 +147,7 @@ export function DataTable<TData>({
 			globalFilter,
 			pagination,
 		},
-		getRowCanExpand: () => isMobile,
+		getRowCanExpand: () => !!renderSubComponent,
 	});
 
 	const totalItemsPreFiltered = table.getPreFilteredRowModel().rows.length;

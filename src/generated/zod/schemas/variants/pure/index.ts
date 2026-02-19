@@ -4,6 +4,7 @@
  */
 
 export { AccountModelSchema } from "./Account.pure";
+export { AlertModelSchema } from "./Alert.pure";
 export { DecisionModelSchema } from "./Decision.pure";
 export { HostModelSchema } from "./Host.pure";
 export { SessionModelSchema } from "./Session.pure";

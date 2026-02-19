@@ -90,6 +90,7 @@ model Host {
   longitude Float?
 
   decisions Decision[]
+  alerts    Alert[]
 }
 
 model Decision {
@@ -104,8 +105,27 @@ model Decision {
   createdAt  DateTime @default(now())
   expiresAt  DateTime? // calculated: createdAt + duration
   active     Boolean  @default(true)
+  alerts     Alert[]  @relation("DecisionAlerts")
 
   @@index([hostIp])
   @@index([active])
   @@index([expiresAt])
+}
+
+model Alert {
+  id          Int      @id // CrowdSec Alert ID
+  scenario    String
+  message     String
+  createdAt   DateTime
+  paths       String   @default("[]") // JSON string[] of unique http_paths from events
+
+  // Link to Host
+  hostIp      String
+  host        Host     @relation(fields: [hostIp], references: [ip])
+
+  // Link to Decisions (many-to-many)
+  decisions   Decision[] @relation("DecisionAlerts")
+
+  // Store raw logs as JSON because they are unstructured
+  events      String   @default("[]") // JSON string of the log lines
 }

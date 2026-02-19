@@ -53,7 +53,11 @@ export const ensureAdminAndSignInFn = createServerFn({ method: "POST" })
 		if (userCount === 0) {
 			// First user — create admin account directly via Prisma,
 			// bypassing signUpEmail which requires a valid email.
-			await createUserAccount(username, password, `${username}${SETUP_EMAIL_DOMAIN}`);
+			await createUserAccount(
+				username,
+				password,
+				`${username}${SETUP_EMAIL_DOMAIN}`,
+			);
 		}
 
 		// Sign in with username

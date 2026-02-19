@@ -60,6 +60,7 @@ export const ModelName = {
 	Verification: "Verification",
 	Host: "Host",
 	Decision: "Decision",
+	Alert: "Alert",
 } as const;
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -164,6 +165,19 @@ export const DecisionScalarFieldEnum = {
 
 export type DecisionScalarFieldEnum =
 	(typeof DecisionScalarFieldEnum)[keyof typeof DecisionScalarFieldEnum];
+
+export const AlertScalarFieldEnum = {
+	id: "id",
+	scenario: "scenario",
+	message: "message",
+	createdAt: "createdAt",
+	paths: "paths",
+	hostIp: "hostIp",
+	events: "events",
+} as const;
+
+export type AlertScalarFieldEnum =
+	(typeof AlertScalarFieldEnum)[keyof typeof AlertScalarFieldEnum];
 
 export const SortOrder = {
 	asc: "asc",

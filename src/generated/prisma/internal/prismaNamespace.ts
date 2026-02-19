@@ -421,6 +421,7 @@ export const ModelName = {
 	Verification: "Verification",
 	Host: "Host",
 	Decision: "Decision",
+	Alert: "Alert",
 } as const;
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -448,7 +449,8 @@ export type TypeMap<
 			| "account"
 			| "verification"
 			| "host"
-			| "decision";
+			| "decision"
+			| "alert";
 		txIsolationLevel: TransactionIsolationLevel;
 	};
 	model: {
@@ -908,6 +910,82 @@ export type TypeMap<
 				};
 			};
 		};
+		Alert: {
+			payload: Prisma.$AlertPayload<ExtArgs>;
+			fields: Prisma.AlertFieldRefs;
+			operations: {
+				findUnique: {
+					args: Prisma.AlertFindUniqueArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload> | null;
+				};
+				findUniqueOrThrow: {
+					args: Prisma.AlertFindUniqueOrThrowArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>;
+				};
+				findFirst: {
+					args: Prisma.AlertFindFirstArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload> | null;
+				};
+				findFirstOrThrow: {
+					args: Prisma.AlertFindFirstOrThrowArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>;
+				};
+				findMany: {
+					args: Prisma.AlertFindManyArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>[];
+				};
+				create: {
+					args: Prisma.AlertCreateArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>;
+				};
+				createMany: {
+					args: Prisma.AlertCreateManyArgs<ExtArgs>;
+					result: BatchPayload;
+				};
+				createManyAndReturn: {
+					args: Prisma.AlertCreateManyAndReturnArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>[];
+				};
+				delete: {
+					args: Prisma.AlertDeleteArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>;
+				};
+				update: {
+					args: Prisma.AlertUpdateArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>;
+				};
+				deleteMany: {
+					args: Prisma.AlertDeleteManyArgs<ExtArgs>;
+					result: BatchPayload;
+				};
+				updateMany: {
+					args: Prisma.AlertUpdateManyArgs<ExtArgs>;
+					result: BatchPayload;
+				};
+				updateManyAndReturn: {
+					args: Prisma.AlertUpdateManyAndReturnArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>[];
+				};
+				upsert: {
+					args: Prisma.AlertUpsertArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>;
+				};
+				aggregate: {
+					args: Prisma.AlertAggregateArgs<ExtArgs>;
+					result: runtime.Types.Utils.Optional<Prisma.AggregateAlert>;
+				};
+				groupBy: {
+					args: Prisma.AlertGroupByArgs<ExtArgs>;
+					result: runtime.Types.Utils.Optional<Prisma.AlertGroupByOutputType>[];
+				};
+				count: {
+					args: Prisma.AlertCountArgs<ExtArgs>;
+					result:
+						| runtime.Types.Utils.Optional<Prisma.AlertCountAggregateOutputType>
+						| number;
+				};
+			};
+		};
 	};
 } & {
 	other: {
@@ -1033,6 +1111,19 @@ export const DecisionScalarFieldEnum = {
 
 export type DecisionScalarFieldEnum =
 	(typeof DecisionScalarFieldEnum)[keyof typeof DecisionScalarFieldEnum];
+
+export const AlertScalarFieldEnum = {
+	id: "id",
+	scenario: "scenario",
+	message: "message",
+	createdAt: "createdAt",
+	paths: "paths",
+	hostIp: "hostIp",
+	events: "events",
+} as const;
+
+export type AlertScalarFieldEnum =
+	(typeof AlertScalarFieldEnum)[keyof typeof AlertScalarFieldEnum];
 
 export const SortOrder = {
 	asc: "asc",
@@ -1217,6 +1308,7 @@ export type GlobalOmitConfig = {
 	verification?: Prisma.VerificationOmit;
 	host?: Prisma.HostOmit;
 	decision?: Prisma.DecisionOmit;
+	alert?: Prisma.AlertOmit;
 };
 
 /* Types for Logging */

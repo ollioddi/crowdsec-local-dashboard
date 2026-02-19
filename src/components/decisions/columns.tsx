@@ -116,12 +116,55 @@ export function createColumns(
 			},
 		},
 		{
+			id: "paths",
+			header: "Path",
+			accessorFn: (row) => {
+				// Collect all unique paths across all alerts for this decision
+				const all = new Set<string>();
+				for (const a of row.alerts) {
+					for (const p of a.paths) all.add(p);
+				}
+				return [...all];
+			},
+			meta: {
+				visibleByDefault: { desktop: true, mobile: false },
+				expandedLabel: "Path",
+			},
+			cell: ({ row }) => {
+				const paths = row.getValue<string[]>("paths");
+				if (!paths.length)
+					return <span className="text-muted-foreground">—</span>;
+				const [first, ...rest] = paths;
+				return (
+					<span className="flex items-center gap-1.5 min-w-0">
+						<span
+							className="font-mono text-xs max-w-[160px] truncate"
+							title={first}
+						>
+							{first}
+						</span>
+						{rest.length > 0 && (
+							<span className="shrink-0 text-[10px] font-medium text-muted-foreground bg-muted rounded px-1">
+								+{rest.length}
+							</span>
+						)}
+					</span>
+				);
+			},
+		},
+		{
 			accessorKey: "duration",
 			header: "Duration",
 			meta: {
 				visibleByDefault: { desktop: true, mobile: false },
 				expandedLabel: "Duration",
 			},
+			cell: ({ row }) =>
+				row.original.active ? (
+					row.getValue<string>("duration")
+				) : (
+					<span className="text-muted-foreground">—</span>
+				),
 		},
 		{
 			accessorKey: "expiresAt",
