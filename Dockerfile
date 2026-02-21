@@ -28,7 +28,7 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 # Built server bundle + static assets
 COPY --from=builder /app/.output ./.output
-# Prisma schema + config — required by `prisma db push` at startup
+# Prisma schema + config - required by `prisma db push` at startup
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
