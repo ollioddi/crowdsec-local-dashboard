@@ -30,7 +30,7 @@ import {
 	useSidebar,
 } from "@/components/ui/sidebar";
 import { useAppSession } from "@/context/session-provider";
-import { signOut } from "@/lib/auth-client";
+import { signOut } from "@/lib/auth/auth-client";
 
 const navigationItems = [
 	{
