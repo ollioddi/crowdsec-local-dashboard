@@ -7,7 +7,7 @@
  */
 
 import { prisma } from "@/db";
-import { auth } from "@/lib/auth.server";
+import { auth } from "@/lib/auth/auth.server";
 
 /**
  * Creates a user record and its associated credential account.

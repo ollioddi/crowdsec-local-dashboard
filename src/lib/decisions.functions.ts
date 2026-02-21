@@ -19,12 +19,12 @@ export const getDecisionsFn = createServerFn({ method: "GET" }).handler(
 			},
 			orderBy: { createdAt: "desc" },
 		});
-		return rows.map((d) => ({
-			...d,
-			alerts: d.alerts.map((a) => ({
-				id: a.id,
-				scenario: a.scenario,
-				paths: JSON.parse(a.paths) as string[],
+		return rows.map((decision) => ({
+			...decision,
+			alerts: decision.alerts.map((alert) => ({
+				id: alert.id,
+				scenario: alert.scenario,
+				paths: JSON.parse(alert.paths) as string[],
 			})),
 		}));
 	},

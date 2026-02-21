@@ -15,7 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SessionProvider } from "@/context/session-provider";
 import { ThemeProvider } from "@/context/theme-provider";
-import { getSessionFn } from "@/lib/auth.functions";
+import { getSessionFn } from "@/lib/auth/auth.functions";
 
 export const Route = createFileRoute("/_app")({
 	component: AppLayout,

@@ -13,3 +13,7 @@ count.txt
 todos.json
 *.db
 *.db-journal
+
+.tanstack
+.output
+.claude

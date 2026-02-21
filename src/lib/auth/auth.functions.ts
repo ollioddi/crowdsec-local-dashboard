@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import z from "zod";
-import type { Session } from "@/lib/auth.server";
+import type { Session } from "@/lib/auth/auth.server";
 
 export const loginSchema = z.object({
 	username: z.string().min(1, "Username is required"),
@@ -14,7 +14,7 @@ export const loginSchema = z.object({
  */
 export const getSessionFn = createServerFn({ method: "GET" }).handler(
 	async (): Promise<Session | null> => {
-		const { auth } = await import("@/lib/auth.server");
+		const { auth } = await import("@/lib/auth/auth.server");
 		const headers = getRequestHeaders();
 		const session = await auth.api.getSession({ headers });
 		return session;
@@ -40,7 +40,7 @@ export const isFirstSetupFn = createServerFn({ method: "GET" }).handler(
 export const ensureAdminAndSignInFn = createServerFn({ method: "POST" })
 	.inputValidator(loginSchema)
 	.handler(async ({ data }) => {
-		const { auth } = await import("@/lib/auth.server");
+		const { auth } = await import("@/lib/auth/auth.server");
 		const { prisma } = await import("@/db");
 		const { createUserAccount } = await import("@/lib/users.server");
 		const { SETUP_EMAIL_DOMAIN } = await import("@/lib/users.functions");
