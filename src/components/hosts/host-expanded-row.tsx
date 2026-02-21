@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { HostWithCount } from "@/lib/hosts.functions";
 
-export function HostExpandedRow({ row }: { row: Row<HostWithCount> }) {
+export function HostExpandedRow({
+	row,
+}: Readonly<{ row: Row<HostWithCount> }>) {
 	const host = row.original;
 	const activeCount = host._count.decisions;
 
