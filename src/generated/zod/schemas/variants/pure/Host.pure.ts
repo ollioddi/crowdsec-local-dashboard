@@ -14,6 +14,7 @@ export const HostModelSchema = z
 		latitude: z.number().nullable(),
 		longitude: z.number().nullable(),
 		decisions: z.array(z.unknown()),
+		alerts: z.array(z.unknown()),
 	})
 	.strict();
 

@@ -75,3 +75,8 @@ export type Host = Prisma.HostModel;
  *
  */
 export type Decision = Prisma.DecisionModel;
+/**
+ * Model Alert
+ *
+ */
+export type Alert = Prisma.AlertModel;

@@ -61,3 +61,43 @@ export type DecisionStreamResponse = {
 export type DeleteDecisionResponse = {
 	nbDeleted: string;
 };
+
+export type AlertEvent = {
+	timestamp: string;
+	meta: Array<{ key: string; value: string }>;
+};
+
+export type CrowdSecAlert = {
+	id: number;
+	scenario: string;
+	message: string;
+	events_count: number;
+	start_at: string;
+	stop_at: string;
+	created_at: string;
+	source: {
+		scope: string;
+		value: string;
+		ip?: string;
+		range?: string;
+		as_name?: string;
+		as_number?: string;
+		cn?: string;
+		latitude?: number;
+		longitude?: number;
+	};
+	events: AlertEvent[];
+	decisions: CrowdSecDecision[];
+};
+
+export type AlertFilters = {
+	scope?: string;
+	value?: string;
+	ip?: string;
+	range?: string;
+	scenario?: string;
+	since?: string;
+	until?: string;
+	limit?: number;
+	has_active_decision?: boolean;
+};

@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { getSessionFn } from "@/lib/auth/auth.functions";
 import {
 	registerSSEConnection,
 	unregisterSSEConnection,
@@ -10,6 +11,12 @@ export const Route = createFileRoute("/sse/decisions")({
 	server: {
 		handlers: {
 			GET: async ({ request }) => {
+				const session = await getSessionFn();
+
+				if (!session) {
+					throw redirect({ to: "/login" });
+				}
+
 				const connectionId = crypto.randomUUID();
 
 				const stream = new ReadableStream({

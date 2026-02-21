@@ -66,9 +66,7 @@ const DataTableRows = <TData,>({
 	);
 };
 
-// ————————————————
 // Virtualized Rows
-// ————————————————
 
 const VirtualizedRows = <TData,>({
 	rows,
@@ -130,9 +128,7 @@ const VirtualizedRows = <TData,>({
 	);
 };
 
-// ————————————————
 // Single Row Component
-// ————————————————
 
 const TableRowWithExpansion = <TData,>({
 	row,
@@ -165,9 +161,7 @@ const TableRowWithExpansion = <TData,>({
 	);
 };
 
-// ————————————————
 // Helper Components
-// ————————————————
 
 const SkeletonRows = ({
 	columnsLength,

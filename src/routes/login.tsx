@@ -23,7 +23,7 @@ import {
 	ensureAdminAndSignInFn,
 	isFirstSetupFn,
 	loginSchema,
-} from "@/lib/auth.functions";
+} from "@/lib/auth/auth.functions";
 
 const LoginPage = () => {
 	const router = useRouter();

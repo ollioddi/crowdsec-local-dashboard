@@ -4,6 +4,7 @@
  */
 
 export { AccountSchema } from "./Account.schema";
+export { AlertSchema } from "./Alert.schema";
 export { DecisionSchema } from "./Decision.schema";
 export { HostSchema } from "./Host.schema";
 export { SessionSchema } from "./Session.schema";

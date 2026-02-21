@@ -253,6 +253,7 @@ export type DecisionWhereInput = {
 	expiresAt?: Prisma.DateTimeNullableFilter<"Decision"> | Date | string | null;
 	active?: Prisma.BoolFilter<"Decision"> | boolean;
 	host?: Prisma.XOR<Prisma.HostScalarRelationFilter, Prisma.HostWhereInput>;
+	alerts?: Prisma.AlertListRelationFilter;
 };
 
 export type DecisionOrderByWithRelationInput = {
@@ -266,6 +267,7 @@ export type DecisionOrderByWithRelationInput = {
 	expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder;
 	active?: Prisma.SortOrder;
 	host?: Prisma.HostOrderByWithRelationInput;
+	alerts?: Prisma.AlertOrderByRelationAggregateInput;
 };
 
 export type DecisionWhereUniqueInput = Prisma.AtLeast<
@@ -289,6 +291,7 @@ export type DecisionWhereUniqueInput = Prisma.AtLeast<
 			| null;
 		active?: Prisma.BoolFilter<"Decision"> | boolean;
 		host?: Prisma.XOR<Prisma.HostScalarRelationFilter, Prisma.HostWhereInput>;
+		alerts?: Prisma.AlertListRelationFilter;
 	},
 	"id"
 >;
@@ -347,6 +350,7 @@ export type DecisionCreateInput = {
 	expiresAt?: Date | string | null;
 	active?: boolean;
 	host: Prisma.HostCreateNestedOneWithoutDecisionsInput;
+	alerts?: Prisma.AlertCreateNestedManyWithoutDecisionsInput;
 };
 
 export type DecisionUncheckedCreateInput = {
@@ -359,6 +363,7 @@ export type DecisionUncheckedCreateInput = {
 	createdAt?: Date | string;
 	expiresAt?: Date | string | null;
 	active?: boolean;
+	alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDecisionsInput;
 };
 
 export type DecisionUpdateInput = {
@@ -379,6 +384,7 @@ export type DecisionUpdateInput = {
 		| null;
 	active?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	host?: Prisma.HostUpdateOneRequiredWithoutDecisionsNestedInput;
+	alerts?: Prisma.AlertUpdateManyWithoutDecisionsNestedInput;
 };
 
 export type DecisionUncheckedUpdateInput = {
@@ -399,6 +405,7 @@ export type DecisionUncheckedUpdateInput = {
 		| string
 		| null;
 	active?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	alerts?: Prisma.AlertUncheckedUpdateManyWithoutDecisionsNestedInput;
 };
 
 export type DecisionCreateManyInput = {
@@ -612,6 +619,96 @@ export type BoolFieldUpdateOperationsInput = {
 	set?: boolean;
 };
 
+export type DecisionCreateNestedManyWithoutAlertsInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.DecisionCreateWithoutAlertsInput,
+				Prisma.DecisionUncheckedCreateWithoutAlertsInput
+		  >
+		| Prisma.DecisionCreateWithoutAlertsInput[]
+		| Prisma.DecisionUncheckedCreateWithoutAlertsInput[];
+	connectOrCreate?:
+		| Prisma.DecisionCreateOrConnectWithoutAlertsInput
+		| Prisma.DecisionCreateOrConnectWithoutAlertsInput[];
+	connect?: Prisma.DecisionWhereUniqueInput | Prisma.DecisionWhereUniqueInput[];
+};
+
+export type DecisionUncheckedCreateNestedManyWithoutAlertsInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.DecisionCreateWithoutAlertsInput,
+				Prisma.DecisionUncheckedCreateWithoutAlertsInput
+		  >
+		| Prisma.DecisionCreateWithoutAlertsInput[]
+		| Prisma.DecisionUncheckedCreateWithoutAlertsInput[];
+	connectOrCreate?:
+		| Prisma.DecisionCreateOrConnectWithoutAlertsInput
+		| Prisma.DecisionCreateOrConnectWithoutAlertsInput[];
+	connect?: Prisma.DecisionWhereUniqueInput | Prisma.DecisionWhereUniqueInput[];
+};
+
+export type DecisionUpdateManyWithoutAlertsNestedInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.DecisionCreateWithoutAlertsInput,
+				Prisma.DecisionUncheckedCreateWithoutAlertsInput
+		  >
+		| Prisma.DecisionCreateWithoutAlertsInput[]
+		| Prisma.DecisionUncheckedCreateWithoutAlertsInput[];
+	connectOrCreate?:
+		| Prisma.DecisionCreateOrConnectWithoutAlertsInput
+		| Prisma.DecisionCreateOrConnectWithoutAlertsInput[];
+	upsert?:
+		| Prisma.DecisionUpsertWithWhereUniqueWithoutAlertsInput
+		| Prisma.DecisionUpsertWithWhereUniqueWithoutAlertsInput[];
+	set?: Prisma.DecisionWhereUniqueInput | Prisma.DecisionWhereUniqueInput[];
+	disconnect?:
+		| Prisma.DecisionWhereUniqueInput
+		| Prisma.DecisionWhereUniqueInput[];
+	delete?: Prisma.DecisionWhereUniqueInput | Prisma.DecisionWhereUniqueInput[];
+	connect?: Prisma.DecisionWhereUniqueInput | Prisma.DecisionWhereUniqueInput[];
+	update?:
+		| Prisma.DecisionUpdateWithWhereUniqueWithoutAlertsInput
+		| Prisma.DecisionUpdateWithWhereUniqueWithoutAlertsInput[];
+	updateMany?:
+		| Prisma.DecisionUpdateManyWithWhereWithoutAlertsInput
+		| Prisma.DecisionUpdateManyWithWhereWithoutAlertsInput[];
+	deleteMany?:
+		| Prisma.DecisionScalarWhereInput
+		| Prisma.DecisionScalarWhereInput[];
+};
+
+export type DecisionUncheckedUpdateManyWithoutAlertsNestedInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.DecisionCreateWithoutAlertsInput,
+				Prisma.DecisionUncheckedCreateWithoutAlertsInput
+		  >
+		| Prisma.DecisionCreateWithoutAlertsInput[]
+		| Prisma.DecisionUncheckedCreateWithoutAlertsInput[];
+	connectOrCreate?:
+		| Prisma.DecisionCreateOrConnectWithoutAlertsInput
+		| Prisma.DecisionCreateOrConnectWithoutAlertsInput[];
+	upsert?:
+		| Prisma.DecisionUpsertWithWhereUniqueWithoutAlertsInput
+		| Prisma.DecisionUpsertWithWhereUniqueWithoutAlertsInput[];
+	set?: Prisma.DecisionWhereUniqueInput | Prisma.DecisionWhereUniqueInput[];
+	disconnect?:
+		| Prisma.DecisionWhereUniqueInput
+		| Prisma.DecisionWhereUniqueInput[];
+	delete?: Prisma.DecisionWhereUniqueInput | Prisma.DecisionWhereUniqueInput[];
+	connect?: Prisma.DecisionWhereUniqueInput | Prisma.DecisionWhereUniqueInput[];
+	update?:
+		| Prisma.DecisionUpdateWithWhereUniqueWithoutAlertsInput
+		| Prisma.DecisionUpdateWithWhereUniqueWithoutAlertsInput[];
+	updateMany?:
+		| Prisma.DecisionUpdateManyWithWhereWithoutAlertsInput
+		| Prisma.DecisionUpdateManyWithWhereWithoutAlertsInput[];
+	deleteMany?:
+		| Prisma.DecisionScalarWhereInput
+		| Prisma.DecisionScalarWhereInput[];
+};
+
 export type DecisionCreateWithoutHostInput = {
 	id: number;
 	type: $Enums.DecisionType;
@@ -621,6 +718,7 @@ export type DecisionCreateWithoutHostInput = {
 	createdAt?: Date | string;
 	expiresAt?: Date | string | null;
 	active?: boolean;
+	alerts?: Prisma.AlertCreateNestedManyWithoutDecisionsInput;
 };
 
 export type DecisionUncheckedCreateWithoutHostInput = {
@@ -632,6 +730,7 @@ export type DecisionUncheckedCreateWithoutHostInput = {
 	createdAt?: Date | string;
 	expiresAt?: Date | string | null;
 	active?: boolean;
+	alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDecisionsInput;
 };
 
 export type DecisionCreateOrConnectWithoutHostInput = {
@@ -691,6 +790,66 @@ export type DecisionScalarWhereInput = {
 	active?: Prisma.BoolFilter<"Decision"> | boolean;
 };
 
+export type DecisionCreateWithoutAlertsInput = {
+	id: number;
+	type: $Enums.DecisionType;
+	origin: $Enums.DecisionOrigin;
+	scenario: string;
+	duration: string;
+	createdAt?: Date | string;
+	expiresAt?: Date | string | null;
+	active?: boolean;
+	host: Prisma.HostCreateNestedOneWithoutDecisionsInput;
+};
+
+export type DecisionUncheckedCreateWithoutAlertsInput = {
+	id: number;
+	hostIp: string;
+	type: $Enums.DecisionType;
+	origin: $Enums.DecisionOrigin;
+	scenario: string;
+	duration: string;
+	createdAt?: Date | string;
+	expiresAt?: Date | string | null;
+	active?: boolean;
+};
+
+export type DecisionCreateOrConnectWithoutAlertsInput = {
+	where: Prisma.DecisionWhereUniqueInput;
+	create: Prisma.XOR<
+		Prisma.DecisionCreateWithoutAlertsInput,
+		Prisma.DecisionUncheckedCreateWithoutAlertsInput
+	>;
+};
+
+export type DecisionUpsertWithWhereUniqueWithoutAlertsInput = {
+	where: Prisma.DecisionWhereUniqueInput;
+	update: Prisma.XOR<
+		Prisma.DecisionUpdateWithoutAlertsInput,
+		Prisma.DecisionUncheckedUpdateWithoutAlertsInput
+	>;
+	create: Prisma.XOR<
+		Prisma.DecisionCreateWithoutAlertsInput,
+		Prisma.DecisionUncheckedCreateWithoutAlertsInput
+	>;
+};
+
+export type DecisionUpdateWithWhereUniqueWithoutAlertsInput = {
+	where: Prisma.DecisionWhereUniqueInput;
+	data: Prisma.XOR<
+		Prisma.DecisionUpdateWithoutAlertsInput,
+		Prisma.DecisionUncheckedUpdateWithoutAlertsInput
+	>;
+};
+
+export type DecisionUpdateManyWithWhereWithoutAlertsInput = {
+	where: Prisma.DecisionScalarWhereInput;
+	data: Prisma.XOR<
+		Prisma.DecisionUpdateManyMutationInput,
+		Prisma.DecisionUncheckedUpdateManyWithoutAlertsInput
+	>;
+};
+
 export type DecisionCreateManyHostInput = {
 	id: number;
 	type: $Enums.DecisionType;
@@ -719,6 +878,7 @@ export type DecisionUpdateWithoutHostInput = {
 		| string
 		| null;
 	active?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	alerts?: Prisma.AlertUpdateManyWithoutDecisionsNestedInput;
 };
 
 export type DecisionUncheckedUpdateWithoutHostInput = {
@@ -738,6 +898,7 @@ export type DecisionUncheckedUpdateWithoutHostInput = {
 		| string
 		| null;
 	active?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	alerts?: Prisma.AlertUncheckedUpdateManyWithoutDecisionsNestedInput;
 };
 
 export type DecisionUncheckedUpdateManyWithoutHostInput = {
@@ -759,6 +920,104 @@ export type DecisionUncheckedUpdateManyWithoutHostInput = {
 	active?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 };
 
+export type DecisionUpdateWithoutAlertsInput = {
+	id?: Prisma.IntFieldUpdateOperationsInput | number;
+	type?:
+		| Prisma.EnumDecisionTypeFieldUpdateOperationsInput
+		| $Enums.DecisionType;
+	origin?:
+		| Prisma.EnumDecisionOriginFieldUpdateOperationsInput
+		| $Enums.DecisionOrigin;
+	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
+	duration?: Prisma.StringFieldUpdateOperationsInput | string;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	expiresAt?:
+		| Prisma.NullableDateTimeFieldUpdateOperationsInput
+		| Date
+		| string
+		| null;
+	active?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	host?: Prisma.HostUpdateOneRequiredWithoutDecisionsNestedInput;
+};
+
+export type DecisionUncheckedUpdateWithoutAlertsInput = {
+	id?: Prisma.IntFieldUpdateOperationsInput | number;
+	hostIp?: Prisma.StringFieldUpdateOperationsInput | string;
+	type?:
+		| Prisma.EnumDecisionTypeFieldUpdateOperationsInput
+		| $Enums.DecisionType;
+	origin?:
+		| Prisma.EnumDecisionOriginFieldUpdateOperationsInput
+		| $Enums.DecisionOrigin;
+	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
+	duration?: Prisma.StringFieldUpdateOperationsInput | string;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	expiresAt?:
+		| Prisma.NullableDateTimeFieldUpdateOperationsInput
+		| Date
+		| string
+		| null;
+	active?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+};
+
+export type DecisionUncheckedUpdateManyWithoutAlertsInput = {
+	id?: Prisma.IntFieldUpdateOperationsInput | number;
+	hostIp?: Prisma.StringFieldUpdateOperationsInput | string;
+	type?:
+		| Prisma.EnumDecisionTypeFieldUpdateOperationsInput
+		| $Enums.DecisionType;
+	origin?:
+		| Prisma.EnumDecisionOriginFieldUpdateOperationsInput
+		| $Enums.DecisionOrigin;
+	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
+	duration?: Prisma.StringFieldUpdateOperationsInput | string;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	expiresAt?:
+		| Prisma.NullableDateTimeFieldUpdateOperationsInput
+		| Date
+		| string
+		| null;
+	active?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+};
+
+/**
+ * Count Type DecisionCountOutputType
+ */
+
+export type DecisionCountOutputType = {
+	alerts: number;
+};
+
+export type DecisionCountOutputTypeSelect<
+	ExtArgs extends
+		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
+> = {
+	alerts?: boolean | DecisionCountOutputTypeCountAlertsArgs;
+};
+
+/**
+ * DecisionCountOutputType without action
+ */
+export type DecisionCountOutputTypeDefaultArgs<
+	ExtArgs extends
+		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
+> = {
+	/**
+	 * Select specific fields to fetch from the DecisionCountOutputType
+	 */
+	select?: Prisma.DecisionCountOutputTypeSelect<ExtArgs> | null;
+};
+
+/**
+ * DecisionCountOutputType without action
+ */
+export type DecisionCountOutputTypeCountAlertsArgs<
+	ExtArgs extends
+		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
+> = {
+	where?: Prisma.AlertWhereInput;
+};
+
 export type DecisionSelect<
 	ExtArgs extends
 		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
@@ -774,6 +1033,8 @@ export type DecisionSelect<
 		expiresAt?: boolean;
 		active?: boolean;
 		host?: boolean | Prisma.HostDefaultArgs<ExtArgs>;
+		alerts?: boolean | Prisma.Decision$alertsArgs<ExtArgs>;
+		_count?: boolean | Prisma.DecisionCountOutputTypeDefaultArgs<ExtArgs>;
 	},
 	ExtArgs["result"]["decision"]
 >;
@@ -848,6 +1109,8 @@ export type DecisionInclude<
 		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
 > = {
 	host?: boolean | Prisma.HostDefaultArgs<ExtArgs>;
+	alerts?: boolean | Prisma.Decision$alertsArgs<ExtArgs>;
+	_count?: boolean | Prisma.DecisionCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type DecisionIncludeCreateManyAndReturn<
 	ExtArgs extends
@@ -869,6 +1132,7 @@ export type $DecisionPayload<
 	name: "Decision";
 	objects: {
 		host: Prisma.$HostPayload<ExtArgs>;
+		alerts: Prisma.$AlertPayload<ExtArgs>[];
 	};
 	scalars: runtime.Types.Extensions.GetPayloadResult<
 		{
@@ -1445,6 +1709,17 @@ export interface Prisma__DecisionClient<
 		ExtArgs,
 		GlobalOmitOptions
 	>;
+	alerts<T extends Prisma.Decision$alertsArgs<ExtArgs> = {}>(
+		args?: Prisma.Subset<T, Prisma.Decision$alertsArgs<ExtArgs>>,
+	): Prisma.PrismaPromise<
+		| runtime.Types.Result.GetResult<
+				Prisma.$AlertPayload<ExtArgs>,
+				T,
+				"findMany",
+				GlobalOmitOptions
+		  >
+		| Null
+	>;
 	/**
 	 * Attaches callbacks for the resolution and/or rejection of the Promise.
 	 * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1952,6 +2227,35 @@ export type DecisionDeleteManyArgs<
 	 * Limit how many Decisions to delete.
 	 */
 	limit?: number;
+};
+
+/**
+ * Decision.alerts
+ */
+export type Decision$alertsArgs<
+	ExtArgs extends
+		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
+> = {
+	/**
+	 * Select specific fields to fetch from the Alert
+	 */
+	select?: Prisma.AlertSelect<ExtArgs> | null;
+	/**
+	 * Omit specific fields from the Alert
+	 */
+	omit?: Prisma.AlertOmit<ExtArgs> | null;
+	/**
+	 * Choose, which related nodes to fetch as well
+	 */
+	include?: Prisma.AlertInclude<ExtArgs> | null;
+	where?: Prisma.AlertWhereInput;
+	orderBy?:
+		| Prisma.AlertOrderByWithRelationInput
+		| Prisma.AlertOrderByWithRelationInput[];
+	cursor?: Prisma.AlertWhereUniqueInput;
+	take?: number;
+	skip?: number;
+	distinct?: Prisma.AlertScalarFieldEnum | Prisma.AlertScalarFieldEnum[];
 };
 
 /**

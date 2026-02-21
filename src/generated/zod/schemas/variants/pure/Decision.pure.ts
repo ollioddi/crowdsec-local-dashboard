@@ -14,6 +14,7 @@ export const DecisionModelSchema = z
 		createdAt: z.date(),
 		expiresAt: z.date().nullable(),
 		active: z.boolean(),
+		alerts: z.array(z.unknown()),
 	})
 	.strict();
 

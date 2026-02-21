@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useContext } from "react";
-import type { Session } from "@/lib/auth.server";
+import type { Session } from "@/lib/auth/auth.server";
 
 const SessionContext = createContext<Session | null>(null);
 

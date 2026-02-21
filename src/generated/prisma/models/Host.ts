@@ -276,6 +276,7 @@ export type HostWhereInput = {
 	latitude?: Prisma.FloatNullableFilter<"Host"> | number | null;
 	longitude?: Prisma.FloatNullableFilter<"Host"> | number | null;
 	decisions?: Prisma.DecisionListRelationFilter;
+	alerts?: Prisma.AlertListRelationFilter;
 };
 
 export type HostOrderByWithRelationInput = {
@@ -291,6 +292,7 @@ export type HostOrderByWithRelationInput = {
 	latitude?: Prisma.SortOrderInput | Prisma.SortOrder;
 	longitude?: Prisma.SortOrderInput | Prisma.SortOrder;
 	decisions?: Prisma.DecisionOrderByRelationAggregateInput;
+	alerts?: Prisma.AlertOrderByRelationAggregateInput;
 };
 
 export type HostWhereUniqueInput = Prisma.AtLeast<
@@ -310,6 +312,7 @@ export type HostWhereUniqueInput = Prisma.AtLeast<
 		latitude?: Prisma.FloatNullableFilter<"Host"> | number | null;
 		longitude?: Prisma.FloatNullableFilter<"Host"> | number | null;
 		decisions?: Prisma.DecisionListRelationFilter;
+		alerts?: Prisma.AlertListRelationFilter;
 	},
 	"id" | "ip"
 >;
@@ -367,6 +370,7 @@ export type HostCreateInput = {
 	latitude?: number | null;
 	longitude?: number | null;
 	decisions?: Prisma.DecisionCreateNestedManyWithoutHostInput;
+	alerts?: Prisma.AlertCreateNestedManyWithoutHostInput;
 };
 
 export type HostUncheckedCreateInput = {
@@ -382,6 +386,7 @@ export type HostUncheckedCreateInput = {
 	latitude?: number | null;
 	longitude?: number | null;
 	decisions?: Prisma.DecisionUncheckedCreateNestedManyWithoutHostInput;
+	alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutHostInput;
 };
 
 export type HostUpdateInput = {
@@ -397,6 +402,7 @@ export type HostUpdateInput = {
 	latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
 	longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
 	decisions?: Prisma.DecisionUpdateManyWithoutHostNestedInput;
+	alerts?: Prisma.AlertUpdateManyWithoutHostNestedInput;
 };
 
 export type HostUncheckedUpdateInput = {
@@ -412,6 +418,7 @@ export type HostUncheckedUpdateInput = {
 	latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
 	longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
 	decisions?: Prisma.DecisionUncheckedUpdateManyWithoutHostNestedInput;
+	alerts?: Prisma.AlertUncheckedUpdateManyWithoutHostNestedInput;
 };
 
 export type HostCreateManyInput = {
@@ -557,6 +564,32 @@ export type HostUpdateOneRequiredWithoutDecisionsNestedInput = {
 	>;
 };
 
+export type HostCreateNestedOneWithoutAlertsInput = {
+	create?: Prisma.XOR<
+		Prisma.HostCreateWithoutAlertsInput,
+		Prisma.HostUncheckedCreateWithoutAlertsInput
+	>;
+	connectOrCreate?: Prisma.HostCreateOrConnectWithoutAlertsInput;
+	connect?: Prisma.HostWhereUniqueInput;
+};
+
+export type HostUpdateOneRequiredWithoutAlertsNestedInput = {
+	create?: Prisma.XOR<
+		Prisma.HostCreateWithoutAlertsInput,
+		Prisma.HostUncheckedCreateWithoutAlertsInput
+	>;
+	connectOrCreate?: Prisma.HostCreateOrConnectWithoutAlertsInput;
+	upsert?: Prisma.HostUpsertWithoutAlertsInput;
+	connect?: Prisma.HostWhereUniqueInput;
+	update?: Prisma.XOR<
+		Prisma.XOR<
+			Prisma.HostUpdateToOneWithWhereWithoutAlertsInput,
+			Prisma.HostUpdateWithoutAlertsInput
+		>,
+		Prisma.HostUncheckedUpdateWithoutAlertsInput
+	>;
+};
+
 export type HostCreateWithoutDecisionsInput = {
 	id?: string;
 	ip: string;
@@ -569,6 +602,7 @@ export type HostCreateWithoutDecisionsInput = {
 	asName?: string | null;
 	latitude?: number | null;
 	longitude?: number | null;
+	alerts?: Prisma.AlertCreateNestedManyWithoutHostInput;
 };
 
 export type HostUncheckedCreateWithoutDecisionsInput = {
@@ -583,6 +617,7 @@ export type HostUncheckedCreateWithoutDecisionsInput = {
 	asName?: string | null;
 	latitude?: number | null;
 	longitude?: number | null;
+	alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutHostInput;
 };
 
 export type HostCreateOrConnectWithoutDecisionsInput = {
@@ -625,6 +660,7 @@ export type HostUpdateWithoutDecisionsInput = {
 	asName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
 	longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
+	alerts?: Prisma.AlertUpdateManyWithoutHostNestedInput;
 };
 
 export type HostUncheckedUpdateWithoutDecisionsInput = {
@@ -639,6 +675,95 @@ export type HostUncheckedUpdateWithoutDecisionsInput = {
 	asName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
 	longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
+	alerts?: Prisma.AlertUncheckedUpdateManyWithoutHostNestedInput;
+};
+
+export type HostCreateWithoutAlertsInput = {
+	id?: string;
+	ip: string;
+	scope?: string;
+	firstSeen?: Date | string;
+	lastSeen?: Date | string;
+	totalBans?: number;
+	country?: string | null;
+	asNumber?: string | null;
+	asName?: string | null;
+	latitude?: number | null;
+	longitude?: number | null;
+	decisions?: Prisma.DecisionCreateNestedManyWithoutHostInput;
+};
+
+export type HostUncheckedCreateWithoutAlertsInput = {
+	id?: string;
+	ip: string;
+	scope?: string;
+	firstSeen?: Date | string;
+	lastSeen?: Date | string;
+	totalBans?: number;
+	country?: string | null;
+	asNumber?: string | null;
+	asName?: string | null;
+	latitude?: number | null;
+	longitude?: number | null;
+	decisions?: Prisma.DecisionUncheckedCreateNestedManyWithoutHostInput;
+};
+
+export type HostCreateOrConnectWithoutAlertsInput = {
+	where: Prisma.HostWhereUniqueInput;
+	create: Prisma.XOR<
+		Prisma.HostCreateWithoutAlertsInput,
+		Prisma.HostUncheckedCreateWithoutAlertsInput
+	>;
+};
+
+export type HostUpsertWithoutAlertsInput = {
+	update: Prisma.XOR<
+		Prisma.HostUpdateWithoutAlertsInput,
+		Prisma.HostUncheckedUpdateWithoutAlertsInput
+	>;
+	create: Prisma.XOR<
+		Prisma.HostCreateWithoutAlertsInput,
+		Prisma.HostUncheckedCreateWithoutAlertsInput
+	>;
+	where?: Prisma.HostWhereInput;
+};
+
+export type HostUpdateToOneWithWhereWithoutAlertsInput = {
+	where?: Prisma.HostWhereInput;
+	data: Prisma.XOR<
+		Prisma.HostUpdateWithoutAlertsInput,
+		Prisma.HostUncheckedUpdateWithoutAlertsInput
+	>;
+};
+
+export type HostUpdateWithoutAlertsInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	ip?: Prisma.StringFieldUpdateOperationsInput | string;
+	scope?: Prisma.StringFieldUpdateOperationsInput | string;
+	firstSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	lastSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	totalBans?: Prisma.IntFieldUpdateOperationsInput | number;
+	country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	asNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	asName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
+	longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
+	decisions?: Prisma.DecisionUpdateManyWithoutHostNestedInput;
+};
+
+export type HostUncheckedUpdateWithoutAlertsInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	ip?: Prisma.StringFieldUpdateOperationsInput | string;
+	scope?: Prisma.StringFieldUpdateOperationsInput | string;
+	firstSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	lastSeen?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	totalBans?: Prisma.IntFieldUpdateOperationsInput | number;
+	country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	asNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	asName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
+	longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
+	decisions?: Prisma.DecisionUncheckedUpdateManyWithoutHostNestedInput;
 };
 
 /**
@@ -647,6 +772,7 @@ export type HostUncheckedUpdateWithoutDecisionsInput = {
 
 export type HostCountOutputType = {
 	decisions: number;
+	alerts: number;
 };
 
 export type HostCountOutputTypeSelect<
@@ -654,6 +780,7 @@ export type HostCountOutputTypeSelect<
 		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
 > = {
 	decisions?: boolean | HostCountOutputTypeCountDecisionsArgs;
+	alerts?: boolean | HostCountOutputTypeCountAlertsArgs;
 };
 
 /**
@@ -679,6 +806,16 @@ export type HostCountOutputTypeCountDecisionsArgs<
 	where?: Prisma.DecisionWhereInput;
 };
 
+/**
+ * HostCountOutputType without action
+ */
+export type HostCountOutputTypeCountAlertsArgs<
+	ExtArgs extends
+		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
+> = {
+	where?: Prisma.AlertWhereInput;
+};
+
 export type HostSelect<
 	ExtArgs extends
 		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
@@ -696,6 +833,7 @@ export type HostSelect<
 		latitude?: boolean;
 		longitude?: boolean;
 		decisions?: boolean | Prisma.Host$decisionsArgs<ExtArgs>;
+		alerts?: boolean | Prisma.Host$alertsArgs<ExtArgs>;
 		_count?: boolean | Prisma.HostCountOutputTypeDefaultArgs<ExtArgs>;
 	},
 	ExtArgs["result"]["host"]
@@ -777,6 +915,7 @@ export type HostInclude<
 		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
 > = {
 	decisions?: boolean | Prisma.Host$decisionsArgs<ExtArgs>;
+	alerts?: boolean | Prisma.Host$alertsArgs<ExtArgs>;
 	_count?: boolean | Prisma.HostCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type HostIncludeCreateManyAndReturn<
@@ -795,6 +934,7 @@ export type $HostPayload<
 	name: "Host";
 	objects: {
 		decisions: Prisma.$DecisionPayload<ExtArgs>[];
+		alerts: Prisma.$AlertPayload<ExtArgs>[];
 	};
 	scalars: runtime.Types.Extensions.GetPayloadResult<
 		{
@@ -1370,6 +1510,17 @@ export interface Prisma__HostClient<
 		  >
 		| Null
 	>;
+	alerts<T extends Prisma.Host$alertsArgs<ExtArgs> = {}>(
+		args?: Prisma.Subset<T, Prisma.Host$alertsArgs<ExtArgs>>,
+	): Prisma.PrismaPromise<
+		| runtime.Types.Result.GetResult<
+				Prisma.$AlertPayload<ExtArgs>,
+				T,
+				"findMany",
+				GlobalOmitOptions
+		  >
+		| Null
+	>;
 	/**
 	 * Attaches callbacks for the resolution and/or rejection of the Promise.
 	 * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1888,6 +2039,35 @@ export type Host$decisionsArgs<
 	take?: number;
 	skip?: number;
 	distinct?: Prisma.DecisionScalarFieldEnum | Prisma.DecisionScalarFieldEnum[];
+};
+
+/**
+ * Host.alerts
+ */
+export type Host$alertsArgs<
+	ExtArgs extends
+		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
+> = {
+	/**
+	 * Select specific fields to fetch from the Alert
+	 */
+	select?: Prisma.AlertSelect<ExtArgs> | null;
+	/**
+	 * Omit specific fields from the Alert
+	 */
+	omit?: Prisma.AlertOmit<ExtArgs> | null;
+	/**
+	 * Choose, which related nodes to fetch as well
+	 */
+	include?: Prisma.AlertInclude<ExtArgs> | null;
+	where?: Prisma.AlertWhereInput;
+	orderBy?:
+		| Prisma.AlertOrderByWithRelationInput
+		| Prisma.AlertOrderByWithRelationInput[];
+	cursor?: Prisma.AlertWhereUniqueInput;
+	take?: number;
+	skip?: number;
+	distinct?: Prisma.AlertScalarFieldEnum | Prisma.AlertScalarFieldEnum[];
 };
 
 /**

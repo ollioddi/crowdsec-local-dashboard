@@ -1,4 +1,5 @@
 export * from "./enums/AccountScalarFieldEnum.schema";
+export * from "./enums/AlertScalarFieldEnum.schema";
 export * from "./enums/DecisionOrigin.schema";
 export * from "./enums/DecisionScalarFieldEnum.schema";
 export * from "./enums/DecisionType.schema";
@@ -12,6 +13,7 @@ export * from "./enums/VerificationScalarFieldEnum.schema";
 export * from "./models/index";
 export * from "./variants/index";
 export * from "./variants/pure/Account.pure";
+export * from "./variants/pure/Alert.pure";
 export * from "./variants/pure/Decision.pure";
 export * from "./variants/pure/Host.pure";
 export * from "./variants/pure/index";

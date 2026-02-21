@@ -21,7 +21,9 @@ async function startDecisionPolling() {
 
 	async function poll() {
 		if (syncInProgress) {
-			console.warn("[lapi-sync] Skipping poll — previous sync still in progress");
+			console.warn(
+				"[lapi-sync] Skipping poll — previous sync still in progress",
+			);
 			return;
 		}
 		syncInProgress = true;

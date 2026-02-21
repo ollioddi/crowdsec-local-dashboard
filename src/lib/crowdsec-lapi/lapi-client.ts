@@ -1,5 +1,7 @@
 import {
+	type AlertFilters,
 	type ConnectionHealth,
+	type CrowdSecAlert,
 	type CrowdSecDecision,
 	type DecisionStreamResponse,
 	type DeleteDecisionResponse,
@@ -255,5 +257,24 @@ export class LapiClient {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Fetches alerts, which contain the specific logs/events that triggered a decision.
+	 * Requires Watcher credentials (machineId + password).
+	 */
+	public async getAlerts(params?: AlertFilters): Promise<CrowdSecAlert[]> {
+		const searchParams = new URLSearchParams();
+		if (params) {
+			for (const [key, value] of Object.entries(params)) {
+				if (value !== undefined) searchParams.set(key, String(value));
+			}
+		}
+		// GET /alerts requires Watcher (JWT) auth
+		const response = await this.watcherFetch(
+			`/v1/alerts?${searchParams.toString()}`,
+		);
+		if (!response.ok) throw new Error(`Failed to fetch alerts`);
+		return await response.json();
 	}
 }
