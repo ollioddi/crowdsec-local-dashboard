@@ -1,10 +1,11 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	createFileRoute,
 	Outlet,
 	redirect,
 	useLoaderData,
 } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
 	SidebarInset,
@@ -30,6 +31,26 @@ export const Route = createFileRoute("/_app")({
 
 const AppShell = ({ children }: Readonly<{ children: ReactNode }>) => {
 	const { session } = useLoaderData({ from: "/_app" });
+	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		let hiddenAt = 0;
+		const THRESHOLD_MS = 30_000;
+
+		const handleVisibility = () => {
+			if (document.visibilityState === "hidden") {
+				hiddenAt = Date.now();
+			} else if (document.visibilityState === "visible") {
+				if (Date.now() - hiddenAt > THRESHOLD_MS) {
+					queryClient.invalidateQueries();
+				}
+			}
+		};
+
+		document.addEventListener("visibilitychange", handleVisibility);
+		return () =>
+			document.removeEventListener("visibilitychange", handleVisibility);
+	}, [queryClient]);
 
 	return (
 		<ThemeProvider storageKey="crowdsec-dashboard-theme">
