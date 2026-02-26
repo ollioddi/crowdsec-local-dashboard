@@ -16,6 +16,12 @@ export const env = createEnv({
 		LAPI_BOUNCER_API_TOKEN: z.string().min(1).optional(),
 		LAPI_POLL_INTERVAL: z.coerce.number().positive().default(60),
 		DECISION_RETENTION_COUNT: z.coerce.number().positive().optional(),
+		// OIDC/OAuth SSO (optional — leave unset to disable SSO login)
+		OIDC_CLIENT_ID: z.string().min(1).optional(),
+		OIDC_CLIENT_SECRET: z.string().min(1).optional(),
+		OIDC_ISSUER_URL: z.url().optional(),
+		OIDC_BUTTON_LABEL: z.string().min(1).optional(),
+		OIDC_AUTO_REDIRECT: z.coerce.boolean().optional(),
 	},
 
 	/**

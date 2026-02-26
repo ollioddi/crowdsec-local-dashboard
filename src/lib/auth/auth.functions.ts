@@ -32,6 +32,30 @@ export const isFirstSetupFn = createServerFn({ method: "GET" }).handler(
 	},
 );
 
+type OidcConfig =
+	| { enabled: false }
+	| { enabled: true; buttonLabel: string; autoRedirect: boolean };
+
+/**
+ * Returns OIDC SSO configuration derived from environment variables.
+ */
+export const getOidcConfigFn = createServerFn({ method: "GET" }).handler(
+	async (): Promise<OidcConfig> => {
+		const { env } = await import("@/env");
+		const enabled = !!(
+			env.OIDC_CLIENT_ID &&
+			env.OIDC_CLIENT_SECRET &&
+			env.OIDC_ISSUER_URL
+		);
+		if (!enabled) return { enabled: false };
+		return {
+			enabled: true,
+			buttonLabel: env.OIDC_BUTTON_LABEL ?? "Sign in with SSO",
+			autoRedirect: env.OIDC_AUTO_REDIRECT ?? false,
+		};
+	},
+);
+
 /**
  * Ensures at least one admin user exists, then signs in.
  * On first login: creates the user with the given credentials.

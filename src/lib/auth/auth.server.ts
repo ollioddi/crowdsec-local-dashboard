@@ -1,9 +1,24 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { genericOAuth } from "better-auth/plugins";
 import { username } from "better-auth/plugins/username";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { prisma } from "@/db";
 import { env } from "@/env";
+
+const oidcConfig =
+	env.OIDC_CLIENT_ID && env.OIDC_CLIENT_SECRET && env.OIDC_ISSUER_URL
+		? [
+				{
+					providerId: "oidc",
+					clientId: env.OIDC_CLIENT_ID,
+					clientSecret: env.OIDC_CLIENT_SECRET,
+					discoveryUrl: `${env.OIDC_ISSUER_URL.replace(/\/$/, "")}/.well-known/openid-configuration`,
+					scopes: ["openid", "email", "profile"],
+					pkce: true,
+				},
+			]
+		: [];
 
 export const auth = betterAuth({
 	// baseURL is intentionally omitted: Better Auth reads BETTER_AUTH_URL from
@@ -15,7 +30,11 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 	},
-	plugins: [tanstackStartCookies(), username()],
+	plugins: [
+		tanstackStartCookies(),
+		username(),
+		genericOAuth({ config: oidcConfig }),
+	],
 });
 
 export type Session = typeof auth.$Infer.Session;

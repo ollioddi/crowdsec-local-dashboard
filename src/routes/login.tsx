@@ -4,6 +4,7 @@ import {
 	useLoaderData,
 	useRouter,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -21,13 +22,24 @@ import {
 import { Input } from "@/components/ui/input";
 import {
 	ensureAdminAndSignInFn,
+	getOidcConfigFn,
 	isFirstSetupFn,
 	loginSchema,
 } from "@/lib/auth/auth.functions";
+import { authClient } from "@/lib/auth/auth-client";
+
+const signInWithOidc = () =>
+	authClient.signIn.oauth2({ providerId: "oidc", callbackURL: "/" });
 
 const LoginPage = () => {
 	const router = useRouter();
-	const { isFirstSetup } = useLoaderData({ from: "/login" });
+	const { isFirstSetup, oidcConfig } = useLoaderData({ from: "/login" });
+
+	useEffect(() => {
+		if (!isFirstSetup && oidcConfig.enabled && oidcConfig.autoRedirect) {
+			signInWithOidc();
+		}
+	}, [isFirstSetup, oidcConfig]);
 
 	const form = useForm({
 		defaultValues: {
@@ -161,6 +173,27 @@ const LoginPage = () => {
 								</Field>
 							</FieldGroup>
 						</form>
+						{oidcConfig.enabled && !isFirstSetup && (
+							<>
+								<div className="relative my-4">
+									<div className="absolute inset-0 flex items-center">
+										<span className="w-full border-t" />
+									</div>
+									<div className="relative flex justify-center text-xs uppercase">
+										<span className="bg-card px-2 text-muted-foreground">
+											or
+										</span>
+									</div>
+								</div>
+								<Button
+									variant="outline"
+									className="w-full"
+									onClick={signInWithOidc}
+								>
+									{oidcConfig.buttonLabel}
+								</Button>
+							</>
+						)}
 					</CardContent>
 				</Card>
 			</div>
@@ -171,7 +204,10 @@ const LoginPage = () => {
 export const Route = createFileRoute("/login")({
 	component: LoginPage,
 	loader: async () => {
-		const isFirstSetup = await isFirstSetupFn();
-		return { isFirstSetup };
+		const [isFirstSetup, oidcConfig] = await Promise.all([
+			isFirstSetupFn(),
+			getOidcConfigFn(),
+		]);
+		return { isFirstSetup, oidcConfig };
 	},
 });
