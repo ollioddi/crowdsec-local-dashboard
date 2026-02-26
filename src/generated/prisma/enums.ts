@@ -23,3 +23,13 @@ export const DecisionOrigin = {
 
 export type DecisionOrigin =
 	(typeof DecisionOrigin)[keyof typeof DecisionOrigin];
+
+export const AlertEntryType = {
+	paths: "paths",
+	ports: "ports",
+	usernames: "usernames",
+	none: "none",
+} as const;
+
+export type AlertEntryType =
+	(typeof AlertEntryType)[keyof typeof AlertEntryType];

@@ -15,7 +15,9 @@ export const getDecisionsFn = createServerFn({ method: "GET" }).handler(
 		const rows = await prisma.decision.findMany({
 			include: {
 				host: true,
-				alerts: { select: { id: true, paths: true, scenario: true } },
+				alerts: {
+					select: { id: true, entries: true, entryType: true, scenario: true },
+				},
 			},
 			orderBy: { createdAt: "desc" },
 		});
@@ -24,7 +26,8 @@ export const getDecisionsFn = createServerFn({ method: "GET" }).handler(
 			alerts: decision.alerts.map((alert) => ({
 				id: alert.id,
 				scenario: alert.scenario,
-				paths: JSON.parse(alert.paths) as string[],
+				entries: JSON.parse(alert.entries) as string[],
+				entryType: alert.entryType,
 			})),
 		}));
 	},
@@ -42,7 +45,7 @@ export const getDecisionAlertsFn = createServerFn({ method: "GET" })
 	.inputValidator(z.object({ decisionId: z.number() }))
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
-		const { parseAlertEvent } = await import("@/lib/parse-alert-event");
+		const { parseAlertEvent } = await import("@/lib/alert-types");
 
 		const decision = await prisma.decision.findUnique({
 			where: { id: data.decisionId },
@@ -57,7 +60,8 @@ export const getDecisionAlertsFn = createServerFn({ method: "GET" })
 			scenario: alert.scenario,
 			message: alert.message,
 			createdAt: alert.createdAt,
-			paths: JSON.parse(alert.paths) as string[],
+			entries: JSON.parse(alert.entries) as string[],
+			entryType: alert.entryType,
 			events: (JSON.parse(alert.events) as AlertEventRaw[]).map(
 				parseAlertEvent,
 			),
@@ -76,9 +80,8 @@ export const deleteDecisionFn = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
 		const { getLapiClient } = await import("@/lib/crowdsec-lapi");
-		const { syncDecisions } = await import("@/lib/crowdsec-lapi/sync");
 
-		console.log(`[decision-delete] Deleting decision ${data.id} from LAPI…`);
+		console.log(`[decision-delete] Deleting decision ${data.id} from LAPI`);
 
 		const client = getLapiClient();
 
@@ -88,7 +91,7 @@ export const deleteDecisionFn = createServerFn({ method: "POST" })
 				`[decision-delete] LAPI confirmed: nbDeleted=${result.nbDeleted}`,
 			);
 
-			// Mark inactive in DB immediately so the UI doesn't show stale data
+			// Mark inactive in DB immediately so the UI reflects the change
 			await prisma.decision.update({
 				where: { id: data.id },
 				data: { active: false },
@@ -96,14 +99,6 @@ export const deleteDecisionFn = createServerFn({ method: "POST" })
 			console.log(
 				`[decision-delete] Marked decision ${data.id} inactive in DB`,
 			);
-
-			// Do a full sync (startup=true) so the DB matches LAPI's complete state
-			// A delta sync would miss the delete since it just happened
-			console.log(
-				"[decision-delete] Triggering full sync (forceFullSync=true)…",
-			);
-			await syncDecisions({ forceFullSync: true });
-			console.log("[decision-delete] Sync complete");
 
 			return result;
 		} catch (error) {

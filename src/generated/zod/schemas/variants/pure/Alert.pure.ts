@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { AlertEntryTypeSchema } from "../../enums/AlertEntryType.schema";
 // prettier-ignore
 export const AlertModelSchema = z
 	.object({
@@ -6,7 +7,8 @@ export const AlertModelSchema = z
 		scenario: z.string(),
 		message: z.string(),
 		createdAt: z.date(),
-		paths: z.string(),
+		entries: z.string(),
+		entryType: AlertEntryTypeSchema,
 		hostIp: z.string(),
 		host: z.unknown(),
 		decisions: z.array(z.unknown()),

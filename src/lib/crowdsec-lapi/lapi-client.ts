@@ -275,6 +275,8 @@ export class LapiClient {
 			`/v1/alerts?${searchParams.toString()}`,
 		);
 		if (!response.ok) throw new Error(`Failed to fetch alerts`);
-		return await response.json();
+		const result = await response.json();
+		// LAPI returns null (not []) when there are no matching alerts
+		return (result as CrowdSecAlert[] | null) ?? [];
 	}
 }

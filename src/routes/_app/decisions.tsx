@@ -84,16 +84,8 @@ function DecisionsPage() {
 		handleDecisionsMessage,
 	);
 
-	console.debug("Decisions page render", { decisions, connected });
-
 	const deleteMutation = useMutation({
 		mutationFn: (id: number) => deleteDecisionFn({ data: { id } }),
-		onSuccess: (_data, id) => {
-			toast.success("Decision deleted", {
-				description: `Decision ${id} removed from LAPI`,
-			});
-			queryClient.invalidateQueries({ queryKey: ["decisions"] });
-		},
 		onError: (error, id) => {
 			toast.error(`Failed to delete decision ${id}`, {
 				description: error instanceof Error ? error.message : "Unknown error",
@@ -101,12 +93,29 @@ function DecisionsPage() {
 		},
 	});
 
-	const handleDelete = useMemo(
-		() => (id: number) => deleteMutation.mutate(id),
-		[deleteMutation],
+	const handleDelete = useCallback(
+		(id: number, collapse?: () => void) => {
+			deleteMutation.mutate(id, {
+				onSuccess: () => {
+					toast.success("Decision deleted", {
+						description: `Decision ${id} removed from LAPI`,
+					});
+					collapse?.();
+					queryClient.invalidateQueries({ queryKey: ["decisions"] });
+				},
+			});
+		},
+		[deleteMutation, queryClient],
 	);
 
-	const columns = useMemo(() => createColumns(handleDelete), [handleDelete]);
+	const deletingId = deleteMutation.isPending
+		? deleteMutation.variables
+		: undefined;
+
+	const columns = useMemo(
+		() => createColumns(handleDelete, deletingId),
+		[handleDelete, deletingId],
+	);
 
 	return (
 		<div className="container mx-auto py-6 px-4">
@@ -124,7 +133,11 @@ function DecisionsPage() {
 				initialGlobalFilter={hostIp}
 				emptyState="No decisions."
 				renderSubComponent={(row) => (
-					<DecisionExpandedRow row={row} onDelete={handleDelete} />
+					<DecisionExpandedRow
+						row={row}
+						onDelete={handleDelete}
+						deletingId={deletingId}
+					/>
 				)}
 				header={(table) => (
 					<DataDisplayToolbar

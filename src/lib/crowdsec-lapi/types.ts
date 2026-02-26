@@ -86,6 +86,8 @@ export type CrowdSecAlert = {
 		latitude?: number;
 		longitude?: number;
 	};
+	/** Alert-level aggregated meta (e.g. dst_port for pf scans, target_uri for HTTP). */
+	meta?: Array<{ key: string; value: string }>;
 	events: AlertEvent[];
 	decisions: CrowdSecDecision[];
 };
@@ -100,4 +102,5 @@ export type AlertFilters = {
 	until?: string;
 	limit?: number;
 	has_active_decision?: boolean;
+	origin?: string;
 };

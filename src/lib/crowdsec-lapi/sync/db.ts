@@ -1,4 +1,5 @@
 import { prisma } from "@/db";
+import { extractAlertData } from "@/lib/alert-types";
 import type {
 	CrowdSecAlert,
 	CrowdSecDecision,
@@ -94,19 +95,9 @@ export async function ensureHostsExist(
 	}
 }
 
-/**
- * Extracts unique http_paths from all events in an alert.
- * Sentinel value "-" is treated as absent.
- */
-function extractPaths(alert: CrowdSecAlert): string {
-	const seen = new Set<string>();
-	for (const event of alert.events ?? []) {
-		const pathEntry = event.meta.find((m) => m.key === "http_path");
-		if (pathEntry && pathEntry.value !== "-") {
-			seen.add(pathEntry.value);
-		}
-	}
-	return JSON.stringify([...seen]);
+function toDbExtract(alert: CrowdSecAlert) {
+	const { entries, entryType } = extractAlertData(alert);
+	return { entries: JSON.stringify(entries), entryType };
 }
 
 /**
@@ -136,11 +127,10 @@ export async function upsertAlerts(
 					message: alert.message,
 					createdAt: new Date(alert.created_at),
 					hostIp: alert.source.value,
-					paths: extractPaths(alert),
+					...toDbExtract(alert),
 					events: JSON.stringify(alert.events ?? []),
 				},
-				// Back-fill paths in case this alert was stored before the column existed
-				update: { paths: extractPaths(alert) },
+				update: toDbExtract(alert),
 			}),
 		),
 	);

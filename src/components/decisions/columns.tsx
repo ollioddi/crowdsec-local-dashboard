@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink, Loader2, Trash2 } from "lucide-react";
 import { RelativeTime } from "@/components/relative-dates";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,8 @@ function typeVariant(type: string) {
 }
 
 export function createColumns(
-	onDelete: (id: number) => void,
+	onDelete: (id: number, collapse?: () => void) => void,
+	deletingId: number | undefined,
 ): ColumnDef<DecisionWithHost>[] {
 	return [
 		{
@@ -116,25 +117,24 @@ export function createColumns(
 			},
 		},
 		{
-			id: "paths",
-			header: "Path",
+			id: "entries",
+			header: "Details",
 			accessorFn: (row) => {
-				// Collect all unique paths across all alerts for this decision
 				const all = new Set<string>();
 				for (const a of row.alerts) {
-					for (const p of a.paths) all.add(p);
+					for (const e of a.entries) all.add(e);
 				}
 				return [...all];
 			},
 			meta: {
 				visibleByDefault: { desktop: true, mobile: false },
-				expandedLabel: "Path",
+				expandedLabel: "Details",
 			},
 			cell: ({ row }) => {
-				const paths = row.getValue<string[]>("paths");
-				if (!paths.length)
+				const entries = row.getValue<string[]>("entries");
+				if (!entries.length)
 					return <span className="text-muted-foreground">—</span>;
-				const [first, ...rest] = paths;
+				const [first, ...rest] = entries;
 				return (
 					<span className="flex items-center gap-1.5 min-w-0">
 						<span
@@ -187,14 +187,20 @@ export function createColumns(
 			cell: ({ row }) => {
 				const decision = row.original;
 				if (!decision.active) return null;
+				const isDeleting = deletingId === decision.id;
 				return (
 					<Button
 						variant="destructive"
 						size="sm"
+						disabled={isDeleting}
 						onClick={() => onDelete(decision.id)}
 					>
-						<Trash2 className="size-4" />
-						Delete
+						{isDeleting ? (
+							<Loader2 className="size-4 animate-spin" />
+						) : (
+							<Trash2 className="size-4" />
+						)}
+						{isDeleting ? "Deleting…" : "Delete"}
 					</Button>
 				);
 			},

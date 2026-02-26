@@ -39,7 +39,8 @@ export type AlertMinAggregateOutputType = {
 	scenario: string | null;
 	message: string | null;
 	createdAt: Date | null;
-	paths: string | null;
+	entries: string | null;
+	entryType: $Enums.AlertEntryType | null;
 	hostIp: string | null;
 	events: string | null;
 };
@@ -49,7 +50,8 @@ export type AlertMaxAggregateOutputType = {
 	scenario: string | null;
 	message: string | null;
 	createdAt: Date | null;
-	paths: string | null;
+	entries: string | null;
+	entryType: $Enums.AlertEntryType | null;
 	hostIp: string | null;
 	events: string | null;
 };
@@ -59,7 +61,8 @@ export type AlertCountAggregateOutputType = {
 	scenario: number;
 	message: number;
 	createdAt: number;
-	paths: number;
+	entries: number;
+	entryType: number;
 	hostIp: number;
 	events: number;
 	_all: number;
@@ -78,7 +81,8 @@ export type AlertMinAggregateInputType = {
 	scenario?: true;
 	message?: true;
 	createdAt?: true;
-	paths?: true;
+	entries?: true;
+	entryType?: true;
 	hostIp?: true;
 	events?: true;
 };
@@ -88,7 +92,8 @@ export type AlertMaxAggregateInputType = {
 	scenario?: true;
 	message?: true;
 	createdAt?: true;
-	paths?: true;
+	entries?: true;
+	entryType?: true;
 	hostIp?: true;
 	events?: true;
 };
@@ -98,7 +103,8 @@ export type AlertCountAggregateInputType = {
 	scenario?: true;
 	message?: true;
 	createdAt?: true;
-	paths?: true;
+	entries?: true;
+	entryType?: true;
 	hostIp?: true;
 	events?: true;
 	_all?: true;
@@ -202,7 +208,8 @@ export type AlertGroupByOutputType = {
 	scenario: string;
 	message: string;
 	createdAt: Date;
-	paths: string;
+	entries: string;
+	entryType: $Enums.AlertEntryType;
 	hostIp: string;
 	events: string;
 	_count: AlertCountAggregateOutputType | null;
@@ -232,7 +239,8 @@ export type AlertWhereInput = {
 	scenario?: Prisma.StringFilter<"Alert"> | string;
 	message?: Prisma.StringFilter<"Alert"> | string;
 	createdAt?: Prisma.DateTimeFilter<"Alert"> | Date | string;
-	paths?: Prisma.StringFilter<"Alert"> | string;
+	entries?: Prisma.StringFilter<"Alert"> | string;
+	entryType?: Prisma.EnumAlertEntryTypeFilter<"Alert"> | $Enums.AlertEntryType;
 	hostIp?: Prisma.StringFilter<"Alert"> | string;
 	events?: Prisma.StringFilter<"Alert"> | string;
 	host?: Prisma.XOR<Prisma.HostScalarRelationFilter, Prisma.HostWhereInput>;
@@ -244,7 +252,8 @@ export type AlertOrderByWithRelationInput = {
 	scenario?: Prisma.SortOrder;
 	message?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
-	paths?: Prisma.SortOrder;
+	entries?: Prisma.SortOrder;
+	entryType?: Prisma.SortOrder;
 	hostIp?: Prisma.SortOrder;
 	events?: Prisma.SortOrder;
 	host?: Prisma.HostOrderByWithRelationInput;
@@ -260,7 +269,10 @@ export type AlertWhereUniqueInput = Prisma.AtLeast<
 		scenario?: Prisma.StringFilter<"Alert"> | string;
 		message?: Prisma.StringFilter<"Alert"> | string;
 		createdAt?: Prisma.DateTimeFilter<"Alert"> | Date | string;
-		paths?: Prisma.StringFilter<"Alert"> | string;
+		entries?: Prisma.StringFilter<"Alert"> | string;
+		entryType?:
+			| Prisma.EnumAlertEntryTypeFilter<"Alert">
+			| $Enums.AlertEntryType;
 		hostIp?: Prisma.StringFilter<"Alert"> | string;
 		events?: Prisma.StringFilter<"Alert"> | string;
 		host?: Prisma.XOR<Prisma.HostScalarRelationFilter, Prisma.HostWhereInput>;
@@ -274,7 +286,8 @@ export type AlertOrderByWithAggregationInput = {
 	scenario?: Prisma.SortOrder;
 	message?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
-	paths?: Prisma.SortOrder;
+	entries?: Prisma.SortOrder;
+	entryType?: Prisma.SortOrder;
 	hostIp?: Prisma.SortOrder;
 	events?: Prisma.SortOrder;
 	_count?: Prisma.AlertCountOrderByAggregateInput;
@@ -296,7 +309,10 @@ export type AlertScalarWhereWithAggregatesInput = {
 	scenario?: Prisma.StringWithAggregatesFilter<"Alert"> | string;
 	message?: Prisma.StringWithAggregatesFilter<"Alert"> | string;
 	createdAt?: Prisma.DateTimeWithAggregatesFilter<"Alert"> | Date | string;
-	paths?: Prisma.StringWithAggregatesFilter<"Alert"> | string;
+	entries?: Prisma.StringWithAggregatesFilter<"Alert"> | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeWithAggregatesFilter<"Alert">
+		| $Enums.AlertEntryType;
 	hostIp?: Prisma.StringWithAggregatesFilter<"Alert"> | string;
 	events?: Prisma.StringWithAggregatesFilter<"Alert"> | string;
 };
@@ -306,7 +322,8 @@ export type AlertCreateInput = {
 	scenario: string;
 	message: string;
 	createdAt: Date | string;
-	paths?: string;
+	entries?: string;
+	entryType?: $Enums.AlertEntryType;
 	events?: string;
 	host: Prisma.HostCreateNestedOneWithoutAlertsInput;
 	decisions?: Prisma.DecisionCreateNestedManyWithoutAlertsInput;
@@ -317,7 +334,8 @@ export type AlertUncheckedCreateInput = {
 	scenario: string;
 	message: string;
 	createdAt: Date | string;
-	paths?: string;
+	entries?: string;
+	entryType?: $Enums.AlertEntryType;
 	hostIp: string;
 	events?: string;
 	decisions?: Prisma.DecisionUncheckedCreateNestedManyWithoutAlertsInput;
@@ -328,7 +346,10 @@ export type AlertUpdateInput = {
 	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
 	message?: Prisma.StringFieldUpdateOperationsInput | string;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-	paths?: Prisma.StringFieldUpdateOperationsInput | string;
+	entries?: Prisma.StringFieldUpdateOperationsInput | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeFieldUpdateOperationsInput
+		| $Enums.AlertEntryType;
 	events?: Prisma.StringFieldUpdateOperationsInput | string;
 	host?: Prisma.HostUpdateOneRequiredWithoutAlertsNestedInput;
 	decisions?: Prisma.DecisionUpdateManyWithoutAlertsNestedInput;
@@ -339,7 +360,10 @@ export type AlertUncheckedUpdateInput = {
 	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
 	message?: Prisma.StringFieldUpdateOperationsInput | string;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-	paths?: Prisma.StringFieldUpdateOperationsInput | string;
+	entries?: Prisma.StringFieldUpdateOperationsInput | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeFieldUpdateOperationsInput
+		| $Enums.AlertEntryType;
 	hostIp?: Prisma.StringFieldUpdateOperationsInput | string;
 	events?: Prisma.StringFieldUpdateOperationsInput | string;
 	decisions?: Prisma.DecisionUncheckedUpdateManyWithoutAlertsNestedInput;
@@ -350,7 +374,8 @@ export type AlertCreateManyInput = {
 	scenario: string;
 	message: string;
 	createdAt: Date | string;
-	paths?: string;
+	entries?: string;
+	entryType?: $Enums.AlertEntryType;
 	hostIp: string;
 	events?: string;
 };
@@ -360,7 +385,10 @@ export type AlertUpdateManyMutationInput = {
 	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
 	message?: Prisma.StringFieldUpdateOperationsInput | string;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-	paths?: Prisma.StringFieldUpdateOperationsInput | string;
+	entries?: Prisma.StringFieldUpdateOperationsInput | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeFieldUpdateOperationsInput
+		| $Enums.AlertEntryType;
 	events?: Prisma.StringFieldUpdateOperationsInput | string;
 };
 
@@ -369,7 +397,10 @@ export type AlertUncheckedUpdateManyInput = {
 	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
 	message?: Prisma.StringFieldUpdateOperationsInput | string;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-	paths?: Prisma.StringFieldUpdateOperationsInput | string;
+	entries?: Prisma.StringFieldUpdateOperationsInput | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeFieldUpdateOperationsInput
+		| $Enums.AlertEntryType;
 	hostIp?: Prisma.StringFieldUpdateOperationsInput | string;
 	events?: Prisma.StringFieldUpdateOperationsInput | string;
 };
@@ -389,7 +420,8 @@ export type AlertCountOrderByAggregateInput = {
 	scenario?: Prisma.SortOrder;
 	message?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
-	paths?: Prisma.SortOrder;
+	entries?: Prisma.SortOrder;
+	entryType?: Prisma.SortOrder;
 	hostIp?: Prisma.SortOrder;
 	events?: Prisma.SortOrder;
 };
@@ -403,7 +435,8 @@ export type AlertMaxOrderByAggregateInput = {
 	scenario?: Prisma.SortOrder;
 	message?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
-	paths?: Prisma.SortOrder;
+	entries?: Prisma.SortOrder;
+	entryType?: Prisma.SortOrder;
 	hostIp?: Prisma.SortOrder;
 	events?: Prisma.SortOrder;
 };
@@ -413,7 +446,8 @@ export type AlertMinOrderByAggregateInput = {
 	scenario?: Prisma.SortOrder;
 	message?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
-	paths?: Prisma.SortOrder;
+	entries?: Prisma.SortOrder;
+	entryType?: Prisma.SortOrder;
 	hostIp?: Prisma.SortOrder;
 	events?: Prisma.SortOrder;
 };
@@ -590,12 +624,17 @@ export type AlertUncheckedUpdateManyWithoutDecisionsNestedInput = {
 	deleteMany?: Prisma.AlertScalarWhereInput | Prisma.AlertScalarWhereInput[];
 };
 
+export type EnumAlertEntryTypeFieldUpdateOperationsInput = {
+	set?: $Enums.AlertEntryType;
+};
+
 export type AlertCreateWithoutHostInput = {
 	id: number;
 	scenario: string;
 	message: string;
 	createdAt: Date | string;
-	paths?: string;
+	entries?: string;
+	entryType?: $Enums.AlertEntryType;
 	events?: string;
 	decisions?: Prisma.DecisionCreateNestedManyWithoutAlertsInput;
 };
@@ -605,7 +644,8 @@ export type AlertUncheckedCreateWithoutHostInput = {
 	scenario: string;
 	message: string;
 	createdAt: Date | string;
-	paths?: string;
+	entries?: string;
+	entryType?: $Enums.AlertEntryType;
 	events?: string;
 	decisions?: Prisma.DecisionUncheckedCreateNestedManyWithoutAlertsInput;
 };
@@ -658,7 +698,8 @@ export type AlertScalarWhereInput = {
 	scenario?: Prisma.StringFilter<"Alert"> | string;
 	message?: Prisma.StringFilter<"Alert"> | string;
 	createdAt?: Prisma.DateTimeFilter<"Alert"> | Date | string;
-	paths?: Prisma.StringFilter<"Alert"> | string;
+	entries?: Prisma.StringFilter<"Alert"> | string;
+	entryType?: Prisma.EnumAlertEntryTypeFilter<"Alert"> | $Enums.AlertEntryType;
 	hostIp?: Prisma.StringFilter<"Alert"> | string;
 	events?: Prisma.StringFilter<"Alert"> | string;
 };
@@ -668,7 +709,8 @@ export type AlertCreateWithoutDecisionsInput = {
 	scenario: string;
 	message: string;
 	createdAt: Date | string;
-	paths?: string;
+	entries?: string;
+	entryType?: $Enums.AlertEntryType;
 	events?: string;
 	host: Prisma.HostCreateNestedOneWithoutAlertsInput;
 };
@@ -678,7 +720,8 @@ export type AlertUncheckedCreateWithoutDecisionsInput = {
 	scenario: string;
 	message: string;
 	createdAt: Date | string;
-	paths?: string;
+	entries?: string;
+	entryType?: $Enums.AlertEntryType;
 	hostIp: string;
 	events?: string;
 };
@@ -724,7 +767,8 @@ export type AlertCreateManyHostInput = {
 	scenario: string;
 	message: string;
 	createdAt: Date | string;
-	paths?: string;
+	entries?: string;
+	entryType?: $Enums.AlertEntryType;
 	events?: string;
 };
 
@@ -733,7 +777,10 @@ export type AlertUpdateWithoutHostInput = {
 	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
 	message?: Prisma.StringFieldUpdateOperationsInput | string;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-	paths?: Prisma.StringFieldUpdateOperationsInput | string;
+	entries?: Prisma.StringFieldUpdateOperationsInput | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeFieldUpdateOperationsInput
+		| $Enums.AlertEntryType;
 	events?: Prisma.StringFieldUpdateOperationsInput | string;
 	decisions?: Prisma.DecisionUpdateManyWithoutAlertsNestedInput;
 };
@@ -743,7 +790,10 @@ export type AlertUncheckedUpdateWithoutHostInput = {
 	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
 	message?: Prisma.StringFieldUpdateOperationsInput | string;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-	paths?: Prisma.StringFieldUpdateOperationsInput | string;
+	entries?: Prisma.StringFieldUpdateOperationsInput | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeFieldUpdateOperationsInput
+		| $Enums.AlertEntryType;
 	events?: Prisma.StringFieldUpdateOperationsInput | string;
 	decisions?: Prisma.DecisionUncheckedUpdateManyWithoutAlertsNestedInput;
 };
@@ -753,7 +803,10 @@ export type AlertUncheckedUpdateManyWithoutHostInput = {
 	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
 	message?: Prisma.StringFieldUpdateOperationsInput | string;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-	paths?: Prisma.StringFieldUpdateOperationsInput | string;
+	entries?: Prisma.StringFieldUpdateOperationsInput | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeFieldUpdateOperationsInput
+		| $Enums.AlertEntryType;
 	events?: Prisma.StringFieldUpdateOperationsInput | string;
 };
 
@@ -762,7 +815,10 @@ export type AlertUpdateWithoutDecisionsInput = {
 	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
 	message?: Prisma.StringFieldUpdateOperationsInput | string;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-	paths?: Prisma.StringFieldUpdateOperationsInput | string;
+	entries?: Prisma.StringFieldUpdateOperationsInput | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeFieldUpdateOperationsInput
+		| $Enums.AlertEntryType;
 	events?: Prisma.StringFieldUpdateOperationsInput | string;
 	host?: Prisma.HostUpdateOneRequiredWithoutAlertsNestedInput;
 };
@@ -772,7 +828,10 @@ export type AlertUncheckedUpdateWithoutDecisionsInput = {
 	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
 	message?: Prisma.StringFieldUpdateOperationsInput | string;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-	paths?: Prisma.StringFieldUpdateOperationsInput | string;
+	entries?: Prisma.StringFieldUpdateOperationsInput | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeFieldUpdateOperationsInput
+		| $Enums.AlertEntryType;
 	hostIp?: Prisma.StringFieldUpdateOperationsInput | string;
 	events?: Prisma.StringFieldUpdateOperationsInput | string;
 };
@@ -782,7 +841,10 @@ export type AlertUncheckedUpdateManyWithoutDecisionsInput = {
 	scenario?: Prisma.StringFieldUpdateOperationsInput | string;
 	message?: Prisma.StringFieldUpdateOperationsInput | string;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-	paths?: Prisma.StringFieldUpdateOperationsInput | string;
+	entries?: Prisma.StringFieldUpdateOperationsInput | string;
+	entryType?:
+		| Prisma.EnumAlertEntryTypeFieldUpdateOperationsInput
+		| $Enums.AlertEntryType;
 	hostIp?: Prisma.StringFieldUpdateOperationsInput | string;
 	events?: Prisma.StringFieldUpdateOperationsInput | string;
 };
@@ -834,7 +896,8 @@ export type AlertSelect<
 		scenario?: boolean;
 		message?: boolean;
 		createdAt?: boolean;
-		paths?: boolean;
+		entries?: boolean;
+		entryType?: boolean;
 		hostIp?: boolean;
 		events?: boolean;
 		host?: boolean | Prisma.HostDefaultArgs<ExtArgs>;
@@ -853,7 +916,8 @@ export type AlertSelectCreateManyAndReturn<
 		scenario?: boolean;
 		message?: boolean;
 		createdAt?: boolean;
-		paths?: boolean;
+		entries?: boolean;
+		entryType?: boolean;
 		hostIp?: boolean;
 		events?: boolean;
 		host?: boolean | Prisma.HostDefaultArgs<ExtArgs>;
@@ -870,7 +934,8 @@ export type AlertSelectUpdateManyAndReturn<
 		scenario?: boolean;
 		message?: boolean;
 		createdAt?: boolean;
-		paths?: boolean;
+		entries?: boolean;
+		entryType?: boolean;
 		hostIp?: boolean;
 		events?: boolean;
 		host?: boolean | Prisma.HostDefaultArgs<ExtArgs>;
@@ -883,7 +948,8 @@ export type AlertSelectScalar = {
 	scenario?: boolean;
 	message?: boolean;
 	createdAt?: boolean;
-	paths?: boolean;
+	entries?: boolean;
+	entryType?: boolean;
 	hostIp?: boolean;
 	events?: boolean;
 };
@@ -892,7 +958,14 @@ export type AlertOmit<
 	ExtArgs extends
 		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
 > = runtime.Types.Extensions.GetOmit<
-	"id" | "scenario" | "message" | "createdAt" | "paths" | "hostIp" | "events",
+	| "id"
+	| "scenario"
+	| "message"
+	| "createdAt"
+	| "entries"
+	| "entryType"
+	| "hostIp"
+	| "events",
 	ExtArgs["result"]["alert"]
 >;
 export type AlertInclude<
@@ -931,7 +1004,8 @@ export type $AlertPayload<
 			scenario: string;
 			message: string;
 			createdAt: Date;
-			paths: string;
+			entries: string;
+			entryType: $Enums.AlertEntryType;
 			hostIp: string;
 			events: string;
 		},
@@ -1555,7 +1629,8 @@ export interface AlertFieldRefs {
 	readonly scenario: Prisma.FieldRef<"Alert", "String">;
 	readonly message: Prisma.FieldRef<"Alert", "String">;
 	readonly createdAt: Prisma.FieldRef<"Alert", "DateTime">;
-	readonly paths: Prisma.FieldRef<"Alert", "String">;
+	readonly entries: Prisma.FieldRef<"Alert", "String">;
+	readonly entryType: Prisma.FieldRef<"Alert", "AlertEntryType">;
 	readonly hostIp: Prisma.FieldRef<"Alert", "String">;
 	readonly events: Prisma.FieldRef<"Alert", "String">;
 }
