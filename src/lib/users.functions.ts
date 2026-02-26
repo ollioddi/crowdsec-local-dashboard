@@ -13,6 +13,7 @@ export const getUsersFn = createServerFn({ method: "GET" }).handler(
 				username: true,
 				displayUsername: true,
 				createdAt: true,
+				accounts: { select: { providerId: true } },
 			},
 		});
 		return users;

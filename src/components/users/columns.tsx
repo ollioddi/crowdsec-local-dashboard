@@ -31,6 +31,23 @@ export function createColumns(
 			),
 		},
 		{
+			id: "loginMethod",
+			header: "Login",
+			meta: { visibleByDefault: true },
+			cell: ({ row }) => {
+				const providers = row.original.accounts.map((a) => a.providerId);
+				return (
+					<div className="flex flex-wrap gap-1">
+						{providers.map((p) => (
+							<Badge key={p} variant="outline">
+								{p === "credential" ? "Password" : p === "oidc" ? "SSO" : p}
+							</Badge>
+						))}
+					</div>
+				);
+			},
+		},
+		{
 			accessorKey: "email",
 			header: "Email",
 			meta: {
