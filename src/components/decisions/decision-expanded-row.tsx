@@ -245,16 +245,13 @@ export function DecisionExpandedRow({
 						variant="destructive"
 						size="sm"
 						className="flex-1"
-						disabled={isDeleting}
+						icon={Trash2}
+						iconPlacement="left"
+						loading={isDeleting}
 						onClick={() =>
 							onDelete(decision.id, () => row.toggleExpanded(false))
 						}
 					>
-						{isDeleting ? (
-							<Loader2 className="mr-1.5 size-4 animate-spin" />
-						) : (
-							<Trash2 className="mr-1.5 size-4" />
-						)}
 						{isDeleting ? "Deleting…" : "Delete"}
 					</Button>
 				)}

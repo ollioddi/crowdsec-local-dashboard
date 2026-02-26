@@ -4,6 +4,23 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes shine {
+  0%   { background-position: 200% 0; }
+  25%  { background-position: -200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes gradient-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@theme {
+  --animate-shine: shine 3s ease-out infinite;
+  --animate-gradient-flow: gradient-flow 10s ease 0s infinite normal none running;
+}
+
 body {
   @apply m-0;
   font-family:

@@ -1,12 +1,21 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useMemo } from "react";
-import { useSession } from "@/lib/auth/auth-client";
+import type { Table } from "@tanstack/react-table";
+import { useMemo } from "react";
+import { toast } from "sonner";
 import DataDisplayToolbar from "@/components/data-table/data-display-toolbar";
 import { DataTable } from "@/components/data-table/data-table";
 import { createColumns } from "@/components/users/columns";
 import { CreateUserForm } from "@/components/users/create-user-form";
+import { useSession } from "@/lib/auth/auth-client";
+import type { UserRow } from "@/lib/users.functions";
 import { deleteUserFn, getUsersFn } from "@/lib/users.functions";
+
+function renderUsersTableHeader(table: Table<UserRow>) {
+	return (
+		<DataDisplayToolbar table={table} searchPlaceholder="Filter by username…" />
+	);
+}
 
 const usersQueryOptions = {
 	queryKey: ["users"],
@@ -28,24 +37,32 @@ function UsersPage() {
 	const firstUserId = users[0]?.id ?? "";
 	const currentUserId = session?.user.id ?? "";
 
-	const handleDelete = useCallback(
-		async (id: string) => {
-			const result = await deleteUserFn({ data: { id } });
+	const deleteMutation = useMutation({
+		mutationFn: (id: string) => deleteUserFn({ data: { id } }),
+		onSuccess: (result) => {
 			if ("error" in result && result.error) {
+				toast.error(result.error);
 				return;
 			}
+			toast.success("User deleted");
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 		},
-		[queryClient],
-	);
+		onError: () => toast.error("Failed to delete user"),
+	});
 
-	const handleCreated = useCallback(() => {
-		queryClient.invalidateQueries({ queryKey: ["users"] });
-	}, [queryClient]);
+	const deletingId = deleteMutation.isPending
+		? deleteMutation.variables
+		: undefined;
 
 	const columns = useMemo(
-		() => createColumns(handleDelete, firstUserId, currentUserId),
-		[handleDelete, firstUserId, currentUserId],
+		() =>
+			createColumns(
+				deleteMutation.mutate,
+				firstUserId,
+				currentUserId,
+				deletingId,
+			),
+		[deleteMutation.mutate, firstUserId, currentUserId, deletingId],
 	);
 
 	return (
@@ -61,15 +78,10 @@ function UsersPage() {
 					columns={columns}
 					data={users}
 					emptyState="No users found."
-					header={(table) => (
-						<DataDisplayToolbar
-							table={table}
-							searchPlaceholder="Filter by username…"
-						/>
-					)}
+					header={renderUsersTableHeader}
 				/>
 				<div className="self-start">
-					<CreateUserForm onSuccess={handleCreated} />
+					<CreateUserForm />
 				</div>
 			</div>
 		</div>

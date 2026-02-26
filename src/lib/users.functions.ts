@@ -54,7 +54,7 @@ export const createUserFn = createServerFn({ method: "POST" })
 			email || `${usernameLower}${LOCAL_EMAIL_DOMAIN}`,
 		);
 
-		return { success: true };
+		return { success: true, username: usernameLower };
 	});
 
 const deleteUserSchema = z.object({

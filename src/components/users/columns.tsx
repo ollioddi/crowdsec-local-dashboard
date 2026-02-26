@@ -14,6 +14,7 @@ export function createColumns(
 	onDelete: (id: string) => void,
 	firstUserId: string,
 	currentUserId: string,
+	deletingId: string | undefined,
 ): ColumnDef<UserRow>[] {
 	return [
 		{
@@ -28,7 +29,7 @@ export function createColumns(
 							row.original.name}
 					</span>
 					{row.original.id === firstUserId && (
-						<Badge variant="secondary">Admin</Badge>
+						<Badge variant="secondary">Owner</Badge>
 					)}
 				</div>
 			),
@@ -90,13 +91,16 @@ export function createColumns(
 					row.original.id === currentUserId
 				)
 					return null;
+				const isDeleting = deletingId === row.original.id;
 				return (
 					<Button
 						variant="destructive"
+						icon={Trash2}
+						iconPlacement="left"
+						loading={isDeleting}
 						onClick={() => onDelete(row.original.id)}
 					>
-						<Trash2 className="size-4" />
-						{isMobile ? "" : "Delete"}
+						{isMobile ? "" : isDeleting ? "Deleting…" : "Delete"}
 					</Button>
 				);
 			},

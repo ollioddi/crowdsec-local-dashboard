@@ -28,7 +28,9 @@ const oidcConfig =
 							displayUsername: preferred,
 						} as Parameters<
 							NonNullable<
-								Parameters<typeof genericOAuth>[0]["config"][number]["mapProfileToUser"]
+								Parameters<
+									typeof genericOAuth
+								>[0]["config"][number]["mapProfileToUser"]
 							>
 						>[0] extends infer _P
 							? Record<string, unknown>
