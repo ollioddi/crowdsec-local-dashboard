@@ -38,5 +38,5 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV DATABASE_URL=file:/data/app.db
 
-# Apply pending schema changes, then start the server.
-CMD ["sh", "-c", "node_modules/.bin/prisma db push && node .output/server/index.mjs"]
+# Apply pending migrations, then start the server.
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node .output/server/index.mjs"]
