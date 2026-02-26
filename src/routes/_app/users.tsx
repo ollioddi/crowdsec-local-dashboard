@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
+import { useSession } from "@/lib/auth/auth-client";
 import DataDisplayToolbar from "@/components/data-table/data-display-toolbar";
 import { DataTable } from "@/components/data-table/data-table";
 import { createColumns } from "@/components/users/columns";
@@ -22,8 +23,10 @@ export const Route = createFileRoute("/_app/users")({
 function UsersPage() {
 	const queryClient = useQueryClient();
 	const { data: users = [] } = useQuery(usersQueryOptions);
+	const { data: session } = useSession();
 
 	const firstUserId = users[0]?.id ?? "";
+	const currentUserId = session?.user.id ?? "";
 
 	const handleDelete = useCallback(
 		async (id: string) => {
@@ -41,8 +44,8 @@ function UsersPage() {
 	}, [queryClient]);
 
 	const columns = useMemo(
-		() => createColumns(handleDelete, firstUserId),
-		[handleDelete, firstUserId],
+		() => createColumns(handleDelete, firstUserId, currentUserId),
+		[handleDelete, firstUserId, currentUserId],
 	);
 
 	return (

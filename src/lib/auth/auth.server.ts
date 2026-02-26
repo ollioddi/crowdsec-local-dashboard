@@ -16,6 +16,24 @@ const oidcConfig =
 					discoveryUrl: `${env.OIDC_ISSUER_URL.replace(/\/$/, "")}/.well-known/openid-configuration`,
 					scopes: ["openid", "email", "profile"],
 					pkce: true,
+					mapProfileToUser: (profile: Record<string, unknown>) => {
+						const preferred =
+							(profile.preferred_username as string | undefined) ??
+							(profile.nickname as string | undefined) ??
+							(profile.name as string | undefined)?.split(" ")[0];
+						// Cast needed: username/displayUsername are added by the username
+						// plugin and are not reflected in the base mapProfileToUser types.
+						return {
+							username: preferred?.toLowerCase(),
+							displayUsername: preferred,
+						} as Parameters<
+							NonNullable<
+								Parameters<typeof genericOAuth>[0]["config"][number]["mapProfileToUser"]
+							>
+						>[0] extends infer _P
+							? Record<string, unknown>
+							: never;
+					},
 				},
 			]
 		: [];

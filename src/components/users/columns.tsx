@@ -13,6 +13,7 @@ import {
 export function createColumns(
 	onDelete: (id: string) => void,
 	firstUserId: string,
+	currentUserId: string,
 ): ColumnDef<UserRow>[] {
 	return [
 		{
@@ -22,7 +23,9 @@ export function createColumns(
 			cell: ({ row }) => (
 				<div className="flex items-center gap-2">
 					<span className="font-medium">
-						{row.getValue("displayUsername") ?? row.original.username}
+						{row.getValue("displayUsername") ??
+							row.original.username ??
+							row.original.name}
 					</span>
 					{row.original.id === firstUserId && (
 						<Badge variant="secondary">Admin</Badge>
@@ -82,7 +85,11 @@ export function createColumns(
 			meta: { visibleByDefault: true },
 			cell: ({ row }) => {
 				const isMobile = useIsMobile();
-				if (row.original.id === firstUserId) return null;
+				if (
+					row.original.id === firstUserId ||
+					row.original.id === currentUserId
+				)
+					return null;
 				return (
 					<Button
 						variant="destructive"
