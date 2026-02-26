@@ -17,3 +17,4 @@ todos.json
 .tanstack
 .output
 .claude
+debug-alert-*.json

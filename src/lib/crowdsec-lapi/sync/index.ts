@@ -49,7 +49,9 @@ async function broadcastCurrentState(): Promise<void> {
 		where: { active: true },
 		include: {
 			host: true,
-			alerts: { select: { id: true, paths: true, scenario: true } },
+			alerts: {
+				select: { id: true, entries: true, entryType: true, scenario: true },
+			},
 		},
 		orderBy: { createdAt: "desc" },
 	});
@@ -58,7 +60,8 @@ async function broadcastCurrentState(): Promise<void> {
 		alerts: d.alerts.map((a) => ({
 			id: a.id,
 			scenario: a.scenario,
-			paths: JSON.parse(a.paths) as string[],
+			entries: JSON.parse(a.entries) as string[],
+			entryType: a.entryType,
 		})),
 	}));
 	broadcastEvent("decisions", activeDecisions);

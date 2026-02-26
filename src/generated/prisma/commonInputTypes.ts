@@ -258,6 +258,31 @@ export type BoolWithAggregatesFilter<$PrismaModel = never> = {
 	_max?: Prisma.NestedBoolFilter<$PrismaModel>;
 };
 
+export type EnumAlertEntryTypeFilter<$PrismaModel = never> = {
+	equals?:
+		| $Enums.AlertEntryType
+		| Prisma.EnumAlertEntryTypeFieldRefInput<$PrismaModel>;
+	in?: $Enums.AlertEntryType[];
+	notIn?: $Enums.AlertEntryType[];
+	not?:
+		| Prisma.NestedEnumAlertEntryTypeFilter<$PrismaModel>
+		| $Enums.AlertEntryType;
+};
+
+export type EnumAlertEntryTypeWithAggregatesFilter<$PrismaModel = never> = {
+	equals?:
+		| $Enums.AlertEntryType
+		| Prisma.EnumAlertEntryTypeFieldRefInput<$PrismaModel>;
+	in?: $Enums.AlertEntryType[];
+	notIn?: $Enums.AlertEntryType[];
+	not?:
+		| Prisma.NestedEnumAlertEntryTypeWithAggregatesFilter<$PrismaModel>
+		| $Enums.AlertEntryType;
+	_count?: Prisma.NestedIntFilter<$PrismaModel>;
+	_min?: Prisma.NestedEnumAlertEntryTypeFilter<$PrismaModel>;
+	_max?: Prisma.NestedEnumAlertEntryTypeFilter<$PrismaModel>;
+};
+
 export type NestedStringFilter<$PrismaModel = never> = {
 	equals?: string | Prisma.StringFieldRefInput<$PrismaModel>;
 	in?: string[];
@@ -521,3 +546,29 @@ export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
 	_min?: Prisma.NestedBoolFilter<$PrismaModel>;
 	_max?: Prisma.NestedBoolFilter<$PrismaModel>;
 };
+
+export type NestedEnumAlertEntryTypeFilter<$PrismaModel = never> = {
+	equals?:
+		| $Enums.AlertEntryType
+		| Prisma.EnumAlertEntryTypeFieldRefInput<$PrismaModel>;
+	in?: $Enums.AlertEntryType[];
+	notIn?: $Enums.AlertEntryType[];
+	not?:
+		| Prisma.NestedEnumAlertEntryTypeFilter<$PrismaModel>
+		| $Enums.AlertEntryType;
+};
+
+export type NestedEnumAlertEntryTypeWithAggregatesFilter<$PrismaModel = never> =
+	{
+		equals?:
+			| $Enums.AlertEntryType
+			| Prisma.EnumAlertEntryTypeFieldRefInput<$PrismaModel>;
+		in?: $Enums.AlertEntryType[];
+		notIn?: $Enums.AlertEntryType[];
+		not?:
+			| Prisma.NestedEnumAlertEntryTypeWithAggregatesFilter<$PrismaModel>
+			| $Enums.AlertEntryType;
+		_count?: Prisma.NestedIntFilter<$PrismaModel>;
+		_min?: Prisma.NestedEnumAlertEntryTypeFilter<$PrismaModel>;
+		_max?: Prisma.NestedEnumAlertEntryTypeFilter<$PrismaModel>;
+	};

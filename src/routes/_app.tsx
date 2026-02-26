@@ -5,7 +5,7 @@ import {
 	redirect,
 	useLoaderData,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
 	SidebarInset,

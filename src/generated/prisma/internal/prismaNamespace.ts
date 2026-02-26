@@ -1117,7 +1117,8 @@ export const AlertScalarFieldEnum = {
 	scenario: "scenario",
 	message: "message",
 	createdAt: "createdAt",
-	paths: "paths",
+	entries: "entries",
+	entryType: "entryType",
 	hostIp: "hostIp",
 	events: "events",
 } as const;
@@ -1197,6 +1198,14 @@ export type EnumDecisionOriginFieldRefInput<$PrismaModel> = FieldRefInputType<
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<
 	$PrismaModel,
 	"Boolean"
+>;
+
+/**
+ * Reference to a field of type 'AlertEntryType'
+ */
+export type EnumAlertEntryTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
+	$PrismaModel,
+	"AlertEntryType"
 >;
 
 /**

@@ -1,7 +1,7 @@
 {
 	"version": "1.0",
 	"generatorVersion": "unknown",
-	"generatedAt": "2026-02-19T20:56:30.073Z",
+	"generatedAt": "2026-02-26T08:37:19.645Z",
 	"outputPath": "/home/oliver/development/code/HOBBY/crowdsec-dashboard/src/generated/zod",
 	"files": [
 		"schemas/enums/TransactionIsolationLevel.schema.ts",
@@ -16,6 +16,7 @@
 		"schemas/enums/NullsOrder.schema.ts",
 		"schemas/enums/DecisionType.schema.ts",
 		"schemas/enums/DecisionOrigin.schema.ts",
+		"schemas/enums/AlertEntryType.schema.ts",
 		"schemas/variants/pure/User.pure.ts",
 		"schemas/variants/pure/Session.pure.ts",
 		"schemas/variants/pure/Account.pure.ts",

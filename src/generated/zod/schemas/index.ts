@@ -1,4 +1,5 @@
 export * from "./enums/AccountScalarFieldEnum.schema";
+export * from "./enums/AlertEntryType.schema";
 export * from "./enums/AlertScalarFieldEnum.schema";
 export * from "./enums/DecisionOrigin.schema";
 export * from "./enums/DecisionScalarFieldEnum.schema";

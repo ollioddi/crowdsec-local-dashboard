@@ -5,7 +5,8 @@ export const AlertScalarFieldEnumSchema = z.enum([
 	"scenario",
 	"message",
 	"createdAt",
-	"paths",
+	"entries",
+	"entryType",
 	"hostIp",
 	"events",
 ]);

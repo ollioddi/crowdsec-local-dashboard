@@ -24,6 +24,13 @@ enum DecisionOrigin {
   cscli
 }
 
+enum AlertEntryType {
+  paths
+  ports
+  usernames
+  none
+}
+
 model User {
   id            String    @id
   name          String
@@ -117,7 +124,8 @@ model Alert {
   scenario    String
   message     String
   createdAt   DateTime
-  paths       String   @default("[]") // JSON string[] of unique http_paths from events
+  entries     String         @default("[]") // JSON string[] of event highlights
+  entryType   AlertEntryType @default(none) // discriminates what entries[] contains
 
   // Link to Host
   hostIp      String

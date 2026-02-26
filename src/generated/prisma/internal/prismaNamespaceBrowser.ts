@@ -171,7 +171,8 @@ export const AlertScalarFieldEnum = {
 	scenario: "scenario",
 	message: "message",
 	createdAt: "createdAt",
-	paths: "paths",
+	entries: "entries",
+	entryType: "entryType",
 	hostIp: "hostIp",
 	events: "events",
 } as const;

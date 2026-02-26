@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Row } from "@tanstack/react-table";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink, Loader2, Trash2 } from "lucide-react";
 import { RelativeTime } from "@/components/relative-dates";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,57 +52,87 @@ interface AlertEvidenceProps {
 }
 
 function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
-	const httpEvents = alert.events.filter((e) => e.httpVerb ?? e.httpPath);
 	const firstEvent = alert.events[0];
 
 	return (
 		<div className="space-y-2">
 			<div className="flex items-center gap-2">
 				<span className="text-xs font-semibold">
-					{alert.scenario.replace("crowdsecurity/", "")}
+					{alert.scenario
+						.replace("crowdsecurity/", "")
+						.replace("firewallservices/", "")}
 				</span>
 				<span className="text-xs text-muted-foreground">
 					· {alert.events.length} event{alert.events.length === 1 ? "" : "s"}
 				</span>
 			</div>
 
-			{firstEvent &&
-				(firstEvent.asnNumber ?? firstEvent.asnOrg ?? firstEvent.isoCode) && (
-					<div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-						{firstEvent.asnNumber && <span>ASN {firstEvent.asnNumber}</span>}
-						{firstEvent.asnOrg && <span>{firstEvent.asnOrg}</span>}
-						{firstEvent.isoCode && <span>{firstEvent.isoCode}</span>}
-						{firstEvent.sourceRange && <span>{firstEvent.sourceRange}</span>}
-					</div>
-				)}
-
-			{httpEvents.length > 0 && (
+			{alert.entryType === "paths" && alert.entries.length > 0 && (
 				<div className="max-h-48 overflow-y-auto space-y-0.5 rounded border p-1">
-					{httpEvents.map((event, idx) => (
-						<div
-							key={`${idx}-${event.httpVerb}${event.httpPath}${event.httpStatus}`}
-							className="flex items-center gap-2 text-xs py-0.5"
-						>
-							{event.httpVerb && (
-								<span
-									className={`shrink-0 rounded px-1 py-0.5 font-mono text-[10px] font-bold ${verbColor(event.httpVerb)}`}
-								>
-									{event.httpVerb}
-								</span>
-							)}
-							<span
-								className="font-mono flex-1 truncate"
-								title={event.httpPath}
+					{alert.events
+						.filter((e) => e.eventType === "http")
+						.map((event, idx) => (
+							<div
+								key={`${idx}-${event.httpVerb}${event.httpPath}${event.httpStatus}`}
+								className="flex items-center gap-2 text-xs py-0.5"
 							>
-								{event.httpPath ?? "—"}
-							</span>
-							{event.httpStatus && (
+								{event.httpVerb && (
+									<span
+										className={`shrink-0 rounded px-1 py-0.5 font-mono text-[10px] font-bold ${verbColor(event.httpVerb)}`}
+									>
+										{event.httpVerb}
+									</span>
+								)}
 								<span
-									className={`shrink-0 font-mono ${statusColor(event.httpStatus)}`}
+									className="font-mono flex-1 truncate"
+									title={event.httpPath}
 								>
-									{event.httpStatus}
+									{event.httpPath ?? "—"}
 								</span>
-							)}
+								{event.httpStatus && (
+									<span
+										className={`shrink-0 font-mono ${statusColor(event.httpStatus)}`}
+									>
+										{event.httpStatus}
+									</span>
+								)}
+							</div>
+						))}
+				</div>
+			)}
+
+			{alert.entryType === "ports" && (
+				<div className="rounded border p-2 text-xs space-y-1.5">
+					<p className="text-muted-foreground font-medium">
+						{alert.events.length} dropped connection
+						{alert.events.length === 1 ? "" : "s"}
+						{firstEvent?.eventType === "firewall_pf" &&
+							firstEvent.pfMachine &&
+							` · ${firstEvent.pfMachine}`}
+					</p>
+					{alert.entries.length > 0 && (
+						<div className="flex flex-wrap gap-1">
+							{alert.entries.map((port) => (
+								<span
+									key={port}
+									className="font-mono rounded bg-muted px-1.5 py-0.5 text-[11px]"
+								>
+									{port}
+								</span>
+							))}
+						</div>
+					)}
+				</div>
+			)}
+
+			{alert.entryType === "usernames" && alert.entries.length > 0 && (
+				<div className="max-h-32 overflow-y-auto space-y-0.5 rounded border p-1">
+					{alert.entries.map((user) => (
+						<div
+							key={user}
+							className="flex items-center gap-2 text-xs py-0.5 px-1"
+						>
+							<span className="font-mono">{user}</span>
 						</div>
 					))}
 				</div>
@@ -113,14 +143,17 @@ function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
 
 interface DecisionExpandedRowProps {
 	row: Row<DecisionWithHost>;
-	onDelete: (id: number) => void;
+	onDelete: (id: number, collapse?: () => void) => void;
+	deletingId: number | undefined;
 }
 
 export function DecisionExpandedRow({
 	row,
 	onDelete,
+	deletingId,
 }: Readonly<DecisionExpandedRowProps>) {
 	const decision = row.original;
+	const isDeleting = deletingId === decision.id;
 
 	const { data: alerts = [], isLoading } = useQuery({
 		queryKey: ["decision-alerts", decision.id],
@@ -130,7 +163,15 @@ export function DecisionExpandedRow({
 	});
 
 	return (
-		<div className="px-1 py-2 space-y-4">
+		<div className="relative px-1 py-2 space-y-4">
+			{isDeleting && (
+				<div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-[2px]">
+					<div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+						<Loader2 className="size-4 animate-spin" />
+						<span>Deleting decision…</span>
+					</div>
+				</div>
+			)}
 			<div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
 				<div className="col-span-2">
 					<p className="text-xs font-medium text-muted-foreground mb-0.5">
@@ -200,15 +241,22 @@ export function DecisionExpandedRow({
 
 			<div className="flex gap-2">
 				{decision.active && (
-					<Button
-						variant="destructive"
-						size="sm"
-						className="flex-1"
-						onClick={() => onDelete(decision.id)}
-					>
+				<Button
+					variant="destructive"
+					size="sm"
+					className="flex-1"
+					disabled={isDeleting}
+					onClick={() =>
+						onDelete(decision.id, () => row.toggleExpanded(false))
+					}
+				>
+					{isDeleting ? (
+						<Loader2 className="mr-1.5 size-4 animate-spin" />
+					) : (
 						<Trash2 className="mr-1.5 size-4" />
-						Delete
-					</Button>
+					)}
+					{isDeleting ? "Deleting…" : "Delete"}
+				</Button>
 				)}
 				<Button
 					variant="default"
