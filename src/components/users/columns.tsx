@@ -13,6 +13,8 @@ import {
 export function createColumns(
 	onDelete: (id: string) => void,
 	firstUserId: string,
+	currentUserId: string,
+	deletingId: string | undefined,
 ): ColumnDef<UserRow>[] {
 	return [
 		{
@@ -22,13 +24,32 @@ export function createColumns(
 			cell: ({ row }) => (
 				<div className="flex items-center gap-2">
 					<span className="font-medium">
-						{row.getValue("displayUsername") ?? row.original.username}
+						{row.getValue("displayUsername") ??
+							row.original.username ??
+							row.original.name}
 					</span>
 					{row.original.id === firstUserId && (
-						<Badge variant="secondary">Admin</Badge>
+						<Badge variant="secondary">Owner</Badge>
 					)}
 				</div>
 			),
+		},
+		{
+			id: "loginMethod",
+			header: "Login",
+			meta: { visibleByDefault: true },
+			cell: ({ row }) => {
+				const providers = row.original.accounts.map((a) => a.providerId);
+				return (
+					<div className="flex flex-wrap gap-1">
+						{providers.map((p) => (
+							<Badge key={p} variant="outline">
+								{p === "credential" ? "Password" : p === "oidc" ? "SSO" : p}
+							</Badge>
+						))}
+					</div>
+				);
+			},
 		},
 		{
 			accessorKey: "email",
@@ -65,14 +86,21 @@ export function createColumns(
 			meta: { visibleByDefault: true },
 			cell: ({ row }) => {
 				const isMobile = useIsMobile();
-				if (row.original.id === firstUserId) return null;
+				if (
+					row.original.id === firstUserId ||
+					row.original.id === currentUserId
+				)
+					return null;
+				const isDeleting = deletingId === row.original.id;
 				return (
 					<Button
 						variant="destructive"
+						icon={Trash2}
+						iconPlacement="left"
+						loading={isDeleting}
 						onClick={() => onDelete(row.original.id)}
 					>
-						<Trash2 className="size-4" />
-						{isMobile ? "" : "Delete"}
+						{isMobile ? "" : isDeleting ? "Deleting…" : "Delete"}
 					</Button>
 				);
 			},

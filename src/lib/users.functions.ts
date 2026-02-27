@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 import z from "zod";
 
 export const getUsersFn = createServerFn({ method: "GET" }).handler(
@@ -13,6 +14,7 @@ export const getUsersFn = createServerFn({ method: "GET" }).handler(
 				username: true,
 				displayUsername: true,
 				createdAt: true,
+				accounts: { select: { providerId: true } },
 			},
 		});
 		return users;
@@ -52,7 +54,7 @@ export const createUserFn = createServerFn({ method: "POST" })
 			email || `${usernameLower}${LOCAL_EMAIL_DOMAIN}`,
 		);
 
-		return { success: true };
+		return { success: true, username: usernameLower };
 	});
 
 const deleteUserSchema = z.object({
@@ -63,11 +65,17 @@ export const deleteUserFn = createServerFn({ method: "POST" })
 	.inputValidator(deleteUserSchema)
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
+		const { auth } = await import("@/lib/auth/auth.server");
+
+		const session = await auth.api.getSession({ headers: getRequestHeaders() });
+		if (data.id === session?.user.id) {
+			return { error: "Cannot delete your own account" };
+		}
+
 		const firstUser = await prisma.user.findFirst({
 			orderBy: { createdAt: "asc" },
 			select: { id: true },
 		});
-
 		if (data.id === firstUser?.id) {
 			return { error: "Cannot delete the admin user" };
 		}

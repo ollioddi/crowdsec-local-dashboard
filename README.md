@@ -46,6 +46,7 @@ This dashboard replaces all of that with a filterable table and a delete button.
 - **Real-time updates** - live changes streamed via Server-Sent Events (no polling on the client)
 - **Historical tracking** - decisions are mirrored to a local SQLite database; expired bans stay visible
 - **User management** - local username/password accounts; the first registered user becomes admin
+- **SSO login** - optional OIDC/OAuth integration; works with Authentik, Keycloak, Okta, and any other standards-compliant provider
 - **Mobile-friendly** - responsive tables that collapse gracefully on small screens
 - **Dark mode** - follows system preference
 - **PWA support** - installable on desktop and mobile;
@@ -114,6 +115,11 @@ The SQLite database is stored in a Docker volume (`db`) and survives updates.
 | `LAPI_MACHINE_PASSWORD` | Yes | | Machine password for watcher authentication. |
 | `LAPI_BOUNCER_API_TOKEN` | Yes | | API token for bouncer (read) access. |
 | `LAPI_POLL_INTERVAL` | | `60` | Seconds between LAPI decision syncs. |
+| `OIDC_CLIENT_ID` | | | Client ID from your OIDC provider. Required to enable SSO. |
+| `OIDC_CLIENT_SECRET` | | | Client secret from your OIDC provider. Required to enable SSO. |
+| `OIDC_ISSUER_URL` | | | Issuer URL of your OIDC provider, e.g. `https://authentik.example.com/application/o/my-app/`. Required to enable SSO. |
+| `OIDC_BUTTON_LABEL` | | `Sign in with SSO` | Label shown on the SSO login button. |
+| `OIDC_AUTO_REDIRECT` | | `false` | Set to `true` to skip the login form and redirect straight to your SSO provider. |
 
 ---
 
@@ -142,6 +148,42 @@ cscli bouncers add crowdsec-dashboard
 Copy the generated token into `LAPI_BOUNCER_API_TOKEN`. It is only shown once.
 
 > **Note:** This dashboard communicates exclusively with your **local** LAPI. It never contacts the CrowdSec Central API (CAPI) directly.
+
+---
+
+## SSO / OIDC Setup
+
+SSO is optional. When the three `OIDC_*` variables are set, a "Sign in with SSO" button appears on the login page alongside the existing username/password form. Username/password login is always kept available so you can still access the dashboard if your identity provider is unreachable.
+
+### 1. Register the application with your provider
+
+Create an OAuth2/OIDC application in your identity provider (Authentik, Keycloak, Okta, etc.) with:
+
+- **Client type:** Confidential
+- **Redirect URI:** `https://your-dashboard-url/api/auth/oauth2/callback/oidc`
+- **Scopes:** `openid`, `email`, `profile`
+
+Note the **client ID**, **client secret**, and **issuer URL** provided by your identity provider.
+
+### 2. Set the environment variables
+
+```env
+OIDC_CLIENT_ID=your-client-id
+OIDC_CLIENT_SECRET=your-client-secret
+OIDC_ISSUER_URL=https://authentik.example.com/application/o/my-app/
+```
+
+### 3. Optional: customise the button or skip the form
+
+```env
+# Change the button label (default: "Sign in with SSO")
+OIDC_BUTTON_LABEL=Sign in with Authentik
+
+# Redirect straight to your SSO provider without showing the login form
+OIDC_AUTO_REDIRECT=true
+```
+
+> `OIDC_AUTO_REDIRECT` is ignored on first launch so the admin account can still be created with a username and password.
 
 ---
 
@@ -183,7 +225,7 @@ pnpm run dev           # start dev server on http://localhost:3000
 |---|---|
 | **Framework** | [TanStack Start](https://tanstack.com/start) - full-stack React with SSR and file-based routing |
 | **Database** | SQLite via [Prisma ORM](https://prisma.io) with the `better-sqlite3` driver |
-| **Auth** | [Better Auth](https://better-auth.com) - username/password with session management |
+| **Auth** | [Better Auth](https://better-auth.com) - username/password with session management; optional OIDC/OAuth SSO |
 | **UI** | [shadcn/ui](https://ui.shadcn.com) components on top of [Tailwind CSS v4](https://tailwindcss.com) |
 | **Tables** | [TanStack Table](https://tanstack.com/table) with faceted filters and pagination |
 | **Real-time** | Server-Sent Events pushed from the server on every sync |
@@ -192,7 +234,6 @@ pnpm run dev           # start dev server on http://localhost:3000
 
 ## Future Improvements
 
-- **OIDC SSO** - support for external identity providers via OpenID Connect
 - **Create decisions** - the ability to submit simple decisions (e.g. "ban this IP for 1 hour") directly from the UI
 
 - **You tell me!** Create an issue or drop a suggestion if there's something you'd like to see.

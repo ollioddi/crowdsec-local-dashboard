@@ -1,4 +1,6 @@
 import { useForm } from "@tanstack/react-form-start";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -16,11 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { createUserFn, createUserSchema } from "@/lib/users.functions";
 
-interface CreateUserFormProps {
-	onSuccess: () => void;
-}
-
-export function CreateUserForm({ onSuccess }: Readonly<CreateUserFormProps>) {
+export function CreateUserForm() {
+	const queryClient = useQueryClient();
 	const form = useForm({
 		defaultValues: {
 			username: "",
@@ -33,11 +32,14 @@ export function CreateUserForm({ onSuccess }: Readonly<CreateUserFormProps>) {
 		onSubmit: async ({ value }) => {
 			try {
 				const result = await createUserFn({ data: value });
-				if ("error" in result && result.error) {
+				if (result.error) {
 					form.setErrorMap({ onSubmit: { form: result.error, fields: {} } });
 				} else {
 					form.reset();
-					onSuccess();
+					toast.success("User created", {
+						description: `Username: ${result.username}`,
+					});
+					queryClient.invalidateQueries({ queryKey: ["users"] });
 				}
 			} catch {
 				form.setErrorMap({
@@ -158,8 +160,8 @@ export function CreateUserForm({ onSuccess }: Readonly<CreateUserFormProps>) {
 						<Field>
 							<form.Subscribe selector={(state) => state.isSubmitting}>
 								{(isSubmitting) => (
-									<Button type="submit" disabled={isSubmitting}>
-										{isSubmitting ? "Creating..." : "Create user"}
+									<Button type="submit" loading={isSubmitting}>
+										Create user
 									</Button>
 								)}
 							</form.Subscribe>
