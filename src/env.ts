@@ -21,7 +21,15 @@ export const env = createEnv({
 		OIDC_CLIENT_SECRET: z.string().min(1).optional(),
 		OIDC_ISSUER_URL: z.url().optional(),
 		OIDC_BUTTON_LABEL: z.string().min(1).optional(),
-		OIDC_AUTO_REDIRECT: z.coerce.boolean().optional(),
+		OIDC_AUTO_REDIRECT: z.preprocess(
+			(val) =>
+				val === "false" || val === "0"
+					? false
+					: val === "true" || val === "1"
+						? true
+						: val,
+			z.boolean().optional(),
+		),
 	},
 
 	/**
@@ -38,7 +46,12 @@ export const env = createEnv({
 	 * What object holds the environment variables at runtime. This is usually
 	 * `process.env` or `import.meta.env`.
 	 */
-	runtimeEnv: process.env,
+	runtimeEnv: Object.fromEntries(
+		Object.entries(process.env).map(([k, v]) => [
+			k,
+			typeof v === "string" ? v.replaceAll(/^"|"$/g, "") : v,
+		]),
+	),
 
 	/**
 	 * By default, this library will feed the environment variables directly to
