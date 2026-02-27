@@ -4,7 +4,7 @@
 
 A self-hosted local web dashboard for viewing and managing decisions made by your [CrowdSec](https://crowdsec.net) instance. Built for homelab use - no enterprise account or cloud connectivity required.
 
-<img src="readme/crowdsec-dashboard-desktop.png" width="600" alt="Hosts view"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub>
+<img src="readme/crowdsec-dashboard-desktop-decisions.png" width="600" alt="Hosts view"/><br/>
 
 ---
 
@@ -24,20 +24,32 @@ This dashboard replaces all of that with a filterable table and a delete button.
 
 ---
 
-## Screenshots
+## Screenshots (Desktop)
 
 <table>
   <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-hosts.png" width="280" alt="Hosts view"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-decisions.png" width="280" alt="Decisions view"/><br/><sub>Decisions - expand any row to see scenario details and delete</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-sidebar.png" width="280" alt="Navigation sidebar"/><br/><sub>Sidebar - slide-out navigation with theme toggle</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-users.png" width="280" alt="User management"/><br/><sub>Users - add and remove dashboard accounts</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-desktop-hosts.png" width="280" alt="Hosts view"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-desktop-users.png" width="280" alt="Decisions view"/><br/><sub>Users - Show users and login sources</sub></td>
   </tr>
 </table>
 
----
+## Screenshots (Mobile)
+
+<table>
+  <tr>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-login.png" width="280" alt="Hosts view"/><br/><sub>Login with optional OIDC SSO (Button text can be customized)</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-users.png" width="280" alt="Decisions view"/><br/><sub>Users - Show users and login sources</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-sidebar.png" width="280" alt="Navigation sidebar"/><br/><sub>Sidebar - slide-out navigation with theme toggle</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-hosts.png" width="280" alt="User management"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
+  </tr>
+    <tr>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-decisions.png" width="280" alt="Navigation sidebar"/><br/><sub>Decisions - expanded row showing HTTP alert details</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-decisions2.png" width="280" alt="User management"/><br/><sub>Decisions - expanded row showing Port Scan alert details</sub></td>
+  </tr>
+</table>
+
 
 ## Features
 
