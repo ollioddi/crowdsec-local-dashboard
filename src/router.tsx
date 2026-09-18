@@ -7,13 +7,7 @@ import { routeTree } from "./routeTree.gen";
 
 // Create a new router instance
 export const getRouter = () => {
-	const queryClient = new QueryClient({
-		defaultOptions: {
-			queries: {
-				refetchOnMount: "always",
-			},
-		},
-	});
+	const queryClient = new QueryClient();
 
 	const router = createRouter({
 		routeTree,

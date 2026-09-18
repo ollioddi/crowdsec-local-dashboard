@@ -22,8 +22,8 @@ const hostsQueryOptions = {
 
 export const Route = createFileRoute("/_app/hosts")({
 	validateSearch: hostSearchSchema,
-	loader: ({ context }) => {
-		context.queryClient.ensureQueryData(hostsQueryOptions);
+	loader: async ({ context }) => {
+		await context.queryClient.ensureQueryData(hostsQueryOptions);
 	},
 	component: HostsPage,
 });

@@ -6,8 +6,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * The `onMessage` callback receives the already-parsed message data — handle
  * cache updates and toasts there.
  *
- * Automatically reconnects when the page becomes visible again (e.g. after
- * the tab is backgrounded on mobile and the browser kills the connection).
+ * Reconnects when the page becomes visible again and the browser has closed
+ * the stream (e.g. a backgrounded tab on mobile). EventSource retries
+ * transient errors on its own; only a fatal HTTP status closes it.
  */
 export function useSSEConnection<T>(
 	url: string,
@@ -39,7 +40,11 @@ export function useSSEConnection<T>(
 		connect();
 
 		const handleVisibilityChange = () => {
-			if (document.visibilityState === "visible") {
+			// Only reconnect if the browser actually dropped the stream
+			if (
+				document.visibilityState === "visible" &&
+				eventSourceRef.current?.readyState === EventSource.CLOSED
+			) {
 				connect();
 			}
 		};
