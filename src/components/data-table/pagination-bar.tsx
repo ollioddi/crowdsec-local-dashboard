@@ -166,6 +166,7 @@ function PageNavigation({
 				<span className="hidden sm:contents">
 					{pageNumbers.map((page, index) =>
 						page === "..." ? (
+							// biome-ignore lint/suspicious/noArrayIndexKey: at most two ellipses at stable positions
 							<PaginationEllipsis key={`ellipsis-${page + index}`} />
 						) : (
 							<PaginationItem key={`page-${page}`}>

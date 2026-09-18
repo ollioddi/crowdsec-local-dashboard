@@ -73,6 +73,7 @@ function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
 						.filter((e) => e.eventType === "http")
 						.map((event, idx) => (
 							<div
+								// biome-ignore lint/suspicious/noArrayIndexKey: events carry no stable id and the list is never reordered
 								key={`${idx}-${event.httpVerb}${event.httpPath}${event.httpStatus}`}
 								className="flex items-center gap-2 text-xs py-0.5"
 							>
