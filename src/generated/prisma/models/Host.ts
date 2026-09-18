@@ -352,7 +352,7 @@ export type HostCreateInput = {
   ip: string
   scope?: string
   firstSeen?: Date | string
-  lastSeen?: Date | string
+  lastSeen: Date | string
   totalBans?: number
   country?: string | null
   asNumber?: string | null
@@ -368,7 +368,7 @@ export type HostUncheckedCreateInput = {
   ip: string
   scope?: string
   firstSeen?: Date | string
-  lastSeen?: Date | string
+  lastSeen: Date | string
   totalBans?: number
   country?: string | null
   asNumber?: string | null
@@ -416,7 +416,7 @@ export type HostCreateManyInput = {
   ip: string
   scope?: string
   firstSeen?: Date | string
-  lastSeen?: Date | string
+  lastSeen: Date | string
   totalBans?: number
   country?: string | null
   asNumber?: string | null
@@ -561,7 +561,7 @@ export type HostCreateWithoutDecisionsInput = {
   ip: string
   scope?: string
   firstSeen?: Date | string
-  lastSeen?: Date | string
+  lastSeen: Date | string
   totalBans?: number
   country?: string | null
   asNumber?: string | null
@@ -576,7 +576,7 @@ export type HostUncheckedCreateWithoutDecisionsInput = {
   ip: string
   scope?: string
   firstSeen?: Date | string
-  lastSeen?: Date | string
+  lastSeen: Date | string
   totalBans?: number
   country?: string | null
   asNumber?: string | null
@@ -637,7 +637,7 @@ export type HostCreateWithoutAlertsInput = {
   ip: string
   scope?: string
   firstSeen?: Date | string
-  lastSeen?: Date | string
+  lastSeen: Date | string
   totalBans?: number
   country?: string | null
   asNumber?: string | null
@@ -652,7 +652,7 @@ export type HostUncheckedCreateWithoutAlertsInput = {
   ip: string
   scope?: string
   firstSeen?: Date | string
-  lastSeen?: Date | string
+  lastSeen: Date | string
   totalBans?: number
   country?: string | null
   asNumber?: string | null

@@ -5,8 +5,10 @@ import type { CrowdSecDecision } from "@/lib/crowdsec-lapi/types";
 import { broadcastEvent } from "@/lib/sse.server";
 import { buildDecisionToAlertMap } from "./alert-linker";
 import {
+	deactivateExpiredDecisions,
 	deactivateStaleDecisions,
 	ensureHostsExist,
+	findExistingDecisionIds,
 	pruneOldDecisions,
 	updateHostBanCounts,
 	upsertActiveDecisions,
@@ -14,37 +16,40 @@ import {
 	upsertInactiveDecisions,
 } from "./db";
 
-/**
- * True only on the first poll per process lifetime. Forces a startup=true
- * request so LAPI sends the complete active set rather than a delta.
- */
+/** First poll per process must be a full (startup=true) pull. */
 let isFirstFetch = true;
 
 /**
- * Upserts hosts, alerts, and active decisions for a set of new decisions.
- * Alert linking is attempted first so DB foreign keys are always satisfied.
+ * LAPI advances the bouncer's last-pull timestamp as soon as it answers the
+ * stream request, so a failure after that point loses the delta for good.
+ * Any failed sync therefore forces a full pull on the next attempt.
  */
+let needsFullSync = false;
+
 async function addNewDecisions(decisions: CrowdSecDecision[]): Promise<void> {
 	const client = getLapiClient();
-	const decisionToAlert = await buildDecisionToAlertMap(decisions, client);
-	await upsertHosts(decisions, decisionToAlert);
+	const [decisionToAlert, existingIds] = await Promise.all([
+		buildDecisionToAlertMap(decisions, client),
+		findExistingDecisionIds(decisions.map((d) => d.id)),
+	]);
+	const newIds = new Set(
+		decisions.map((d) => d.id).filter((id) => !existingIds.has(id)),
+	);
+	await upsertHosts(decisions, decisionToAlert, newIds);
 	await upsertActiveDecisions(decisions, decisionToAlert);
-	await updateHostBanCounts([...new Set(decisions.map((d) => d.value))]);
+	await updateHostBanCounts(decisions.map((d) => d.value));
 }
 
-/**
- * Ensures host records exist then marks the given decisions as inactive.
- */
 async function removeDeletedDecisions(
 	decisions: CrowdSecDecision[],
 ): Promise<void> {
 	await ensureHostsExist(decisions);
 	await upsertInactiveDecisions(decisions);
-	await updateHostBanCounts([...new Set(decisions.map((d) => d.value))]);
+	await updateHostBanCounts(decisions.map((d) => d.value));
 }
 
-/** Fetches the current active decision + host state and broadcasts it to SSE clients. */
-async function broadcastCurrentState(): Promise<void> {
+/** Pushes the current active decisions and host list to SSE clients. */
+export async function broadcastCurrentState(): Promise<void> {
 	const activeDecisionsRaw = await prisma.decision.findMany({
 		where: { active: true },
 		include: {
@@ -77,72 +82,86 @@ async function broadcastCurrentState(): Promise<void> {
 	broadcastEvent("hosts", allHosts);
 
 	console.log(
-		`[lapi-sync] Sync complete — ${activeDecisions.length} active decisions, ${allHosts.length} hosts`,
+		`[lapi-sync] Broadcast ${activeDecisions.length} active decisions, ${allHosts.length} hosts`,
 	);
 }
 
 /**
- * Syncs decisions from LAPI using the stream endpoint.
+ * Syncs decisions from the LAPI stream endpoint.
  *
- * The first call per process lifetime (or when `forceFullSync` is true) uses
- * `startup=true` so LAPI returns the complete active set. Subsequent calls
- * receive only the delta (new + deleted) since the last poll.
+ * The first call per process, any call after a failed sync, and calls with
+ * `forceFullSync` use `startup=true` to receive the complete active set.
+ * Other calls receive only the delta since the last poll.
  */
 export async function syncDecisions(options?: {
 	forceFullSync?: boolean;
 }): Promise<void> {
-	const useStartup = isFirstFetch || options?.forceFullSync === true;
+	const useStartup =
+		isFirstFetch || needsFullSync || options?.forceFullSync === true;
 
-	console.log(
-		`[lapi-sync] Starting sync (startup=${useStartup}, isFirstFetch=${isFirstFetch}, forceFullSync=${options?.forceFullSync ?? false})`,
-	);
+	console.log(`[lapi-sync] Starting sync (startup=${useStartup})`);
 
-	const client = getLapiClient();
-	const stream = await client.getDecisionStream({
-		startup: useStartup,
-		origins: "crowdsec,cscli",
-	});
+	try {
+		const client = getLapiClient();
+		const stream = await client.getDecisionStream({
+			startup: useStartup,
+			origins: "crowdsec,cscli",
+		});
 
-	const newDecisions = stream.new ?? [];
-	const deletedDecisions = stream.deleted ?? [];
+		const newDecisions = stream.new ?? [];
+		const deletedDecisions = stream.deleted ?? [];
+		let changed = false;
 
-	console.log(
-		`[lapi-sync] Stream: ${newDecisions.length} new, ${deletedDecisions.length} deleted`,
-	);
-
-	if (newDecisions.length > 0) {
-		console.log(`[lapi-sync] Processing ${newDecisions.length} new decisions`);
-		await addNewDecisions(newDecisions);
-	}
-
-	if (deletedDecisions.length > 0) {
 		console.log(
-			`[lapi-sync] Processing ${deletedDecisions.length} deleted decisions`,
+			`[lapi-sync] Stream: ${newDecisions.length} new, ${deletedDecisions.length} deleted`,
 		);
-		await removeDeletedDecisions(deletedDecisions);
-	}
 
-	// On a full (startup) fetch, deactivate any DB decisions absent from LAPI's response
-	if (useStartup) {
-		const staleCount = await deactivateStaleDecisions(
-			newDecisions.map((d) => d.id),
-		);
-		if (staleCount > 0) {
-			console.log(
-				`[lapi-sync] Marked ${staleCount} stale DB decisions as inactive`,
+		if (newDecisions.length > 0) {
+			await addNewDecisions(newDecisions);
+			changed = true;
+		}
+
+		if (deletedDecisions.length > 0) {
+			await removeDeletedDecisions(deletedDecisions);
+			changed = true;
+		}
+
+		if (useStartup) {
+			const staleCount = await deactivateStaleDecisions(
+				newDecisions.map((d) => d.id),
 			);
+			if (staleCount > 0) {
+				console.log(`[lapi-sync] Deactivated ${staleCount} stale decisions`);
+				changed = true;
+			}
 		}
-	}
 
-	isFirstFetch = false;
-
-	// Prune old inactive decisions if we exceed the retention threshold
-	if (env.DECISION_RETENTION_COUNT != null) {
-		const prunedIps = await pruneOldDecisions(env.DECISION_RETENTION_COUNT);
-		if (prunedIps.length > 0) {
-			await updateHostBanCounts(prunedIps);
+		const expiredCount = await deactivateExpiredDecisions();
+		if (expiredCount > 0) {
+			console.log(
+				`[lapi-sync] Deactivated ${expiredCount} decisions past their expiry`,
+			);
+			changed = true;
 		}
-	}
 
-	await broadcastCurrentState();
+		isFirstFetch = false;
+		needsFullSync = false;
+
+		if (env.DECISION_RETENTION_COUNT > 0) {
+			const prunedIps = await pruneOldDecisions(env.DECISION_RETENTION_COUNT);
+			if (prunedIps.length > 0) {
+				await updateHostBanCounts(prunedIps);
+				changed = true;
+			}
+		}
+
+		if (changed) {
+			await broadcastCurrentState();
+		} else {
+			console.log("[lapi-sync] No changes");
+		}
+	} catch (error) {
+		needsFullSync = true;
+		throw error;
+	}
 }
