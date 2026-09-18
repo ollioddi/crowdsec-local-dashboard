@@ -9,23 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
-import { Route as SseHostsRouteImport } from './routes/sse/hosts'
-import { Route as SseDecisionsRouteImport } from './routes/sse/decisions'
-import { Route as AppUsersRouteImport } from './routes/_app/users'
-import { Route as AppHostsRouteImport } from './routes/_app/hosts'
 import { Route as AppDecisionsRouteImport } from './routes/_app/decisions'
+import { Route as AppHostsRouteImport } from './routes/_app/hosts'
+import { Route as AppUsersRouteImport } from './routes/_app/users'
+import { Route as SseDecisionsRouteImport } from './routes/sse/decisions'
+import { Route as SseHostsRouteImport } from './routes/sse/hosts'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -33,19 +33,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const SseHostsRoute = SseHostsRouteImport.update({
-  id: '/sse/hosts',
-  path: '/sse/hosts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SseDecisionsRoute = SseDecisionsRouteImport.update({
-  id: '/sse/decisions',
-  path: '/sse/decisions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppUsersRoute = AppUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
+const AppDecisionsRoute = AppDecisionsRouteImport.update({
+  id: '/decisions',
+  path: '/decisions',
   getParentRoute: () => AppRoute,
 } as any)
 const AppHostsRoute = AppHostsRouteImport.update({
@@ -53,10 +43,20 @@ const AppHostsRoute = AppHostsRouteImport.update({
   path: '/hosts',
   getParentRoute: () => AppRoute,
 } as any)
-const AppDecisionsRoute = AppDecisionsRouteImport.update({
-  id: '/decisions',
-  path: '/decisions',
+const AppUsersRoute = AppUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
   getParentRoute: () => AppRoute,
+} as any)
+const SseDecisionsRoute = SseDecisionsRouteImport.update({
+  id: '/sse/decisions',
+  path: '/sse/decisions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SseHostsRoute = SseHostsRouteImport.update({
+  id: '/sse/hosts',
+  path: '/sse/hosts',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -140,18 +140,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_app': {
       id: '/_app'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -161,25 +161,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/sse/hosts': {
-      id: '/sse/hosts'
-      path: '/sse/hosts'
-      fullPath: '/sse/hosts'
-      preLoaderRoute: typeof SseHostsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sse/decisions': {
-      id: '/sse/decisions'
-      path: '/sse/decisions'
-      fullPath: '/sse/decisions'
-      preLoaderRoute: typeof SseDecisionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/users': {
-      id: '/_app/users'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof AppUsersRouteImport
+    '/_app/decisions': {
+      id: '/_app/decisions'
+      path: '/decisions'
+      fullPath: '/decisions'
+      preLoaderRoute: typeof AppDecisionsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/hosts': {
@@ -189,12 +175,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHostsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/decisions': {
-      id: '/_app/decisions'
-      path: '/decisions'
-      fullPath: '/decisions'
-      preLoaderRoute: typeof AppDecisionsRouteImport
+    '/_app/users': {
+      id: '/_app/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AppUsersRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/sse/decisions': {
+      id: '/sse/decisions'
+      path: '/sse/decisions'
+      fullPath: '/sse/decisions'
+      preLoaderRoute: typeof SseDecisionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sse/hosts': {
+      id: '/sse/hosts'
+      path: '/sse/hosts'
+      fullPath: '/sse/hosts'
+      preLoaderRoute: typeof SseHostsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
