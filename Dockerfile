@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl \
 WORKDIR /app
 
 FROM base AS deps
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Use a cache mount for pnpm to speed up re-builds
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 

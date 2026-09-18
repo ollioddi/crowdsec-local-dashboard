@@ -1,3 +1,6 @@
-ignoredBuiltDependencies:
-  - '@prisma/engines'
-  - prisma-zod-generator
+allowBuilds:
+  better-sqlite3: true
+  esbuild: true
+  '@prisma/engines': false
+  prisma: false
+  prisma-zod-generator: false
