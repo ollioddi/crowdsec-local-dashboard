@@ -84,14 +84,19 @@ export const ensureAdminAndSignInFn = createServerFn({ method: "POST" })
 			);
 		}
 
-		// Sign in with username
-		const signInRes = await auth.api.signInUsername({
-			body: { username, password },
-			headers,
-		});
-
-		if (!signInRes) {
-			return { error: "Invalid credentials" };
+		// Sign in with username. better-auth throws an APIError on bad credentials
+		// rather than returning null, so translate that into a form error.
+		const { APIError } = await import("better-auth/api");
+		try {
+			await auth.api.signInUsername({
+				body: { username, password },
+				headers,
+			});
+		} catch (error) {
+			if (error instanceof APIError) {
+				return { error: "Invalid credentials" };
+			}
+			throw error;
 		}
 
 		return { success: true };

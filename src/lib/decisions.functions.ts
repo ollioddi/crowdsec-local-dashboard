@@ -1,16 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import {
-	DecisionOriginSchema,
-	DecisionTypeSchema,
-} from "./crowdsec-lapi/types";
+import { authMiddleware } from "./auth/auth.middleware";
 
 /**
  * Get all decisions from the database.
  * The background sync loop keeps the DB in sync with LAPI.
  */
-export const getDecisionsFn = createServerFn({ method: "GET" }).handler(
-	async () => {
+export const getDecisionsFn = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.handler(async () => {
 		const { prisma } = await import("@/db");
 		const rows = await prisma.decision.findMany({
 			include: {
@@ -30,8 +28,7 @@ export const getDecisionsFn = createServerFn({ method: "GET" }).handler(
 				entryType: alert.entryType,
 			})),
 		}));
-	},
-);
+	});
 
 export type DecisionWithHost = Awaited<
 	ReturnType<typeof getDecisionsFn>
@@ -42,6 +39,7 @@ export type DecisionWithHost = Awaited<
  * Intended for the expanded row — fetched lazily on expand.
  */
 export const getDecisionAlertsFn = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
 	.inputValidator(z.object({ decisionId: z.number() }))
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
@@ -76,6 +74,7 @@ export type DecisionAlertDetail = Awaited<
  * Delete a decision from LAPI and mark inactive in DB.
  */
 export const deleteDecisionFn = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.inputValidator(z.object({ id: z.number() }))
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
@@ -108,32 +107,4 @@ export const deleteDecisionFn = createServerFn({ method: "POST" })
 			);
 			throw error;
 		}
-	});
-
-const decisionHistoryFiltersSchema = z
-	.object({
-		hostIp: z.string().optional(),
-		active: z.boolean().optional(),
-		origin: DecisionOriginSchema.optional(),
-		type: DecisionTypeSchema.optional(),
-	})
-	.optional();
-
-/**
- * Query historical decisions from DB (including inactive).
- */
-export const getDecisionHistoryFn = createServerFn({ method: "GET" })
-	.inputValidator(decisionHistoryFiltersSchema)
-	.handler(async ({ data: filters }) => {
-		const { prisma } = await import("@/db");
-		return prisma.decision.findMany({
-			where: {
-				...(filters?.hostIp && { hostIp: filters.hostIp }),
-				...(filters?.active !== undefined && { active: filters.active }),
-				...(filters?.origin && { origin: filters.origin }),
-				...(filters?.type && { type: filters.type }),
-			},
-			include: { host: true },
-			orderBy: { createdAt: "desc" },
-		});
 	});

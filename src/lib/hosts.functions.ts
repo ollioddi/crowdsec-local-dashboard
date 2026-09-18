@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { authMiddleware } from "./auth/auth.middleware";
 
-export const getHostsFn = createServerFn({ method: "GET" }).handler(
-	async () => {
+export const getHostsFn = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.handler(async () => {
 		const { prisma } = await import("@/db");
 		return prisma.host.findMany({
 			orderBy: { lastSeen: "desc" },
@@ -11,7 +13,6 @@ export const getHostsFn = createServerFn({ method: "GET" }).handler(
 				},
 			},
 		});
-	},
-);
+	});
 
 export type HostWithCount = Awaited<ReturnType<typeof getHostsFn>>[number];

@@ -1,9 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeaders } from "@tanstack/react-start/server";
 import z from "zod";
+import { authMiddleware } from "./auth/auth.middleware";
 
-export const getUsersFn = createServerFn({ method: "GET" }).handler(
-	async () => {
+export const getUsersFn = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.handler(async () => {
 		const { prisma } = await import("@/db");
 		const users = await prisma.user.findMany({
 			orderBy: { createdAt: "asc" },
@@ -18,8 +19,7 @@ export const getUsersFn = createServerFn({ method: "GET" }).handler(
 			},
 		});
 		return users;
-	},
-);
+	});
 
 export type UserRow = Awaited<ReturnType<typeof getUsersFn>>[number];
 
@@ -34,6 +34,7 @@ export const createUserSchema = z.object({
 });
 
 export const createUserFn = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.inputValidator(createUserSchema)
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
@@ -62,13 +63,12 @@ const deleteUserSchema = z.object({
 });
 
 export const deleteUserFn = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.inputValidator(deleteUserSchema)
-	.handler(async ({ data }) => {
+	.handler(async ({ data, context }) => {
 		const { prisma } = await import("@/db");
-		const { auth } = await import("@/lib/auth/auth.server");
 
-		const session = await auth.api.getSession({ headers: getRequestHeaders() });
-		if (data.id === session?.user.id) {
+		if (data.id === context.session.user.id) {
 			return { error: "Cannot delete your own account" };
 		}
 
