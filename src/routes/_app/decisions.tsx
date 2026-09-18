@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
-import type { ColumnFiltersState } from "@tanstack/react-table";
+import type { ColumnFiltersState, Row } from "@tanstack/react-table";
 import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -61,6 +61,7 @@ function DecisionsPage() {
 	const handleDecisionsMessage = useCallback(
 		(incoming: DecisionWithHost[]) => {
 			queryClient.setQueryData<DecisionWithHost[]>(["decisions"], (old) => {
+				const incomingIds = new Set(incoming.map((d) => d.id));
 				if (old) {
 					const knownIds = new Set(old.map((d) => d.id));
 					for (const decision of incoming) {
@@ -71,9 +72,12 @@ function DecisionsPage() {
 						}
 					}
 				}
-				// Keep expired decisions, replace active portion
-				const expired = (old ?? []).filter((d) => !d.active);
-				return [...incoming, ...expired];
+				// The server sends the active set; anything we knew as active that
+				// is no longer in it has expired and moves to the inactive part.
+				const inactive = (old ?? [])
+					.filter((d) => !incomingIds.has(d.id))
+					.map((d) => (d.active ? { ...d, active: false } : d));
+				return [...incoming, ...inactive];
 			});
 		},
 		[queryClient],
@@ -84,8 +88,27 @@ function DecisionsPage() {
 		handleDecisionsMessage,
 	);
 
-	const deleteMutation = useMutation({
+	const {
+		mutate: deleteDecision,
+		isPending,
+		variables,
+	} = useMutation({
 		mutationFn: (id: number) => deleteDecisionFn({ data: { id } }),
+		onSuccess: (result, id) => {
+			// Update the row in place; the server broadcasts the new state too
+			queryClient.setQueryData<DecisionWithHost[]>(["decisions"], (old) =>
+				old?.map((d) =>
+					d.id === id
+						? { ...d, active: false, expiresAt: result.expiresAt }
+						: d,
+				),
+			);
+			toast.success("Decision deleted", {
+				description: result.deleted
+					? `Decision ${id} removed from LAPI`
+					: `Decision ${id} had already expired`,
+			});
+		},
 		onError: (error, id) => {
 			toast.error(`Failed to delete decision ${id}`, {
 				description: error instanceof Error ? error.message : "Unknown error",
@@ -95,25 +118,26 @@ function DecisionsPage() {
 
 	const handleDelete = useCallback(
 		(id: number, collapse?: () => void) => {
-			deleteMutation.mutate(id, {
-				onSuccess: () => {
-					toast.success("Decision deleted", {
-						description: `Decision ${id} removed from LAPI`,
-					});
-					collapse?.();
-					queryClient.invalidateQueries({ queryKey: ["decisions"] });
-				},
-			});
+			deleteDecision(id, { onSuccess: () => collapse?.() });
 		},
-		[deleteMutation, queryClient],
+		[deleteDecision],
 	);
 
-	const deletingId = deleteMutation.isPending
-		? deleteMutation.variables
-		: undefined;
+	const deletingId = isPending ? variables : undefined;
 
 	const columns = useMemo(
 		() => createColumns(handleDelete, deletingId),
+		[handleDelete, deletingId],
+	);
+
+	const renderSubComponent = useCallback(
+		(row: Row<DecisionWithHost>) => (
+			<DecisionExpandedRow
+				row={row}
+				onDelete={handleDelete}
+				deletingId={deletingId}
+			/>
+		),
 		[handleDelete, deletingId],
 	);
 
@@ -132,13 +156,7 @@ function DecisionsPage() {
 				initialSorting={[{ id: "status", desc: false }]}
 				initialGlobalFilter={hostIp}
 				emptyState="No decisions."
-				renderSubComponent={(row) => (
-					<DecisionExpandedRow
-						row={row}
-						onDelete={handleDelete}
-						deletingId={deletingId}
-					/>
-				)}
+				renderSubComponent={renderSubComponent}
 				header={(table) => (
 					<DataDisplayToolbar
 						table={table}
