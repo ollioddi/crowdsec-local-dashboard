@@ -79,34 +79,20 @@ export const deleteDecisionFn = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
 		const { getLapiClient } = await import("@/lib/crowdsec-lapi");
+		const { broadcastCurrentState } = await import("@/lib/crowdsec-lapi/sync");
 
-		console.log(`[decision-delete] Deleting decision ${data.id} from LAPI`);
-
-		const client = getLapiClient();
-
-		try {
-			const result = await client.deleteDecisionById(data.id);
-			if (!result.deleted) {
-				console.log(
-					`[decision-delete] Decision ${data.id} already gone from LAPI`,
-				);
-			}
-
-			// Mark inactive in DB immediately so the UI reflects the change
-			await prisma.decision.update({
-				where: { id: data.id },
-				data: { active: false },
-			});
-			console.log(
-				`[decision-delete] Marked decision ${data.id} inactive in DB`,
-			);
-
-			return result;
-		} catch (error) {
-			console.error(
-				`[decision-delete] Failed to delete decision ${data.id}:`,
-				error instanceof Error ? error.message : error,
-			);
-			throw error;
+		const result = await getLapiClient().deleteDecisionById(data.id);
+		if (!result.deleted) {
+			console.log(`[decision-delete] ${data.id} already gone from LAPI`);
 		}
+
+		const expiresAt = new Date();
+		await prisma.decision.updateMany({
+			where: { id: data.id },
+			data: { active: false, expiresAt },
+		});
+		// Other tabs and the hosts page see the change now, not at the next poll
+		await broadcastCurrentState();
+
+		return { deleted: result.deleted, expiresAt };
 	});
