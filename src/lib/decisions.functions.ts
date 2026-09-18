@@ -86,9 +86,11 @@ export const deleteDecisionFn = createServerFn({ method: "POST" })
 
 		try {
 			const result = await client.deleteDecisionById(data.id);
-			console.log(
-				`[decision-delete] LAPI confirmed: nbDeleted=${result.nbDeleted}`,
-			);
+			if (!result.deleted) {
+				console.log(
+					`[decision-delete] Decision ${data.id} already gone from LAPI`,
+				);
+			}
 
 			// Mark inactive in DB immediately so the UI reflects the change
 			await prisma.decision.update({

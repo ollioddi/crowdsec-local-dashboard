@@ -20,6 +20,9 @@ export type DecisionFilters = {
 	origins?: string;
 };
 
+const REQUEST_TIMEOUT_MS = 15_000;
+const STREAM_TIMEOUT_MS = 60_000;
+
 /**
  * HTTP client for the CrowdSec Local API (LAPI).
  *
@@ -38,6 +41,7 @@ export class LapiClient {
 
 	private watcherToken: string | null = null;
 	private tokenExpiry = 0;
+	private loginInFlight: Promise<void> | null = null;
 
 	constructor(config: LapiConfig) {
 		const result = LapiConfigSchema.safeParse(config);
@@ -75,6 +79,7 @@ export class LapiClient {
 				machine_id: this.machineId,
 				password: this.machinePassword,
 			}),
+			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
 		});
 
 		if (!response.ok) {
@@ -92,9 +97,13 @@ export class LapiClient {
 	private async getWatcherToken(): Promise<string> {
 		const now = Date.now();
 		if (!this.watcherToken || now >= this.tokenExpiry - 60_000) {
-			await this.loginWatcher();
+			// Concurrent callers share one login instead of each hitting LAPI
+			this.loginInFlight ??= this.loginWatcher().finally(() => {
+				this.loginInFlight = null;
+			});
+			await this.loginInFlight;
 		}
-		// biome-ignore lint/style/noNonNullAssertion: Its safe here because we just set it in loginWatcher
+		// biome-ignore lint/style/noNonNullAssertion: set by loginWatcher above
 		return this.watcherToken!;
 	}
 
@@ -105,6 +114,7 @@ export class LapiClient {
 		init?: RequestInit,
 	): Promise<Response> {
 		return fetch(`${this.lapiUrl}${path}`, {
+			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
 			...init,
 			headers: {
 				...this.commonHeaders,
@@ -212,6 +222,8 @@ export class LapiClient {
 		const queryString = query ? `?${query}` : "";
 		const response = await this.bouncerFetch(
 			`/v1/decisions/stream${queryString}`,
+			// A startup pull returns the full active set, which can be large
+			{ signal: AbortSignal.timeout(STREAM_TIMEOUT_MS) },
 		);
 
 		if (!response.ok) {
@@ -225,38 +237,23 @@ export class LapiClient {
 
 	/**
 	 * Deletes a decision by ID via the watcher (JWT) endpoint.
-	 * Throws if the request fails or if LAPI reports `nbDeleted=0`
-	 * (decision didn't exist).
+	 * Resolves with `deleted: false` when LAPI no longer has the decision
+	 * (it expired or was removed elsewhere); callers should treat that as done.
 	 */
-	public async deleteDecisionById(id: number): Promise<DeleteDecisionResponse> {
-		console.log(`[lapi-client] DELETE ${this.lapiUrl}/v1/decisions/${id}`);
-
+	public async deleteDecisionById(id: number): Promise<{ deleted: boolean }> {
 		const response = await this.watcherFetch(`/v1/decisions/${id}`, {
 			method: "DELETE",
 		});
 
-		console.log(
-			`[lapi-client] DELETE response: ${response.status} ${response.statusText}`,
-		);
-
 		if (!response.ok) {
 			const body = await response.text().catch(() => "");
-			console.error(
-				`[lapi-client] DELETE failed: ${response.status} — ${body}`,
-			);
 			throw new Error(
 				`Failed to delete decision ${id}: ${response.status} ${response.statusText} — ${body}`,
 			);
 		}
 
 		const result = (await response.json()) as DeleteDecisionResponse;
-		console.log(`[lapi-client] DELETE result: nbDeleted=${result.nbDeleted}`);
-
-		if (Number.parseInt(result.nbDeleted, 10) === 0) {
-			throw new Error(`Decision ${id} was not found in LAPI (nbDeleted=0)`);
-		}
-
-		return result;
+		return { deleted: Number.parseInt(result.nbDeleted, 10) > 0 };
 	}
 
 	/**
@@ -274,7 +271,11 @@ export class LapiClient {
 		const response = await this.watcherFetch(
 			`/v1/alerts?${searchParams.toString()}`,
 		);
-		if (!response.ok) throw new Error(`Failed to fetch alerts`);
+		if (!response.ok) {
+			throw new Error(
+				`Failed to fetch alerts: ${response.status} ${response.statusText}`,
+			);
+		}
 		const result = await response.json();
 		// LAPI returns null (not []) when there are no matching alerts
 		return (result as CrowdSecAlert[] | null) ?? [];
