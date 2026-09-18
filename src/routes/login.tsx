@@ -29,7 +29,7 @@ import {
 import { authClient } from "@/lib/auth/auth-client";
 
 const signInWithOidc = () =>
-	authClient.signIn.oauth2({ providerId: "oidc", callbackURL: "/" });
+	authClient.signIn.social({ provider: "oidc", callbackURL: "/" });
 
 const LoginPage = () => {
 	const router = useRouter();

@@ -1,12 +1,13 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { genericOAuth } from "better-auth/plugins";
+import type { GenericOAuthConfig } from "better-auth/plugins/generic-oauth";
 import { username } from "better-auth/plugins/username";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { prisma } from "@/db";
 import { env } from "@/env";
 
-const oidcConfig =
+const oidcConfig: GenericOAuthConfig[] =
 	env.OIDC_CLIENT_ID && env.OIDC_CLIENT_SECRET && env.OIDC_ISSUER_URL
 		? [
 				{
@@ -16,25 +17,17 @@ const oidcConfig =
 					discoveryUrl: `${env.OIDC_ISSUER_URL.replace(/\/$/, "")}/.well-known/openid-configuration`,
 					scopes: ["openid", "email", "profile"],
 					pkce: true,
-					mapProfileToUser: (profile: Record<string, unknown>) => {
+					mapProfileToUser: (profile) => {
 						const preferred =
 							(profile.preferred_username as string | undefined) ??
 							(profile.nickname as string | undefined) ??
 							(profile.name as string | undefined)?.split(" ")[0];
-						// Cast needed: username/displayUsername are added by the username
-						// plugin and are not reflected in the base mapProfileToUser types.
+						// username/displayUsername are added by the username plugin;
+						// OAuthMappedUser allows extra keys via its index signature.
 						return {
 							username: preferred?.toLowerCase(),
 							displayUsername: preferred,
-						} as Parameters<
-							NonNullable<
-								Parameters<
-									typeof genericOAuth
-								>[0]["config"][number]["mapProfileToUser"]
-							>
-						>[0] extends infer _P
-							? Record<string, unknown>
-							: never;
+						};
 					},
 				},
 			]

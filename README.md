@@ -175,7 +175,7 @@ SSO is optional. When the three `OIDC_*` variables are set, a "Sign in with SSO"
 Create an OAuth2/OIDC application in your identity provider (Authentik, Keycloak, Okta, etc.) with:
 
 - **Client type:** Confidential
-- **Redirect URI:** `https://your-dashboard-url/api/auth/oauth2/callback/oidc`
+- **Redirect URI:** `https://your-dashboard-url/api/auth/callback/oidc`
 - **Scopes:** `openid`, `email`, `profile`
 
 Note the **client ID**, **client secret**, and **issuer URL** provided by your identity provider.
