@@ -2,12 +2,16 @@ import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 import { env } from "@/env";
 import { syncDecisions } from "@/lib/crowdsec-lapi/sync";
 
-let pollStarted = false;
+declare global {
+	// Survives Vite SSR module reloads in dev so only one poller ever runs
+	var __lapiPollStarted: boolean | undefined;
+}
+
 let syncInProgress = false;
 
 async function startDecisionPolling() {
-	if (pollStarted) return;
-	pollStarted = true;
+	if (globalThis.__lapiPollStarted) return;
+	globalThis.__lapiPollStarted = true;
 
 	if (!env.LAPI_URL || !env.LAPI_BOUNCER_API_TOKEN) {
 		console.log(
