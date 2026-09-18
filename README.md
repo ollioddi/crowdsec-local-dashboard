@@ -64,7 +64,7 @@ This dashboard replaces all of that with a filterable table and a delete button.
 - **SSO login** - optional OIDC/OAuth integration; works with Authentik, Keycloak, Okta, and any other standards-compliant provider
 - **Mobile-friendly** - responsive tables that collapse gracefully on small screens
 - **Dark mode** - follows system preference
-- **PWA support** - installable on desktop and mobile;
+- **Installable** - ships a web app manifest so it can be added to the home screen on desktop and mobile
 
 ---
 
