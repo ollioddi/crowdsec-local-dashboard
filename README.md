@@ -130,6 +130,7 @@ The SQLite database is stored in a Docker volume (`db`) and survives updates.
 | `LAPI_MACHINE_PASSWORD` | Yes | | Machine password for watcher authentication. |
 | `LAPI_BOUNCER_API_TOKEN` | Yes | | API token for bouncer (read) access. |
 | `LAPI_POLL_INTERVAL` | | `60` | Seconds between LAPI decision syncs. |
+| `DECISION_RETENTION_COUNT` | | `5000` | Maximum decisions kept in the database. The oldest inactive ones are pruned first, together with hosts and alerts nothing references anymore. Set to `0` to keep everything. |
 | `OIDC_CLIENT_ID` | | | Client ID from your OIDC provider. Required to enable SSO. |
 | `OIDC_CLIENT_SECRET` | | | Client secret from your OIDC provider. Required to enable SSO. |
 | `OIDC_ISSUER_URL` | | | Issuer URL of your OIDC provider, e.g. `https://authentik.example.com/application/o/my-app/`. Required to enable SSO. |

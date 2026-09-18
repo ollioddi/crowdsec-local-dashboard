@@ -25,6 +25,8 @@ services:
       LAPI_BOUNCER_API_TOKEN: ""
       # How often (in seconds) to poll LAPI for decision updates. Default: 60.
       LAPI_POLL_INTERVAL: "60"
+      # Max decisions kept in the database (oldest inactive pruned first). 0 keeps everything.
+      DECISION_RETENTION_COUNT: "5000"
 
     restart: unless-stopped
 

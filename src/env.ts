@@ -15,7 +15,8 @@ export const env = createEnv({
 		LAPI_MACHINE_PASSWORD: z.string().min(1).optional(),
 		LAPI_BOUNCER_API_TOKEN: z.string().min(1).optional(),
 		LAPI_POLL_INTERVAL: z.coerce.number().positive().default(60),
-		DECISION_RETENTION_COUNT: z.coerce.number().positive().optional(),
+		// Max decisions kept in the DB (oldest inactive pruned first). 0 disables pruning.
+		DECISION_RETENTION_COUNT: z.coerce.number().int().min(0).default(5000),
 		// OIDC/OAuth SSO (optional — leave unset to disable SSO login)
 		OIDC_CLIENT_ID: z.string().min(1).optional(),
 		OIDC_CLIENT_SECRET: z.string().min(1).optional(),
