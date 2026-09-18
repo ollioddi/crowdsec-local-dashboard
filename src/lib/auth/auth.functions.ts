@@ -62,7 +62,7 @@ export const getOidcConfigFn = createServerFn({ method: "GET" }).handler(
  * On subsequent logins: signs in with existing credentials.
  */
 export const ensureAdminAndSignInFn = createServerFn({ method: "POST" })
-	.inputValidator(loginSchema)
+	.validator(loginSchema)
 	.handler(async ({ data }) => {
 		const { auth } = await import("@/lib/auth/auth.server");
 		const { prisma } = await import("@/db");

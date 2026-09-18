@@ -40,7 +40,7 @@ export type DecisionWithHost = Awaited<
  */
 export const getDecisionAlertsFn = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
-	.inputValidator(z.object({ decisionId: z.number() }))
+	.validator(z.object({ decisionId: z.number() }))
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
 		const { parseAlertEvent } = await import("@/lib/alert-types");
@@ -75,7 +75,7 @@ export type DecisionAlertDetail = Awaited<
  */
 export const deleteDecisionFn = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.inputValidator(z.object({ id: z.number() }))
+	.validator(z.object({ id: z.number() }))
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
 		const { getLapiClient } = await import("@/lib/crowdsec-lapi");

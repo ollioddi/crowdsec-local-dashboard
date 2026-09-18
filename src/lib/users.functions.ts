@@ -35,7 +35,7 @@ export const createUserSchema = z.object({
 
 export const createUserFn = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.inputValidator(createUserSchema)
+	.validator(createUserSchema)
 	.handler(async ({ data }) => {
 		const { prisma } = await import("@/db");
 		const { createUserAccount } = await import("@/lib/users.server");
@@ -64,7 +64,7 @@ const deleteUserSchema = z.object({
 
 export const deleteUserFn = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.inputValidator(deleteUserSchema)
+	.validator(deleteUserSchema)
 	.handler(async ({ data, context }) => {
 		const { prisma } = await import("@/db");
 
