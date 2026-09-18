@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "generatorVersion": "unknown",
-  "generatedAt": "2026-09-18T21:39:47.166Z",
+  "generatedAt": "2026-09-18T21:47:11.024Z",
   "outputPath": "/home/oliver/development/code/HOBBY/crowdsec-dashboard/src/generated/zod",
   "files": [
     "schemas/enums/TransactionIsolationLevel.schema.ts",
