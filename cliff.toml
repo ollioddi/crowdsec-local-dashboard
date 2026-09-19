@@ -1,0 +1,55 @@
+# git-cliff configuration — https://git-cliff.org/docs/configuration
+# Release notes are generated from Conventional Commits. See RELEASING.md.
+
+[changelog]
+header = """
+# Changelog
+
+All notable changes to this project are listed here. Each entry is the body of
+the corresponding GitHub release: a hand-written summary followed by the list
+generated from commits.
+
+"""
+body = """
+{%- set repo = "https://github.com/ollioddi/crowdsec-local-dashboard" -%}
+{% if version -%}
+## [{{ version }}]({{ repo }}/releases/tag/{{ version }}) - {{ timestamp | date(format="%Y-%m-%d") }}
+{%- else -%}
+## Unreleased
+{%- endif %}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | trim }}
+{% for commit in commits %}
+- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}]({{ repo }}/commit/{{ commit.id }})){% if commit.breaking and commit.breaking_description and commit.breaking_description != commit.message %}
+  {{ commit.breaking_description | trim | replace(from="\n", to="\n  ") }}{% endif %}
+{%- endfor %}
+{% endfor %}
+{%- if previous and previous.version %}
+**Full diff:** [{{ previous.version }}...{{ version | default(value="HEAD") }}]({{ repo }}/compare/{{ previous.version }}...{{ version | default(value="HEAD") }})
+{% endif %}
+"""
+footer = ""
+trim = false
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+protect_breaking_commits = true
+commit_parsers = [
+  { message = "^[a-z]+(\\(.+\\))?!:", group = "<!-- 0 -->⚠ Breaking changes" },
+  { footer = "^BREAKING[ -]CHANGE", group = "<!-- 0 -->⚠ Breaking changes" },
+  { message = "^feat", group = "<!-- 1 -->Features" },
+  { message = "^fix", group = "<!-- 2 -->Bug fixes" },
+  { message = "^perf", group = "<!-- 3 -->Performance" },
+  { message = "^docs\\(changelog\\)", skip = true },
+  { message = "^docs", group = "<!-- 4 -->Documentation" },
+  { message = "^chore\\(deps\\)", group = "<!-- 5 -->Dependencies" },
+  { message = "^(chore|refactor|style|test|ci|build)", skip = true },
+]
+filter_commits = false
+tag_pattern = "^v[0-9]"
+sort_commits = "oldest"
+
+[bump]
+features_always_bump_minor = true
+breaking_always_bump_major = false

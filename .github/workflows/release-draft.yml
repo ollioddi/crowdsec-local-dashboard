@@ -1,0 +1,95 @@
+name: Draft release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag to release, e.g. v1.2.0. Leave empty to derive it from the commits since the last tag."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  MARKER: "<!-- generated-notes-below -->"
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Resolve version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          version="${INPUT_VERSION:-$(pnpm exec git-cliff --bumped-version 2>/dev/null)}"
+          case "$version" in v*) ;; *) version="v$version" ;; esac
+          if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+            echo "::error::Tag $version already exists"; exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing as $version"
+
+      - name: Generate release notes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # Drop git-cliff's own version heading; the release title carries it
+          pnpm exec git-cliff --unreleased --tag "$VERSION" --strip all 2>/dev/null \
+            | awk 'NR==1 && /^## /{next} NR==2 && /^$/{next} {print}' > generated.md
+
+          # Text above the marker comes from the existing draft (keeps edits) or the template
+          if ! gh release view "$VERSION" --json body -q .body > source.md 2>/dev/null \
+             || ! grep -qF "$MARKER" source.md; then
+            cp .github/release-notes-template.md source.md
+          fi
+          awk -v m="$MARKER" '$0==m{exit} {print}' source.md > above.md
+
+          { cat above.md; echo "$MARKER"; echo "## Changes"; echo; cat generated.md; } > notes.md
+          cat notes.md
+
+      - name: Create or update the draft
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          prerelease=()
+          case "$VERSION" in *-*) prerelease=(--prerelease) ;; esac
+
+          if gh release view "$VERSION" --json isDraft -q .isDraft > is_draft.txt 2>/dev/null; then
+            if [ "$(cat is_draft.txt)" != "true" ]; then
+              echo "::error::$VERSION is already published"; exit 1
+            fi
+            gh release edit "$VERSION" --draft --target "$GITHUB_SHA" --title "$VERSION" \
+              --notes-file notes.md "${prerelease[@]}"
+            action="Updated"
+          else
+            gh release create "$VERSION" --draft --target "$GITHUB_SHA" --title "$VERSION" \
+              --notes-file notes.md "${prerelease[@]}"
+            action="Created"
+          fi
+
+          url="$(gh release view "$VERSION" --json url -q .url)"
+          {
+            echo "### $action draft release $VERSION"
+            echo
+            echo "Edit the summary above the marker, then publish: $url"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,34 @@
+name: Update changelog
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Write release notes to a file
+        env:
+          BODY: ${{ github.event.release.body }}
+        run: printf '%s\n' "$BODY" > release-notes.md
+
+      - name: Prepend to CHANGELOG.md
+        run: node .github/scripts/update-changelog.mjs "${{ github.event.release.tag_name }}" release-notes.md
+
+      - name: Commit
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --cached --quiet && { echo "No changelog change"; exit 0; }
+          git commit -m "docs(changelog): ${{ github.event.release.tag_name }} [skip ci]"
+          git push origin HEAD:main

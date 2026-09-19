@@ -19,7 +19,9 @@
     "db:push": "dotenv -e .env -- prisma db push",
     "db:migrate": "dotenv -e .env -- prisma migrate dev",
     "db:studio": "dotenv -e .env -- prisma studio",
-    "db:reset": "dotenv -e .env -- prisma migrate reset"
+    "db:reset": "dotenv -e .env -- prisma migrate reset",
+    "release:preview": "git-cliff --unreleased --strip all",
+    "release:version": "git-cliff --bumped-version"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.0",
@@ -58,11 +60,6 @@
     "vite-tsconfig-paths": "^6.1.1",
     "zod": "^4.6.5"
   },
-  "pnpm": {
-    "overrides": {
-      "vite": "$vite"
-    }
-  },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
     "@tanstack/devtools-vite": "^0.8.5",
@@ -74,6 +71,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "babel-plugin-react-compiler": "^1.0.0",
     "dotenv-cli": "^11.0.0",
+    "git-cliff": "2.14.2",
     "jsdom": "^30.1.0",
     "oxc-transform-react": "^0.145.0",
     "prisma-zod-generator": "^3.3.1",

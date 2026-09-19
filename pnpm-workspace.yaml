@@ -4,3 +4,11 @@ allowBuilds:
   '@prisma/engines': false
   prisma: false
   prisma-zod-generator: false
+minimumReleaseAgeExclude:
+  - git-cliff-darwin-arm64@2.14.2
+  - git-cliff-darwin-x64@2.14.2
+  - git-cliff-linux-arm64@2.14.2
+  - git-cliff-linux-x64@2.14.2
+  - git-cliff-windows-arm64@2.14.2
+  - git-cliff-windows-x64@2.14.2
+  - git-cliff@2.14.2
