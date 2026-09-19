@@ -8,6 +8,7 @@ import {
 } from "@/lib/crowdsec-lapi/sync/status";
 import { errorFields, initLogging, logger } from "@/lib/logging/logger";
 import { closeAllSSEConnections } from "@/lib/sse.server";
+import { APP_VERSION } from "@/lib/version";
 
 declare global {
 	// Survive Vite SSR module reloads in dev so only one poller and one set of
@@ -80,12 +81,15 @@ function startDecisionPolling() {
 async function boot() {
 	initLogging({ level: env.LOG_LEVEL, format: env.LOG_FORMAT });
 	const startedAt = performance.now();
-	log.info("CrowdSec Dashboard starting");
+	log.info("CrowdSec Dashboard {version} starting", { version: APP_VERSION });
 	await prisma.$queryRaw`SELECT 1`;
 	log.info("Database reachable", { url: env.DATABASE_URL });
 	startDecisionPolling();
 	if (env.OIDC_ISSUER_URL) {
 		log.info("SSO enabled", { issuer: env.OIDC_ISSUER_URL });
+	}
+	if (!env.UPDATE_CHECK) {
+		log.info("Update check off");
 	}
 	log.info("Ready in {durationMs}ms", {
 		durationMs: Math.round(performance.now() - startedAt),

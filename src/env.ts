@@ -20,6 +20,7 @@ export const env = createEnv({
 		DECISION_RETENTION_COUNT: z.coerce.number().int().min(0).default(5000),
 		LOG_LEVEL: z.enum(LOG_LEVELS).default("info"),
 		LOG_FORMAT: z.enum(LOG_FORMATS).default("human"),
+		UPDATE_CHECK: z.stringbool().default(true),
 		// OIDC/OAuth SSO (optional — leave unset to disable SSO login)
 		OIDC_CLIENT_ID: z.string().min(1).optional(),
 		OIDC_CLIENT_SECRET: z.string().min(1).optional(),

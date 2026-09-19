@@ -29,6 +29,7 @@ import {
 	SidebarSeparator,
 	useSidebar,
 } from "@/components/ui/sidebar";
+import { VersionBadge } from "@/components/version-badge";
 import { useAppSession } from "@/context/session-provider";
 import { signOut } from "@/lib/auth/auth-client";
 
@@ -123,6 +124,9 @@ export function AppSidebar() {
 
 			<SidebarFooter>
 				<SidebarMenu>
+					<SidebarMenuItem>
+						<VersionBadge />
+					</SidebarMenuItem>
 					<SidebarMenuItem>
 						<ThemeToggle className={open ? "pb-2" : ""} collapsed={!open} />
 					</SidebarMenuItem>

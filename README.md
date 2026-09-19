@@ -137,6 +137,7 @@ The SQLite database is stored in a Docker volume (`db`) and survives updates.
 | `LAPI_BOUNCER_API_TOKEN` | Yes | | API token for bouncer (read) access. |
 | `LAPI_POLL_INTERVAL` | | `60` | Seconds between LAPI decision syncs. |
 | `DECISION_RETENTION_COUNT` | | `5000` | Maximum decisions kept in the database. The oldest inactive ones are pruned first, together with hosts and alerts nothing references anymore. Set to `0` to keep everything. |
+| `UPDATE_CHECK` | | `true` | Ask GitHub for the newest release a few times a day so the sidebar can point out an update. Set to `false` to never contact GitHub. |
 | `LOG_LEVEL` | | `info` | Lowest level written: `fatal`, `error`, `warn`, `info`, `debug` or `trace`. `debug` shows every sync, `info` only the ones that changed something. |
 | `LOG_FORMAT` | | `human` | `human` is one colored line per event (set `NO_COLOR=1` to drop the colors). `json` writes one JSON object per line for a log collector. |
 
@@ -216,6 +217,8 @@ OIDC_AUTO_REDIRECT=true
 ## Deployment
 
 Docker Compose is the recommended approach for homelab use. The container applies any pending schema changes on every startup and then launches the server.
+
+The sidebar shows the running version and, unless `UPDATE_CHECK=false`, the newest release on GitHub.
 
 ### Other options
 
