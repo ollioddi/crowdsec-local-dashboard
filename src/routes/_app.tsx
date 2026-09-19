@@ -1,12 +1,13 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	createFileRoute,
 	Outlet,
 	redirect,
 	useLoaderData,
 } from "@tanstack/react-router";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useCallback, useEffect } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
+import { SyncStatusBanner } from "@/components/sync-status-banner";
 import {
 	SidebarInset,
 	SidebarProvider,
@@ -16,15 +17,24 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SessionProvider } from "@/context/session-provider";
 import { ThemeProvider } from "@/context/theme-provider";
+import { useSSEConnection } from "@/hooks/use-sse-connection";
 import { getSessionFn } from "@/lib/auth/auth.functions";
+import {
+	type SyncStatus,
+	syncStatusQueryOptions,
+} from "@/lib/sync-status.functions";
 
 export const Route = createFileRoute("/_app")({
 	component: AppLayout,
-	loader: async () => {
+	loader: async ({ context }) => {
 		const session = await getSessionFn();
 		if (!session) {
 			throw redirect({ to: "/login" });
 		}
+		await context.queryClient.query({
+			...syncStatusQueryOptions,
+			staleTime: "static",
+		});
 		return { session };
 	},
 });
@@ -32,6 +42,12 @@ export const Route = createFileRoute("/_app")({
 const AppShell = ({ children }: Readonly<{ children: ReactNode }>) => {
 	const { session } = useLoaderData({ from: "/_app" });
 	const queryClient = useQueryClient();
+	const { data: syncStatus } = useQuery(syncStatusQueryOptions);
+	const handleSyncStatus = useCallback(
+		(status: SyncStatus) => queryClient.setQueryData(["sync-status"], status),
+		[queryClient],
+	);
+	useSSEConnection<SyncStatus>("/sse/sync-status", handleSyncStatus);
 
 	useEffect(() => {
 		let hiddenAt = 0;
@@ -63,6 +79,7 @@ const AppShell = ({ children }: Readonly<{ children: ReactNode }>) => {
 							<header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
 								<SidebarTrigger className="-ml-1" />
 							</header>
+							<SyncStatusBanner status={syncStatus} />
 							<main className="flex-1 overflow-auto">{children}</main>
 						</SidebarInset>
 					</SidebarProvider>

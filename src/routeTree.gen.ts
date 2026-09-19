@@ -17,6 +17,7 @@ import { Route as AppHostsRouteImport } from './routes/_app/hosts'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as SseDecisionsRouteImport } from './routes/sse/decisions'
 import { Route as SseHostsRouteImport } from './routes/sse/hosts'
+import { Route as SseSyncStatusRouteImport } from './routes/sse/sync-status'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const AppRoute = AppRouteImport.update({
@@ -58,6 +59,11 @@ const SseHostsRoute = SseHostsRouteImport.update({
   path: '/sse/hosts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SseSyncStatusRoute = SseSyncStatusRouteImport.update({
+  id: '/sse/sync-status',
+  path: '/sse/sync-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AppUsersRoute
   '/sse/decisions': typeof SseDecisionsRoute
   '/sse/hosts': typeof SseHostsRoute
+  '/sse/sync-status': typeof SseSyncStatusRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/users': typeof AppUsersRoute
   '/sse/decisions': typeof SseDecisionsRoute
   '/sse/hosts': typeof SseHostsRoute
+  '/sse/sync-status': typeof SseSyncStatusRoute
   '/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/_app/users': typeof AppUsersRoute
   '/sse/decisions': typeof SseDecisionsRoute
   '/sse/hosts': typeof SseHostsRoute
+  '/sse/sync-status': typeof SseSyncStatusRoute
   '/_app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/sse/decisions'
     | '/sse/hosts'
+    | '/sse/sync-status'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/sse/decisions'
     | '/sse/hosts'
+    | '/sse/sync-status'
     | '/'
     | '/api/auth/$'
   id:
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/_app/users'
     | '/sse/decisions'
     | '/sse/hosts'
+    | '/sse/sync-status'
     | '/_app/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -135,6 +147,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SseDecisionsRoute: typeof SseDecisionsRoute
   SseHostsRoute: typeof SseHostsRoute
+  SseSyncStatusRoute: typeof SseSyncStatusRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -196,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SseHostsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sse/sync-status': {
+      id: '/sse/sync-status'
+      path: '/sse/sync-status'
+      fullPath: '/sse/sync-status'
+      preLoaderRoute: typeof SseSyncStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -227,6 +247,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SseDecisionsRoute: SseDecisionsRoute,
   SseHostsRoute: SseHostsRoute,
+  SseSyncStatusRoute: SseSyncStatusRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

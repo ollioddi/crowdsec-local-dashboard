@@ -1,6 +1,11 @@
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 import { env } from "@/env";
 import { syncDecisions } from "@/lib/crowdsec-lapi/sync";
+import {
+	describeError,
+	markSyncConfigured,
+	recordSyncResult,
+} from "@/lib/crowdsec-lapi/sync/status";
 
 declare global {
 	// Survives Vite SSR module reloads in dev so only one poller ever runs
@@ -20,6 +25,7 @@ async function startDecisionPolling() {
 		return;
 	}
 
+	markSyncConfigured();
 	const intervalSec = env.LAPI_POLL_INTERVAL;
 	console.log(`[lapi-sync] Starting decision polling every ${intervalSec}s`);
 
@@ -33,8 +39,10 @@ async function startDecisionPolling() {
 		syncInProgress = true;
 		try {
 			await syncDecisions();
+			recordSyncResult(null);
 		} catch (err) {
-			console.error("[lapi-sync] Sync failed:", err);
+			recordSyncResult(err);
+			console.error(`[lapi-sync] Sync failed: ${describeError(err)}`);
 		} finally {
 			syncInProgress = false;
 		}
