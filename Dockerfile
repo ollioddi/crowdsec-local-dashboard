@@ -1,5 +1,5 @@
 # ─── Stage 1: Base & Deps ──────────────────────────────────────────────────
-FROM node:24-slim AS base
+FROM node:25-slim AS base
 RUN corepack enable pnpm
 # Install OpenSSL here so Prisma is happy during 'generate'
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \
@@ -21,7 +21,7 @@ RUN pnpm run build
 RUN pnpm prune --prod
 
 # ─── Stage 3: Runtime ─────────────────────────────────────────────────────
-FROM node:24-slim AS runner
+FROM node:25-slim AS runner
 # Re-install openssl for the runtime environment
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \
     && rm -rf /var/lib/apt/lists/*
