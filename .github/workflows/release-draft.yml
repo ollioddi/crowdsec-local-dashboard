@@ -11,7 +11,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: write
 
 env:
   MARKER: "<!-- generated-notes-below -->"
@@ -51,6 +50,7 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           set -euo pipefail
           # Image tags carry no "v" prefix (metadata-action semver pattern)
@@ -66,13 +66,13 @@ jobs:
           git commit -am "chore(release): pin compose to $VERSION"
           git push --force origin "$branch"
 
+          # See the changelog workflow: PRs need a maintainer token to get CI
+          export GH_TOKEN="${RELEASE_TOKEN:-$GH_TOKEN}"
           if ! gh pr view "$branch" --json number >/dev/null 2>&1; then
             gh pr create --base main --head "$branch" \
               --title "chore(release): pin compose to $VERSION" \
               --body "Merge before publishing the $VERSION draft so the tagged compose file pulls its own image."
           fi
-          # Pull requests opened with the workflow token do not start CI on their own
-          gh workflow run ci.yml --ref "$branch"
           gh pr merge "$branch" --auto --squash \
             || echo "::warning::Auto-merge is not enabled; merge the prep PR by hand before publishing."
           git checkout -q "$GITHUB_SHA"

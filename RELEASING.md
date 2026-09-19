@@ -65,5 +65,12 @@ Publish the draft. GitHub then creates the tag, which triggers:
   settings; without it, merge that PR by hand. The workflow can also be run
   manually with a tag to add a release that was missed.
 
+Both the prep PR and the changelog PR are opened with the `RELEASE_TOKEN`
+repository secret, a fine-grained personal access token for this repository
+with Contents and Pull requests set to read and write. Pull requests opened
+with the built-in workflow token never get a CI run, so the required check
+would keep them blocked forever. Without the secret the PRs are still
+created, but you have to close and reopen them to start CI.
+
 A version containing a `-` (for example `v1.0.0-rc.1`) is marked as a
 pre-release.

@@ -13,7 +13,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: write
 
 jobs:
   changelog:
@@ -33,6 +32,8 @@ jobs:
         run: node .github/scripts/update-changelog.mjs "$TAG" release-notes.md
 
       - name: Open a pull request
+        env:
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           set -euo pipefail
           git add CHANGELOG.md
@@ -45,14 +46,14 @@ jobs:
           git commit -m "docs(changelog): $TAG [skip ci]"
           git push --force origin "$branch"
 
+          # A PR opened with the workflow token gets no CI run, so the ruleset
+          # never lets it merge. RELEASE_TOKEN is a fine-grained PAT of the
+          # maintainer; PRs it opens trigger CI like any other.
+          export GH_TOKEN="${RELEASE_TOKEN:-$GH_TOKEN}"
           if ! gh pr view "$branch" --json number >/dev/null 2>&1; then
             gh pr create --base main --head "$branch" \
               --title "docs(changelog): $TAG" \
               --body "Adds the $TAG release notes to CHANGELOG.md. Opened by the Update changelog workflow."
           fi
-
-          # Pull requests opened with the workflow token do not start CI on their own
-          gh workflow run ci.yml --ref "$branch"
-
           gh pr merge "$branch" --auto --squash \
             || echo "::warning::Auto-merge is not enabled for this repository; merge the changelog PR by hand."
