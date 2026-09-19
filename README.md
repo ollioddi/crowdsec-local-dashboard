@@ -124,7 +124,7 @@ The SQLite database is stored in a Docker volume (`db`) and survives updates.
 |---|---|---|---|
 | `DATABASE_URL` | | `file:/data/app.db` | SQLite path. Defaults to the persistent volume - no need to change. |
 | `BETTER_AUTH_SECRET` | Yes | | Secret used to sign sessions. Generate with `npx @better-auth/cli secret`. |
-| `BETTER_AUTH_URL` | | _(inferred from request)_ | Set this if cookies or auth redirects break - this happens when Node.js sees an internal URL (e.g. `http://localhost:3000`) instead of the external one (e.g. `https://dashboard.example.com`). |
+| `BETTER_AUTH_URL` | | _(inferred from the proxy headers)_ | The public URL of the dashboard, e.g. `https://dashboard.example.com`. Set it if your reverse proxy does not send `X-Forwarded-Host` and `X-Forwarded-Proto`, or if logins fail with "Invalid origin". |
 | `LAPI_URL` | Yes | | CrowdSec LAPI base URL including port, e.g. `http://192.168.1.100:8080`. |
 | `LAPI_MACHINE_ID` | Yes | | Machine ID for watcher authentication. |
 | `LAPI_MACHINE_PASSWORD` | Yes | | Machine password for watcher authentication. |
