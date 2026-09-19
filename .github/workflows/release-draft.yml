@@ -10,6 +10,8 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
+  actions: write
 
 env:
   MARKER: "<!-- generated-notes-below -->"
@@ -45,6 +47,36 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Releasing as $version"
 
+      - name: Pin the compose file to the release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # Image tags carry no "v" prefix (metadata-action semver pattern)
+          sed -i -E "s#(image: ghcr.io/ollioddi/crowdsec-local-dashboard:).*#\1${VERSION#v}#" docker-compose.yml
+          if git diff --quiet -- docker-compose.yml; then
+            echo "docker-compose.yml already pins $VERSION"; exit 0
+          fi
+
+          branch="release/$VERSION"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git commit -am "chore(release): pin compose to $VERSION"
+          git push --force origin "$branch"
+
+          if ! gh pr view "$branch" --json number >/dev/null 2>&1; then
+            gh pr create --base main --head "$branch" \
+              --title "chore(release): pin compose to $VERSION" \
+              --body "Merge before publishing the $VERSION draft so the tagged compose file pulls its own image."
+          fi
+          # Pull requests opened with the workflow token do not start CI on their own
+          gh workflow run ci.yml --ref "$branch"
+          gh pr merge "$branch" --auto --squash \
+            || echo "::warning::Auto-merge is not enabled; merge the prep PR by hand before publishing."
+          git checkout -q "$GITHUB_SHA"
+
       - name: Generate release notes
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -78,11 +110,11 @@ jobs:
             if [ "$(cat is_draft.txt)" != "true" ]; then
               echo "::error::$VERSION is already published"; exit 1
             fi
-            gh release edit "$VERSION" --draft --target "$GITHUB_SHA" --title "$VERSION" \
+            gh release edit "$VERSION" --draft --target main --title "$VERSION" \
               --notes-file notes.md "${prerelease[@]}"
             action="Updated"
           else
-            gh release create "$VERSION" --draft --target "$GITHUB_SHA" --title "$VERSION" \
+            gh release create "$VERSION" --draft --target main --title "$VERSION" \
               --notes-file notes.md "${prerelease[@]}"
             action="Created"
           fi
@@ -91,5 +123,5 @@ jobs:
           {
             echo "### $action draft release $VERSION"
             echo
-            echo "Edit the summary above the marker, then publish: $url"
+            echo "Merge the prep PR, edit the summary above the marker, then publish: $url"
           } >> "$GITHUB_STEP_SUMMARY"

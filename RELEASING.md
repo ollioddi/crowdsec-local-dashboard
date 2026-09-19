@@ -41,9 +41,12 @@ explicitly to override, and always pass one when the previous tag was a
 pre-release such as `v0.3.0-beta`, since the automatic bump would only
 increment the pre-release number.
 
-The workflow creates a **draft** GitHub release for the commit it ran on, with
-the notes template on top and the generated list below a
-`<!-- generated-notes-below -->` marker. Nothing is tagged yet.
+The workflow opens a small prep PR that pins `docker-compose.yml` to the new
+tag, and creates a **draft** GitHub release targeting `main`, with the notes
+template on top and the generated list below a `<!-- generated-notes-below -->`
+marker. Nothing is tagged yet. Merge the prep PR before publishing so the
+tagged tree, and the image built from it, ship a compose file that pulls
+their own version.
 
 ## 3. Write the summary and publish
 
@@ -54,7 +57,8 @@ after landing one more fix, regenerates the list and keeps your text.
 
 Publish the draft. GitHub then creates the tag, which triggers:
 
-- **Build and push Docker image**: publishes `ghcr.io/…:X.Y.Z`, `X.Y` and `latest`.
+- **Build and push Docker image**: publishes `ghcr.io/…:X.Y.Z` (no `v` prefix)
+  and, for stable releases, `X.Y`. `latest` follows `main`, not releases.
 - **Update changelog**: opens a pull request that prepends the release body to
   `CHANGELOG.md`, runs CI on it and merges it automatically once CI passes.
   Automatic merging needs "Allow auto-merge" enabled in the repository
