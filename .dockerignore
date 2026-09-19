@@ -1,8 +1,24 @@
+# Build output and local state
 node_modules
 .output
-.git
+.nitro
+.tanstack
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
 .env
 .env.*
-prisma/dev.db
-prisma/*.db
+
+# Not needed to build the image
+.git
+.github
+.vscode
+.claude
+.cta.json
+readme
 *.md
+LICENSE
+docker-compose.yml
+Dockerfile
+.dockerignore

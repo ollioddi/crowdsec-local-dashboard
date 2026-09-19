@@ -2,10 +2,22 @@ services:
   dashboard:
     image: ghcr.io/ollioddi/crowdsec-local-dashboard:0.4.1-beta
     # build: .  # Uncomment to build from source instead of using the pre-built image
+    container_name: crowdsec-dashboard
     ports:
       - "3000:3000"
     volumes:
       - db:/data
+    # The image runs as the unprivileged "node" user (uid 1000) and needs no
+    # capabilities. Upgrading from a release before 0.5.0? The database was
+    # created by root; fix it once with:
+    #   docker compose run --rm --user root --cap-add CHOWN --entrypoint chown dashboard -R node:node /data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       # ── Database ─────────────────────────────────────────────────────────────
       DATABASE_URL: file:/data/app.db

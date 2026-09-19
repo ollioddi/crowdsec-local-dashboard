@@ -218,7 +218,22 @@ OIDC_AUTO_REDIRECT=true
 
 Docker Compose is the recommended approach for homelab use. The container applies any pending schema changes on every startup and then launches the server.
 
+The image runs as the unprivileged `node` user (uid 1000), keeps its own files read-only, and needs no Linux capabilities. The bundled compose file also mounts the root filesystem read-only and drops every capability. `GET /api/health` answers `200` as soon as the server is up; the image ships a `HEALTHCHECK` that polls it.
+
 The sidebar shows the running version and, unless `UPDATE_CHECK=false`, the newest release on GitHub.
+
+#### Upgrading from 0.4.x or earlier
+
+Those releases ran as root, so the database in the `db` volume is owned by root and the new image cannot write to it. Fix the ownership once before starting the new version:
+
+```sh
+docker compose run --rm --user root --cap-add CHOWN --entrypoint chown dashboard -R node:node /data
+docker compose up -d
+```
+
+The container refuses to start and prints this command if the volume is still owned by root.
+
+A volume from 0.2.x or earlier cannot be upgraded at all: those releases created the database without migration history, and 0.3.0 already required a reset. The container explains this too. Start over with `docker compose down -v && docker compose up -d`.
 
 ### Other options
 

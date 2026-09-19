@@ -15,6 +15,7 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppDecisionsRouteImport } from './routes/_app/decisions'
 import { Route as AppHostsRouteImport } from './routes/_app/hosts'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as SseDecisionsRouteImport } from './routes/sse/decisions'
 import { Route as SseHostsRouteImport } from './routes/sse/hosts'
 import { Route as SseSyncStatusRouteImport } from './routes/sse/sync-status'
@@ -49,6 +50,11 @@ const AppUsersRoute = AppUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SseDecisionsRoute = SseDecisionsRouteImport.update({
   id: '/sse/decisions',
   path: '/sse/decisions',
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/decisions': typeof AppDecisionsRoute
   '/hosts': typeof AppHostsRoute
   '/users': typeof AppUsersRoute
+  '/api/health': typeof ApiHealthRoute
   '/sse/decisions': typeof SseDecisionsRoute
   '/sse/hosts': typeof SseHostsRoute
   '/sse/sync-status': typeof SseSyncStatusRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/decisions': typeof AppDecisionsRoute
   '/hosts': typeof AppHostsRoute
   '/users': typeof AppUsersRoute
+  '/api/health': typeof ApiHealthRoute
   '/sse/decisions': typeof SseDecisionsRoute
   '/sse/hosts': typeof SseHostsRoute
   '/sse/sync-status': typeof SseSyncStatusRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   '/_app/decisions': typeof AppDecisionsRoute
   '/_app/hosts': typeof AppHostsRoute
   '/_app/users': typeof AppUsersRoute
+  '/api/health': typeof ApiHealthRoute
   '/sse/decisions': typeof SseDecisionsRoute
   '/sse/hosts': typeof SseHostsRoute
   '/sse/sync-status': typeof SseSyncStatusRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
     | '/decisions'
     | '/hosts'
     | '/users'
+    | '/api/health'
     | '/sse/decisions'
     | '/sse/hosts'
     | '/sse/sync-status'
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
     | '/decisions'
     | '/hosts'
     | '/users'
+    | '/api/health'
     | '/sse/decisions'
     | '/sse/hosts'
     | '/sse/sync-status'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/_app/decisions'
     | '/_app/hosts'
     | '/_app/users'
+    | '/api/health'
     | '/sse/decisions'
     | '/sse/hosts'
     | '/sse/sync-status'
@@ -145,6 +157,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   SseDecisionsRoute: typeof SseDecisionsRoute
   SseHostsRoute: typeof SseHostsRoute
   SseSyncStatusRoute: typeof SseSyncStatusRoute
@@ -194,6 +207,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/users'
       preLoaderRoute: typeof AppUsersRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/sse/decisions': {
       id: '/sse/decisions'
@@ -245,6 +265,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiHealthRoute: ApiHealthRoute,
   SseDecisionsRoute: SseDecisionsRoute,
   SseHostsRoute: SseHostsRoute,
   SseSyncStatusRoute: SseSyncStatusRoute,
