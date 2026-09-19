@@ -1,6 +1,6 @@
 services:
   dashboard:
-    image: ghcr.io/ollioddi/crowdsec-local-dashboard:0.4.0-beta
+    image: ghcr.io/ollioddi/crowdsec-local-dashboard:0.4.1-beta
     # build: .  # Uncomment to build from source instead of using the pre-built image
     ports:
       - "3000:3000"
