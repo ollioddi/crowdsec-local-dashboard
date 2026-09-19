@@ -35,6 +35,11 @@ jobs:
           pnpm exec prisma migrate deploy
           pnpm exec prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code
 
+      - name: Generated Prisma client is committed
+        run: |
+          pnpm exec prisma generate
+          git diff --exit-code -- src/generated ':!src/generated/zod/.prisma-zod-generator-manifest.json'
+
       - name: Typecheck
         run: pnpm typecheck
 
