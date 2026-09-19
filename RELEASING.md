@@ -55,7 +55,11 @@ after landing one more fix, regenerates the list and keeps your text.
 Publish the draft. GitHub then creates the tag, which triggers:
 
 - **Build and push Docker image**: publishes `ghcr.io/…:X.Y.Z`, `X.Y` and `latest`.
-- **Update changelog**: prepends the release body to `CHANGELOG.md` on `main`.
+- **Update changelog**: opens a pull request that prepends the release body to
+  `CHANGELOG.md`, runs CI on it and merges it automatically once CI passes.
+  Automatic merging needs "Allow auto-merge" enabled in the repository
+  settings; without it, merge that PR by hand. The workflow can also be run
+  manually with a tag to add a release that was missed.
 
 A version containing a `-` (for example `v1.0.0-rc.1`) is marked as a
 pre-release.

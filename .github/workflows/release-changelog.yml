@@ -3,32 +3,56 @@ name: Update changelog
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to add to CHANGELOG.md, e.g. v0.4.0-beta"
+        required: true
+        type: string
 
 permissions:
   contents: write
+  pull-requests: write
+  actions: write
 
 jobs:
   changelog:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag || github.event.release.tag_name }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           ref: main
 
-      - name: Write release notes to a file
-        env:
-          BODY: ${{ github.event.release.body }}
-        run: printf '%s\n' "$BODY" > release-notes.md
+      - name: Fetch the release notes
+        run: gh release view "$TAG" --json body -q .body > release-notes.md
 
       - name: Prepend to CHANGELOG.md
-        run: node .github/scripts/update-changelog.mjs "${{ github.event.release.tag_name }}" release-notes.md
+        run: node .github/scripts/update-changelog.mjs "$TAG" release-notes.md
 
-      - name: Commit
+      - name: Open a pull request
         run: |
           set -euo pipefail
+          git add CHANGELOG.md
+          git diff --cached --quiet && { echo "CHANGELOG.md already has $TAG"; exit 0; }
+
+          branch="changelog/$TAG"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git diff --cached --quiet && { echo "No changelog change"; exit 0; }
-          git commit -m "docs(changelog): ${{ github.event.release.tag_name }} [skip ci]"
-          git push origin HEAD:main
+          git checkout -b "$branch"
+          git commit -m "docs(changelog): $TAG [skip ci]"
+          git push --force origin "$branch"
+
+          if ! gh pr view "$branch" --json number >/dev/null 2>&1; then
+            gh pr create --base main --head "$branch" \
+              --title "docs(changelog): $TAG" \
+              --body "Adds the $TAG release notes to CHANGELOG.md. Opened by the Update changelog workflow."
+          fi
+
+          # Pull requests opened with the workflow token do not start CI on their own
+          gh workflow run ci.yml --ref "$branch"
+
+          gh pr merge "$branch" --auto --squash \
+            || echo "::warning::Auto-merge is not enabled for this repository; merge the changelog PR by hand."
