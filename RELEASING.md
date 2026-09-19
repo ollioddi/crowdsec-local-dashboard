@@ -1,0 +1,61 @@
+# Releasing
+
+Releases are cut from `main` with two GitHub Actions workflows. The release
+notes are a mix of a summary you write and a list generated from commits.
+
+## 1. Write commits the generator understands
+
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+| Prefix | Ends up under |
+|---|---|
+| `feat:` / `feat(scope):` | Features |
+| `fix:` | Bug fixes |
+| `perf:` | Performance |
+| `docs:` | Documentation |
+| `chore(deps):` | Dependencies |
+| `chore:`, `refactor:`, `style:`, `test:`, `ci:`, `build:` | not listed |
+
+Mark a breaking change with `!` after the type, and explain it in a footer.
+Both end up in a "⚠ Breaking changes" section at the top of the list:
+
+```
+feat(config)!: rename LAPI_TOKEN to LAPI_BOUNCER_API_TOKEN
+
+BREAKING CHANGE: set LAPI_BOUNCER_API_TOKEN in your environment; LAPI_TOKEN is ignored.
+```
+
+Preview what the next release would contain:
+
+```sh
+pnpm release:preview   # notes for everything since the last tag
+pnpm release:version   # the version git-cliff would pick
+```
+
+## 2. Draft the release
+
+Run the **Draft release** workflow from the Actions tab. Leave the version
+empty to derive it from the commits (`feat` bumps minor, `fix` bumps patch;
+breaking changes bump minor while the project is on 0.x). Pass a version
+explicitly to override, and always pass one when the previous tag was a
+pre-release such as `v0.3.0-beta`, since the automatic bump would only
+increment the pre-release number.
+
+The workflow creates a **draft** GitHub release for the commit it ran on, with
+the notes template on top and the generated list below a
+`<!-- generated-notes-below -->` marker. Nothing is tagged yet.
+
+## 3. Write the summary and publish
+
+Open the draft on GitHub and edit the text above the marker: what the release
+means for users, breaking changes and how to migrate, upgrade steps. Leave the
+marker and the generated list in place. Re-running the workflow, for example
+after landing one more fix, regenerates the list and keeps your text.
+
+Publish the draft. GitHub then creates the tag, which triggers:
+
+- **Build and push Docker image**: publishes `ghcr.io/…:X.Y.Z`, `X.Y` and `latest`.
+- **Update changelog**: prepends the release body to `CHANGELOG.md` on `main`.
+
+A version containing a `-` (for example `v1.0.0-rc.1`) is marked as a
+pre-release.

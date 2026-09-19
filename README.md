@@ -235,6 +235,12 @@ pnpm run dev           # start dev server on http://localhost:3000
 
 ---
 
+## Releasing
+
+See [RELEASING.md](RELEASING.md): commits follow Conventional Commits, a workflow drafts the release with a generated change list, and the summary is written by hand before publishing.
+
+---
+
 ## Tech Stack
 
 | | |
