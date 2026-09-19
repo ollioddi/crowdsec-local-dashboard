@@ -84,7 +84,7 @@ The image is published as **ghcr.io/ollioddi/crowdsec-local-dashboard**. The old
 > Pin a tagged version instead of `latest` while the project is in beta. `latest` is rebuilt on every merge to main and can change under you between releases.
 
 ```yaml
-image: ghcr.io/ollioddi/crowdsec-local-dashboard:v0.4.0-beta
+image: ghcr.io/ollioddi/crowdsec-local-dashboard:0.4.0-beta
 ```
 
 ---
