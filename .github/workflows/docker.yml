@@ -8,6 +8,12 @@ on:
       - "v*"
   workflow_dispatch:
 
+# A newer push to main supersedes any latest build still running or queued.
+# Tag builds are never cancelled; every release must produce its image.
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
