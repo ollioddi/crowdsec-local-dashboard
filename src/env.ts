@@ -26,15 +26,7 @@ export const env = createEnv({
 		OIDC_CLIENT_SECRET: z.string().min(1).optional(),
 		OIDC_ISSUER_URL: z.url().optional(),
 		OIDC_BUTTON_LABEL: z.string().min(1).optional(),
-		OIDC_AUTO_REDIRECT: z.preprocess(
-			(val) =>
-				val === "false" || val === "0"
-					? false
-					: val === "true" || val === "1"
-						? true
-						: val,
-			z.boolean().optional(),
-		),
+		OIDC_AUTO_REDIRECT: z.stringbool().optional(),
 	},
 
 	/**
@@ -72,4 +64,21 @@ export const env = createEnv({
 	 * explicitly specify this option as true.
 	 */
 	emptyStringAsUndefined: true,
+
+	// Name the offending variables, then stop: a server answering 500 to every
+	// request hides the cause behind a generic message.
+	onValidationError: (issues) => {
+		const details = issues.map((issue) => {
+			const path = issue.path?.map((segment) =>
+				typeof segment === "object" ? String(segment.key) : String(segment),
+			);
+			return `  ${path?.join(".") ?? "?"}: ${issue.message}`;
+		});
+		const message = `Invalid environment variables:\n${details.join("\n")}`;
+		if (typeof process !== "undefined" && typeof process.exit === "function") {
+			process.stderr.write(`${message}\n`);
+			process.exit(1);
+		}
+		throw new Error(message);
+	},
 });

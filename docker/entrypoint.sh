@@ -17,6 +17,16 @@ MSG
 	exit 1
 fi
 
+# No secret configured: keep a generated one in the volume so sessions survive restarts
+SECRET_FILE=$DATA_DIR/auth-secret
+if [ -z "${BETTER_AUTH_SECRET:-}" ]; then
+	if [ ! -f "$SECRET_FILE" ]; then
+		(umask 077 && node -e 'process.stdout.write(require("crypto").randomBytes(32).toString("base64"))' > "$SECRET_FILE")
+	fi
+	BETTER_AUTH_SECRET=$(cat "$SECRET_FILE")
+	export BETTER_AUTH_SECRET
+fi
+
 if ! output=$(node_modules/.bin/prisma migrate deploy 2>&1); then
 	printf '%s\n' "$output" >&2
 	case "$output" in

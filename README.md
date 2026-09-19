@@ -97,7 +97,7 @@ cd crowdsec-local-dashboard
 curl -o .env https://raw.githubusercontent.com/ollioddi/crowdsec-local-dashboard/main/.env.example
 ```
 
-Edit `.env` with your values - see [Configuration](#configuration) below.
+Edit `.env` with your values - see [Configuration](#configuration) below. This step is optional: without a `.env` the dashboard starts with a generated session secret and shows the login page, but does not sync anything until the `LAPI_*` values are set.
 
 ### 3. Run
 
@@ -129,7 +129,7 @@ The SQLite database is stored in a Docker volume (`db`) and survives updates.
 | Variable | Required | Default | Description |
 |---|---|---|---|
 | `DATABASE_URL` | | `file:/data/app.db` | SQLite path. Defaults to the persistent volume - no need to change. |
-| `BETTER_AUTH_SECRET` | Yes | | Secret used to sign sessions. Generate with `npx @better-auth/cli secret`. |
+| `BETTER_AUTH_SECRET` | | _(generated)_ | Secret used to sign sessions. The container generates one on first start and keeps it in the volume at `/data/auth-secret`. Set it to choose your own, and always set it for `pnpm dev`. Generate with `openssl rand -base64 32`. |
 | `BETTER_AUTH_URL` | | _(inferred from the proxy headers)_ | The public URL of the dashboard, e.g. `https://dashboard.example.com`. Set it if your reverse proxy does not send `X-Forwarded-Host` and `X-Forwarded-Proto`, or if logins fail with "Invalid origin". |
 | `LAPI_URL` | Yes | | CrowdSec LAPI base URL including port, e.g. `http://192.168.1.100:8080`. |
 | `LAPI_MACHINE_ID` | Yes | | Machine ID for watcher authentication. |
