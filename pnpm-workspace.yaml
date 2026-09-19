@@ -12,3 +12,9 @@ minimumReleaseAgeExclude:
   - git-cliff-windows-arm64@2.14.2
   - git-cliff-windows-x64@2.14.2
   - git-cliff@2.14.2
+
+# Transitive packages with published advisories that their parents have not bumped yet
+overrides:
+  ip-address: '>=10.3.1'
+  mysql2: '>=3.23.1'
+  deepmerge-ts: '>=8.0.0'

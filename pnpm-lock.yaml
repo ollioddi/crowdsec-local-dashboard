@@ -162,6 +162,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  ip-address: '>=10.3.1'
+  mysql2: '>=3.23.1'
+  deepmerge-ts: '>=8.0.0'
+
 importers:
 
   .:
@@ -171,7 +176,7 @@ importers:
         version: 7.10.0
       '@prisma/client':
         specifier: ^7.10.0
-        version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
+        version: 7.10.0(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
       '@t3-oss/env-core':
         specifier: ^0.13.11
         version: 0.13.11(typescript@7.0.2)(valibot@1.4.2(typescript@7.0.2))(zod@4.6.5)
@@ -216,7 +221,7 @@ importers:
         version: 1.168.40(@tanstack/react-router@1.170.38(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(esbuild@0.28.2)(rolldown@1.2.9)(rollup@4.63.3)(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13))
       better-auth:
         specifier: ^1.7.5
-        version: 1.7.5(@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2))(@tanstack/react-start@1.168.56(crossws@0.4.12(srvx@1.0.5))(esbuild@0.28.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rolldown@1.2.9)(rollup@4.63.3)(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)))(mysql2@3.15.3)(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(solid-js@1.9.15)(vitest@5.0.1(@types/node@24.13.5)(jsdom@30.1.0(@noble/hashes@2.4.0))(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)))
+        version: 1.7.5(@prisma/client@7.10.0(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2))(@tanstack/react-start@1.168.56(crossws@0.4.12(srvx@1.0.5))(esbuild@0.28.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rolldown@1.2.9)(rollup@4.63.3)(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)))(mysql2@3.24.4(@types/node@24.13.5))(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(solid-js@1.9.15)(vitest@5.0.1(@types/node@24.13.5)(jsdom@30.1.0(@noble/hashes@2.4.0))(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)))
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -243,7 +248,7 @@ importers:
         version: nitro-nightly@3.0.1-20260917-173458-e2e14e72
       prisma:
         specifier: ^7.10.0
-        version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
+        version: 7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
       radix-ui:
         specifier: ^1.6.7
         version: 1.6.7(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -313,7 +318,7 @@ importers:
         version: 0.145.0
       prisma-zod-generator:
         specifier: ^3.3.1
-        version: 3.3.1(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)(zod@4.6.5)
+        version: 3.3.1(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)(zod@4.6.5)
       tsx:
         specifier: ^4.23.13
         version: 4.23.13
@@ -2801,9 +2806,6 @@ packages:
   '@types/lodash@4.17.25':
     resolution: {integrity: sha512-+K1NIO8I+F9/wNulfVvu23QYd0Pe9/OCqRrim4NoYIf1VoEDL90Ve4ClzpyqBLc7NpGGWRvYNCKZ1BE/Jpf8dQ==}
 
-  '@types/node@22.20.3':
-    resolution: {integrity: sha512-DZmzkmwHzXrLPAXPyKNDzlIwMMUZCVacoD25ywdy5YTKGbOx/2ld+Q38Im2zJ0vBuZP5Prd3VZutKZyXwkOS8A==}
-
   '@types/node@24.13.5':
     resolution: {integrity: sha512-TXyindR+lBr22aJIdMQzCFHPHR6cR4js838mRDCSz5hOKWZvZwsXSSiXDmjRj4iJmgl+sR9O+1mkoVBSMadNug==}
 
@@ -3093,7 +3095,7 @@ packages:
       drizzle-kit: '>=0.31.4 || >=1.0.0-beta.1'
       drizzle-orm: ^0.45.2 || >=1.0.0-rc.1 <2.0.0
       mongodb: ^6.0.0 || ^7.0.0
-      mysql2: ^3.0.0
+      mysql2: '>=3.23.1'
       next: ^14.0.0 || ^15.0.0 || ^16.0.0
       pg: ^8.0.0
       prisma: ^5.0.0 || ^6.0.0 || ^7.0.0
@@ -3391,19 +3393,15 @@ packages:
     resolution: {integrity: sha512-LOHxIOaPYdHlJRtCQfDIVZtfw/ufM8+rVj649RIHzcm/vGwQRXFt6OPqIFWsm2XEMrNIEtWR64sY1LEKD2vAOA==}
     engines: {node: '>=4.0.0'}
 
-  deepmerge-ts@7.1.5:
-    resolution: {integrity: sha512-HOJkrhaYsweh+W+e74Yn7YStZOilkoPb6fycpwNLKzSPtruFs48nYis0zy5yJz1+ktUhHxoRDJ27RQAWLIJVJw==}
-    engines: {node: '>=16.0.0'}
+  deepmerge-ts@8.0.2:
+    resolution: {integrity: sha512-uqbvqLUMrc6p0MO+WBRtTxY55hmyh94WRwI5a++PZe54X+bfVh59FSN7uWCBCW1CCVjzjnrwzfI8zidE2obMMw==}
+    engines: {node: '>=16.9.0'}
 
   defu@6.1.7:
     resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
 
   delaunator@5.1.0:
     resolution: {integrity: sha512-AGrQ4QSgssa1NGmWmLPqN5NY2KajF5MqxetNEO+o0n3ZwZZeTmt7bBnvzHWrmkZFxGgr4HdyFgelzgi06otLuQ==}
-
-  denque@2.1.0:
-    resolution: {integrity: sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw==}
-    engines: {node: '>=0.10'}
 
   depd@2.0.0:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
@@ -3785,9 +3783,9 @@ packages:
     resolution: {integrity: sha512-5Hh7Y1wQbvY5ooGgPbDaL5iYLAPzMTUrjMulskHLH6wnv/A+1q5rgEaiuqEjB+oxGXIVZs1FF+R/KPN3ZSQYYg==}
     engines: {node: '>=12'}
 
-  ip-address@6.4.0:
-    resolution: {integrity: sha512-c5uxc2WUTuRBVHT/6r4m7HIr/DfV0bF6DvLH3iZGSK8wp8iMwwZSgIq2do0asFf8q9ECug0SE+6+1ACMe4sorA==}
-    engines: {node: '>= 0.10'}
+  ip-address@10.7.2:
+    resolution: {integrity: sha512-7H/2gFSIitxc0hG3nOI1glS8QLo/EHBFFLk8vEUjXY/xu0AdL8jZ9U1IzO2PUm0d2D/ofQcAifb0g6OBkt8U7w==}
+    engines: {node: '>= 12'}
 
   ipaddr.js@1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
@@ -3834,9 +3832,6 @@ packages:
   js-yaml@4.3.2:
     resolution: {integrity: sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==}
     hasBin: true
-
-  jsbn@1.1.0:
-    resolution: {integrity: sha512-4bYVV3aAMtDTTu4+xsDYa6sy9GyJ69/amsu9sYF2zqjiEoZA5xJi3BrfX3uY+/IekIu7MwdObdbDWpoZdBv3/A==}
 
   jsdom@30.1.0:
     resolution: {integrity: sha512-h/Q+H+KmlGf49ITw3TrykSVbg04S75S2O7ZtJc9gMGOWBrQRZmx5AJIKLtJ01e6Kszl+/tpFthCVqxNifxhoqg==}
@@ -4022,21 +4017,6 @@ packages:
     resolution: {integrity: sha512-WkUDrojuJs0xkgGf2udWxa3yGBRxPtxUkB79i6aCZLRgc7PM8fZe9TosfPDcvEpQZbuFASnHYmRLBLUbmLOIIA==}
     engines: {node: '>= 12.0.0'}
 
-  lodash.find@4.6.0:
-    resolution: {integrity: sha512-yaRZoAV3Xq28F1iafWN1+a0rflOej93l1DQUejs3SZ41h2O9UJBoS9aueGjPDgAl4B6tPC0NuuchLKaDQQ3Isg==}
-
-  lodash.max@4.0.1:
-    resolution: {integrity: sha512-iykTDTb7PK33HSQmKy34zv+hh4WEu7WonJPXQcgODzUbbtradtNs8RsD/GI7XV++60KaKR1xhW56N4ISqHesfQ==}
-
-  lodash.merge@4.6.2:
-    resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
-
-  lodash.padstart@4.6.1:
-    resolution: {integrity: sha512-sW73O6S8+Tg66eY56DBk85aQzzUJDtpoXFBgELMd5P/SotAguo+1kYO6RuYgXxA4HJH3LFTFPASX6ET6bjfriw==}
-
-  lodash.repeat@4.1.0:
-    resolution: {integrity: sha512-eWsgQW89IewS95ZOcr15HHCX6FVDxq3f2PNUIng3fyzsPev9imFQxIYdFZ6crl8L56UR6ZlGDLcEb3RZsCSSqw==}
-
   lodash@4.18.1:
     resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
@@ -4108,9 +4088,11 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  mysql2@3.15.3:
-    resolution: {integrity: sha512-FBrGau0IXmuqg4haEZRBfHNWB5mUARw6hNwPDXXGg0XzVJ50mr/9hb267lvpVMnhZ1FON3qNd4Xfcez1rbFwSg==}
+  mysql2@3.24.4:
+    resolution: {integrity: sha512-A2olluVlj0mvgyIRRISMEzXc51m+21mRtcMVjJyIpt2GG98+XrC9m9HzsqcMsX2LcnfccJvY5NB22g8fENBnOA==}
     engines: {node: '>= 8.0'}
+    peerDependencies:
+      '@types/node': '>= 8'
 
   named-placeholders@1.1.6:
     resolution: {integrity: sha512-Tz09sEL2EEuv5fFowm419c1+a/jSMiBjI9gHxVLrVdbUkkNUUfjsVYs9pVZu5oCon/kmRh9TfLEObFtkVxmY0w==}
@@ -4466,9 +4448,6 @@ packages:
     resolution: {integrity: sha512-1gnZf7DFcoIcajTjTwjwuDjzuz4PPcY2StKPlsGAQ1+YH20IRVrBaXSWmdjowTJ6u8Rc01PoYOGHXfP1mYcZNQ==}
     engines: {node: '>= 18'}
 
-  seq-queue@0.0.5:
-    resolution: {integrity: sha512-hr3Wtp/GZIc/6DAGPDcV4/9WoZhjrkXsi5B/07QgX8tsdc6ilr7BFM6PM6rbdAX1kFSDYeZGLipIZZKyQP0O5Q==}
-
   seroval-plugins@1.5.6:
     resolution: {integrity: sha512-HXuLAX2pu/UByPpaeo/TaMfvMIi+1QqIoPJYCcAtU8QkVNwgR6MPlGuCQTErV1JwraaMbYaWVIBX7mppzGLATQ==}
     engines: {node: '>=10'}
@@ -4590,12 +4569,9 @@ packages:
     resolution: {integrity: sha512-i5uvt8C3ikiWeNZSVZNWcfZPItFQOsYTUAOkcUPGd8DqDy1uOUikjt5dG+uRlwyvR108Fb9DOd4GvXfT0N2/uQ==}
     engines: {node: '>= 12'}
 
-  sprintf-js@1.1.2:
-    resolution: {integrity: sha512-VE0SOVEHCk7Qc8ulkWw3ntAzXuqf7S2lvwQaDLRnUeIEaKNQJzV6BwmLKhOqT61aGhfUMrXeaBk+oDGCzvhcug==}
-
-  sqlstring@2.3.3:
-    resolution: {integrity: sha512-qC9iz2FlN7DQl3+wjwn3802RTyjCx7sDvfQEXchwa6CWOx07/WVfh91gBmQ9fahw8snwGEWU3xGzOt4tFyHLxg==}
-    engines: {node: '>= 0.6'}
+  sql-escaper@1.5.2:
+    resolution: {integrity: sha512-6CKD38c31SENivxOADeMNLdukOnUxUcflKtzVWzace7Riv1v7cAEym5Cx9Q7gYZ3ezIJI7ZpqecQq8cqNeSSFg==}
+    engines: {bun: '>=1.0.0', deno: '>=2.0.0', node: '>=12.0.0'}
 
   srvx@0.11.22:
     resolution: {integrity: sha512-LqZxxBDMKuMAZzFzJnDCkFOrs9MZQZr0LvHiO/SuSZVdQaXD7xQ5UWTUxheJrQPve1qk9MG2B/yttUvJxw8egQ==}
@@ -4724,9 +4700,6 @@ packages:
 
   ufo@1.6.4:
     resolution: {integrity: sha512-JFNbkD1Svwe0KvGi8GOeLcP4kAWQ609twvCdcHxq1oSL8svv39ZuSvajcD8B+5D0eL4+s1Is2D/O6KN3qcTeRA==}
-
-  undici-types@6.21.0:
-    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
@@ -5164,13 +5137,13 @@ snapshots:
       '@better-auth/core': 1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3)
       '@better-auth/utils': 0.4.2
 
-  '@better-auth/prisma-adapter@1.7.5(@better-auth/core@1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3))(@better-auth/utils@0.4.2)(@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2))(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))':
+  '@better-auth/prisma-adapter@1.7.5(@better-auth/core@1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3))(@better-auth/utils@0.4.2)(@prisma/client@7.10.0(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2))(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))':
     dependencies:
       '@better-auth/core': 1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3)
       '@better-auth/utils': 0.4.2
     optionalDependencies:
-      '@prisma/client': 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
-      prisma: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
+      '@prisma/client': 7.10.0(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
+      prisma: 7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
 
   '@better-auth/telemetry@1.7.5(@better-auth/core@1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)':
     dependencies:
@@ -5605,17 +5578,17 @@ snapshots:
 
   '@prisma/client-runtime-utils@7.10.0': {}
 
-  '@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)':
+  '@prisma/client@7.10.0(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)':
     dependencies:
       '@prisma/client-runtime-utils': 7.10.0
     optionalDependencies:
-      prisma: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
+      prisma: 7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
       typescript: 7.0.2
 
   '@prisma/config@7.10.0':
     dependencies:
       c12: 3.3.4
-      deepmerge-ts: 7.1.5
+      deepmerge-ts: 8.0.2
       effect: 3.20.0
       empathic: 2.0.0
     transitivePeerDependencies:
@@ -7282,7 +7255,7 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 22.20.3
+      '@types/node': 24.13.5
 
   '@types/chai@5.2.3':
     dependencies:
@@ -7291,11 +7264,11 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.20.3
+      '@types/node': 24.13.5
 
   '@types/cors@2.8.19':
     dependencies:
-      '@types/node': 22.20.3
+      '@types/node': 24.13.5
 
   '@types/d3-array@3.0.3': {}
 
@@ -7333,7 +7306,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.3':
     dependencies:
-      '@types/node': 22.20.3
+      '@types/node': 24.13.5
       '@types/qs': 6.15.1
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -7349,10 +7322,6 @@ snapshots:
   '@types/http-errors@2.0.5': {}
 
   '@types/lodash@4.17.25': {}
-
-  '@types/node@22.20.3':
-    dependencies:
-      undici-types: 6.21.0
 
   '@types/node@24.13.5':
     dependencies:
@@ -7372,12 +7341,12 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 22.20.3
+      '@types/node': 24.13.5
 
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 22.20.3
+      '@types/node': 24.13.5
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     optional: true
@@ -7597,14 +7566,14 @@ snapshots:
 
   baseline-browser-mapping@2.11.25: {}
 
-  better-auth@1.7.5(@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2))(@tanstack/react-start@1.168.56(crossws@0.4.12(srvx@1.0.5))(esbuild@0.28.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rolldown@1.2.9)(rollup@4.63.3)(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)))(mysql2@3.15.3)(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(solid-js@1.9.15)(vitest@5.0.1(@types/node@24.13.5)(jsdom@30.1.0(@noble/hashes@2.4.0))(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13))):
+  better-auth@1.7.5(@prisma/client@7.10.0(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2))(@tanstack/react-start@1.168.56(crossws@0.4.12(srvx@1.0.5))(esbuild@0.28.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rolldown@1.2.9)(rollup@4.63.3)(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)))(mysql2@3.24.4(@types/node@24.13.5))(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(solid-js@1.9.15)(vitest@5.0.1(@types/node@24.13.5)(jsdom@30.1.0(@noble/hashes@2.4.0))(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13))):
     dependencies:
       '@better-auth/core': 1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3)
       '@better-auth/drizzle-adapter': 1.7.5(@better-auth/core@1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3))(@better-auth/utils@0.4.2)
       '@better-auth/kysely-adapter': 1.7.5(@better-auth/core@1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3))(@better-auth/utils@0.4.2)(kysely@0.29.6)
       '@better-auth/memory-adapter': 1.7.5(@better-auth/core@1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3))(@better-auth/utils@0.4.2)
       '@better-auth/mongo-adapter': 1.7.5(@better-auth/core@1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3))(@better-auth/utils@0.4.2)
-      '@better-auth/prisma-adapter': 1.7.5(@better-auth/core@1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3))(@better-auth/utils@0.4.2)(@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2))(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))
+      '@better-auth/prisma-adapter': 1.7.5(@better-auth/core@1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3))(@better-auth/utils@0.4.2)(@prisma/client@7.10.0(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2))(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))
       '@better-auth/telemetry': 1.7.5(@better-auth/core@1.7.5(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.3))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)
       '@better-auth/utils': 0.4.2
       '@better-fetch/fetch': 1.3.2
@@ -7617,10 +7586,10 @@ snapshots:
       nanostores: 1.5.3
       zod: 4.6.5
     optionalDependencies:
-      '@prisma/client': 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
+      '@prisma/client': 7.10.0(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
       '@tanstack/react-start': 1.168.56(crossws@0.4.12(srvx@1.0.5))(esbuild@0.28.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rolldown@1.2.9)(rollup@4.63.3)(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13))
-      mysql2: 3.15.3
-      prisma: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
+      mysql2: 3.24.4(@types/node@24.13.5)
+      prisma: 7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
       solid-js: 1.9.15
@@ -7871,15 +7840,13 @@ snapshots:
 
   deep-extend@0.6.0: {}
 
-  deepmerge-ts@7.1.5: {}
+  deepmerge-ts@8.0.2: {}
 
   defu@6.1.7: {}
 
   delaunator@5.1.0:
     dependencies:
       robust-predicates: 3.0.3
-
-  denque@2.1.0: {}
 
   depd@2.0.0: {}
 
@@ -8144,7 +8111,7 @@ snapshots:
     dependencies:
       async: 2.6.4
       countries-list: 3.4.1
-      ip-address: 6.4.0
+      ip-address: 10.7.2
       yauzl: 2.10.0
 
   get-intrinsic@1.3.0:
@@ -8274,15 +8241,7 @@ snapshots:
 
   internmap@2.0.3: {}
 
-  ip-address@6.4.0:
-    dependencies:
-      jsbn: 1.1.0
-      lodash.find: 4.6.0
-      lodash.max: 4.0.1
-      lodash.merge: 4.6.2
-      lodash.padstart: 4.6.1
-      lodash.repeat: 4.1.0
-      sprintf-js: 1.1.2
+  ip-address@10.7.2: {}
 
   ipaddr.js@1.9.1: {}
 
@@ -8311,8 +8270,6 @@ snapshots:
   js-yaml@4.3.2:
     dependencies:
       argparse: 2.0.1
-
-  jsbn@1.1.0: {}
 
   jsdom@30.1.0(@noble/hashes@2.4.0):
     dependencies:
@@ -8458,16 +8415,6 @@ snapshots:
       lightningcss-win32-arm64-msvc: 1.33.0
       lightningcss-win32-x64-msvc: 1.33.0
 
-  lodash.find@4.6.0: {}
-
-  lodash.max@4.0.1: {}
-
-  lodash.merge@4.6.2: {}
-
-  lodash.padstart@4.6.1: {}
-
-  lodash.repeat@4.1.0: {}
-
   lodash@4.18.1: {}
 
   long@5.3.2: {}
@@ -8518,17 +8465,16 @@ snapshots:
 
   ms@2.1.3: {}
 
-  mysql2@3.15.3:
+  mysql2@3.24.4(@types/node@24.13.5):
     dependencies:
+      '@types/node': 24.13.5
       aws-ssl-profiles: 1.1.2
-      denque: 2.1.0
       generate-function: 2.3.1
       iconv-lite: 0.7.3
       long: 5.3.2
       lru.min: 1.1.5
       named-placeholders: 1.1.6
-      seq-queue: 0.0.5
-      sqlstring: 2.3.3
+      sql-escaper: 1.5.2
 
   named-placeholders@1.1.6:
     dependencies:
@@ -8721,9 +8667,9 @@ snapshots:
     dependencies:
       parse-ms: 4.0.0
 
-  prisma-zod-generator@3.3.1(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)(zod@4.6.5):
+  prisma-zod-generator@3.3.1(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)(zod@4.6.5):
     dependencies:
-      '@prisma/client': 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
+      '@prisma/client': 7.10.0(prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
       '@prisma/generator-helper': 7.10.0
       '@prisma/internals': 7.10.0(typescript@7.0.2)
       '@types/cors': 2.8.19
@@ -8744,18 +8690,19 @@ snapshots:
       - supports-color
       - typescript
 
-  prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2):
+  prisma@7.10.0(@types/node@24.13.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(better-sqlite3@12.11.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2):
     dependencies:
       '@prisma/config': 7.10.0
       '@prisma/dev': 0.24.17(typescript@7.0.2)
       '@prisma/engines': 7.10.0
       '@prisma/studio-core': 0.33.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      mysql2: 3.15.3
+      mysql2: 3.24.4(@types/node@24.13.5)
       postgres: 3.4.7
     optionalDependencies:
       better-sqlite3: 12.11.1
       typescript: 7.0.2
     transitivePeerDependencies:
+      - '@types/node'
       - '@types/react'
       - '@types/react-dom'
       - magicast
@@ -9034,8 +8981,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  seq-queue@0.0.5: {}
-
   seroval-plugins@1.5.6(seroval@1.5.6):
     dependencies:
       seroval: 1.5.6
@@ -9155,9 +9100,7 @@ snapshots:
 
   source-map@0.7.6: {}
 
-  sprintf-js@1.1.2: {}
-
-  sqlstring@2.3.3: {}
+  sql-escaper@1.5.2: {}
 
   srvx@0.11.22: {}
 
@@ -9285,8 +9228,6 @@ snapshots:
       '@typescript/typescript-win32-x64': 7.0.2
 
   ufo@1.6.4: {}
-
-  undici-types@6.21.0: {}
 
   undici-types@7.18.2: {}
 
