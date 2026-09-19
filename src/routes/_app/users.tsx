@@ -24,7 +24,10 @@ const usersQueryOptions = {
 
 export const Route = createFileRoute("/_app/users")({
 	loader: async ({ context }) => {
-		await context.queryClient.ensureQueryData(usersQueryOptions);
+		await context.queryClient.query({
+			...usersQueryOptions,
+			staleTime: "static",
+		});
 	},
 	component: UsersPage,
 });

@@ -35,7 +35,10 @@ const decisionsQueryOptions = {
 export const Route = createFileRoute("/_app/decisions")({
 	validateSearch: decisionsSearchSchema,
 	loader: async ({ context }) => {
-		await context.queryClient.ensureQueryData(decisionsQueryOptions);
+		await context.queryClient.query({
+			...decisionsQueryOptions,
+			staleTime: "static",
+		});
 	},
 	component: DecisionsPage,
 });

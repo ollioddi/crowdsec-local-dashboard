@@ -23,7 +23,10 @@ const hostsQueryOptions = {
 export const Route = createFileRoute("/_app/hosts")({
 	validateSearch: hostSearchSchema,
 	loader: async ({ context }) => {
-		await context.queryClient.ensureQueryData(hostsQueryOptions);
+		await context.queryClient.query({
+			...hostsQueryOptions,
+			staleTime: "static",
+		});
 	},
 	component: HostsPage,
 });
