@@ -32,6 +32,10 @@ pnpm release:preview   # notes for everything since the last tag
 pnpm release:version   # the version git-cliff would pick
 ```
 
+Each entry links to its pull request when git-cliff can ask GitHub which PR
+the commit came from. The workflow has a token; locally, prefix the preview
+with `GITHUB_TOKEN=$(gh auth token)` to see the links.
+
 ## 2. Draft the release
 
 Run the **Draft release** workflow from the Actions tab. Leave the version

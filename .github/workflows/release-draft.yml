@@ -81,6 +81,8 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
           GH_TOKEN: ${{ github.token }}
+          # git-cliff looks up the pull request behind each commit with this
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           # Drop git-cliff's own version heading; the release title carries it
