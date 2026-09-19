@@ -4,6 +4,45 @@ All notable changes to this project are listed here. Each entry is the body of
 the corresponding GitHub release: a hand-written summary followed by the list
 generated from commits.
 
+## [v0.4.1-beta](https://github.com/ollioddi/crowdsec-local-dashboard/releases/tag/v0.4.1-beta) - 2026-09-19
+
+# v0.4.1-beta
+
+A small follow-up to v0.4.0-beta. No breaking changes, but one correction you should read.
+
+### Highlights
+
+#### Image tag correction
+
+The v0.4.0-beta notes told you to pin `image: ghcr.io/ollioddi/crowdsec-local-dashboard:v0.4.0-beta`. That tag does not exist. Image tags on GHCR have no `v` prefix, so the right value was `0.4.0-beta`, and for this release it is:
+
+```yaml
+image: ghcr.io/ollioddi/crowdsec-local-dashboard:0.4.1-beta
+```
+
+The compose file in the repo now pins the release it belongs to, so downloading it again gets you the matching image. Updating is now: download the compose file, `docker compose pull`, `docker compose up -d`. The README says the same.
+
+#### Smaller things
+
+- The image on GHCR shows a description again
+- Release housekeeping: the changelog is added through a pull request, `latest` builds no longer queue up behind each other, and each release pins the compose file automatically
+
+### Changes
+
+#### Features
+
+- **ci:** Pin the compose file to the release from the draft workflow ([549270e](https://github.com/ollioddi/crowdsec-local-dashboard/commit/549270e68861f7768ee8a494f65cf263534e6f73))
+
+#### Bug fixes
+
+- **ci:** Update the changelog through a pull request ([5ffba44](https://github.com/ollioddi/crowdsec-local-dashboard/commit/5ffba442442811baf6b504e888a7ab1f3993e3f1))
+
+#### Documentation
+
+- Pin compose to 0.4.0-beta and describe updating with a pinned tag ([1d39c6f](https://github.com/ollioddi/crowdsec-local-dashboard/commit/1d39c6fa77b589f8ae3ba462dca480c059284cdd))
+
+**Full diff:** [v0.4.0-beta...v0.4.1-beta](https://github.com/ollioddi/crowdsec-local-dashboard/compare/v0.4.0-beta...v0.4.1-beta)
+
 ## [v0.4.0-beta](https://github.com/ollioddi/crowdsec-local-dashboard/releases/tag/v0.4.0-beta) - 2026-09-19
 
 # v0.4.0-beta
