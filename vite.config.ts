@@ -7,6 +7,12 @@ import { defineConfig } from "vite";
 
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
+	build: {
+		rolldownOptions: {
+			// "use client" and "use no memo" are for React, not the bundler
+			checks: { moduleLevelDirective: false },
+		},
+	},
 	plugins: [
 		// Enhanced logs rewrite server console output as two-line "LOG file:line" blocks
 		devtools({ enhancedLogs: { enabled: false } }),
