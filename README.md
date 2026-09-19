@@ -81,20 +81,20 @@ This dashboard replaces all of that with a filterable table and a delete button.
 ### 1. Download the compose file
 
 ```sh
-curl -o docker-compose.yml https://raw.githubusercontent.com/ollioddi/crowdsec-dashboard/main/docker-compose.yml
+curl -o docker-compose.yml https://raw.githubusercontent.com/ollioddi/crowdsec-local-dashboard/main/docker-compose.yml
 ```
 
 Or clone the full repo if you want to build from source:
 
 ```sh
-git clone https://github.com/ollioddi/crowdsec-dashboard.git
-cd crowdsec-dashboard
+git clone https://github.com/ollioddi/crowdsec-local-dashboard.git
+cd crowdsec-local-dashboard
 ```
 
 ### 2. Configure
 
 ```sh
-curl -o .env https://raw.githubusercontent.com/ollioddi/crowdsec-dashboard/main/.env.example
+curl -o .env https://raw.githubusercontent.com/ollioddi/crowdsec-local-dashboard/main/.env.example
 ```
 
 Edit `.env` with your values - see [Configuration](#configuration) below.
@@ -109,10 +109,16 @@ Open [http://localhost:3000](http://localhost:3000). On first launch you will be
 
 ### Updating
 
+The compose file pins the release it was downloaded with. To move to a newer
+release, download it again and pull:
+
 ```sh
+curl -o docker-compose.yml https://raw.githubusercontent.com/ollioddi/crowdsec-local-dashboard/main/docker-compose.yml
 docker compose pull
 docker compose up -d
 ```
+
+Check the [release notes](https://github.com/ollioddi/crowdsec-local-dashboard/releases) first; some releases need configuration changes.
 
 The SQLite database is stored in a Docker volume (`db`) and survives updates.
 
