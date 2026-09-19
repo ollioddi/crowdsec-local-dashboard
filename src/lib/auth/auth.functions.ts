@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import z from "zod";
 import type { Session } from "@/lib/auth/auth.server";
+import { logger } from "@/lib/logging/logger";
+
+const log = logger("auth");
 
 export const loginSchema = z.object({
 	username: z.string().min(1, "Username is required"),
@@ -82,6 +85,7 @@ export const ensureAdminAndSignInFn = createServerFn({ method: "POST" })
 				password,
 				`${username}${SETUP_EMAIL_DOMAIN}`,
 			);
+			log.info("{username} is the first user and becomes admin", { username });
 		}
 
 		// Sign in with username. better-auth throws an APIError on bad credentials
@@ -94,6 +98,7 @@ export const ensureAdminAndSignInFn = createServerFn({ method: "POST" })
 			});
 		} catch (error) {
 			if (error instanceof APIError) {
+				log.warn("Failed sign-in for {username}", { username });
 				return { error: "Invalid credentials" };
 			}
 			throw error;

@@ -3,6 +3,9 @@ import type {
 	CrowdSecAlert,
 	CrowdSecDecision,
 } from "@/lib/crowdsec-lapi/types";
+import { errorFields, logger } from "@/lib/logging/logger";
+
+const log = logger("lapi-sync");
 
 const ALERT_FETCH_CHUNK_SIZE = 10;
 
@@ -48,7 +51,10 @@ export async function buildDecisionToAlertMap(
 				client
 					.getAlerts({ ip, has_active_decision: true, origin: "crowdsec" })
 					.catch((e) => {
-						console.warn(`[lapi-sync] Failed to fetch alerts for ${ip}:`, e);
+						log.warn("Could not fetch alerts for {ip}: {errorMessage}", {
+							ip,
+							...errorFields(e),
+						});
 						return [] as CrowdSecAlert[];
 					}),
 			),
@@ -61,9 +67,10 @@ export async function buildDecisionToAlertMap(
 		}
 	}
 
-	console.log(
-		`[lapi-sync] Linked ${out.size}/${decisions.length} decisions to alerts`,
-	);
+	log.debug("Linked {linked} of {decisions} decisions to alerts", {
+		linked: out.size,
+		decisions: decisions.length,
+	});
 
 	return out;
 }

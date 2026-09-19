@@ -58,6 +58,24 @@ export function unregisterSSEConnection(id: string, channel: string) {
 	}
 }
 
+/** Ends every open stream so the HTTP server can drain on shutdown. */
+export function closeAllSSEConnections() {
+	for (const conns of channels.values()) {
+		for (const controller of conns.values()) {
+			try {
+				controller.close();
+			} catch {
+				// already closed by the client
+			}
+		}
+	}
+	channels.clear();
+	if (heartbeatTimer) {
+		clearInterval(heartbeatTimer);
+		heartbeatTimer = null;
+	}
+}
+
 export function broadcastEvent(channel: string, payload: unknown) {
 	const conns = channels.get(channel);
 	if (!conns) return;

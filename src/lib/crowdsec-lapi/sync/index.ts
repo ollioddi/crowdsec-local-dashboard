@@ -2,6 +2,7 @@ import { prisma } from "@/db";
 import { env } from "@/env";
 import { getLapiClient } from "@/lib/crowdsec-lapi";
 import type { CrowdSecDecision } from "@/lib/crowdsec-lapi/types";
+import { logger } from "@/lib/logging/logger";
 import { broadcastEvent } from "@/lib/sse.server";
 import { buildDecisionToAlertMap } from "./alert-linker";
 import {
@@ -9,12 +10,15 @@ import {
 	deactivateStaleDecisions,
 	ensureHostsExist,
 	findExistingDecisionIds,
+	findKnownHostIps,
 	pruneOldDecisions,
 	updateHostBanCounts,
 	upsertActiveDecisions,
 	upsertHosts,
 	upsertInactiveDecisions,
 } from "./db";
+
+const log = logger("lapi-sync");
 
 /** First poll per process must be a full (startup=true) pull. */
 let isFirstFetch = true;
@@ -26,18 +30,22 @@ let isFirstFetch = true;
  */
 let needsFullSync = false;
 
-async function addNewDecisions(decisions: CrowdSecDecision[]): Promise<void> {
+/** Returns how many of the decisions' hosts were seen for the first time. */
+async function addNewDecisions(decisions: CrowdSecDecision[]): Promise<number> {
 	const client = getLapiClient();
-	const [decisionToAlert, existingIds] = await Promise.all([
+	const ips = [...new Set(decisions.map((d) => d.value))];
+	const [decisionToAlert, existingIds, knownIps] = await Promise.all([
 		buildDecisionToAlertMap(decisions, client),
 		findExistingDecisionIds(decisions.map((d) => d.id)),
+		findKnownHostIps(ips),
 	]);
 	const newIds = new Set(
 		decisions.map((d) => d.id).filter((id) => !existingIds.has(id)),
 	);
 	await upsertHosts(decisions, decisionToAlert, newIds);
 	await upsertActiveDecisions(decisions, decisionToAlert);
-	await updateHostBanCounts(decisions.map((d) => d.value));
+	await updateHostBanCounts(ips);
+	return ips.length - knownIps.size;
 }
 
 async function removeDeletedDecisions(
@@ -81,9 +89,10 @@ export async function broadcastCurrentState(): Promise<void> {
 	});
 	broadcastEvent("hosts", allHosts);
 
-	console.log(
-		`[lapi-sync] Broadcast ${activeDecisions.length} active decisions, ${allHosts.length} hosts`,
-	);
+	log.debug("Broadcast {decisions} active decisions and {hosts} hosts", {
+		decisions: activeDecisions.length,
+		hosts: allHosts.length,
+	});
 }
 
 /**
@@ -99,7 +108,8 @@ export async function syncDecisions(options?: {
 	const useStartup =
 		isFirstFetch || needsFullSync || options?.forceFullSync === true;
 
-	console.log(`[lapi-sync] Starting sync (startup=${useStartup})`);
+	log.debug(useStartup ? "Starting full sync" : "Starting delta sync");
+	const startedAt = performance.now();
 
 	try {
 		const client = getLapiClient();
@@ -111,13 +121,10 @@ export async function syncDecisions(options?: {
 		const newDecisions = stream.new ?? [];
 		const deletedDecisions = stream.deleted ?? [];
 		let changed = false;
-
-		console.log(
-			`[lapi-sync] Stream: ${newDecisions.length} new, ${deletedDecisions.length} deleted`,
-		);
+		let newHosts = 0;
 
 		if (newDecisions.length > 0) {
-			await addNewDecisions(newDecisions);
+			newHosts = await addNewDecisions(newDecisions);
 			changed = true;
 		}
 
@@ -131,16 +138,18 @@ export async function syncDecisions(options?: {
 				newDecisions.map((d) => d.id),
 			);
 			if (staleCount > 0) {
-				console.log(`[lapi-sync] Deactivated ${staleCount} stale decisions`);
+				log.info("Deactivated {count} decisions no longer in LAPI", {
+					count: staleCount,
+				});
 				changed = true;
 			}
 		}
 
 		const expiredCount = await deactivateExpiredDecisions();
 		if (expiredCount > 0) {
-			console.log(
-				`[lapi-sync] Deactivated ${expiredCount} decisions past their expiry`,
-			);
+			log.info("Deactivated {count} decisions past their expiry", {
+				count: expiredCount,
+			});
 			changed = true;
 		}
 
@@ -155,10 +164,21 @@ export async function syncDecisions(options?: {
 			}
 		}
 
+		const durationMs = Math.round(performance.now() - startedAt);
 		if (changed) {
+			log.info(
+				"Synced {newDecisions} new and {deletedDecisions} deleted decisions",
+				{
+					newDecisions: newDecisions.length,
+					deletedDecisions: deletedDecisions.length,
+					newHosts,
+					full: useStartup,
+					durationMs,
+				},
+			);
 			await broadcastCurrentState();
 		} else {
-			console.log("[lapi-sync] No changes");
+			log.debug("No changes", { full: useStartup, durationMs });
 		}
 	} catch (error) {
 		needsFullSync = true;

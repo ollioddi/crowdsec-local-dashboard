@@ -137,6 +137,10 @@ The SQLite database is stored in a Docker volume (`db`) and survives updates.
 | `LAPI_BOUNCER_API_TOKEN` | Yes | | API token for bouncer (read) access. |
 | `LAPI_POLL_INTERVAL` | | `60` | Seconds between LAPI decision syncs. |
 | `DECISION_RETENTION_COUNT` | | `5000` | Maximum decisions kept in the database. The oldest inactive ones are pruned first, together with hosts and alerts nothing references anymore. Set to `0` to keep everything. |
+| `LOG_LEVEL` | | `info` | Lowest level written: `fatal`, `error`, `warn`, `info`, `debug` or `trace`. `debug` shows every sync, `info` only the ones that changed something. |
+| `LOG_FORMAT` | | `human` | `human` is one colored line per event (set `NO_COLOR=1` to drop the colors). `json` writes one JSON object per line for a log collector. |
+
+At `info` the log records what changed: sign-ins and failed sign-ins, users created or deleted, decisions removed from the dashboard and by whom, every sync that changed something, and LAPI outages with their recovery. Stack traces appear only at `debug`, where quiet polls are logged too.
 | `OIDC_CLIENT_ID` | | | Client ID from your OIDC provider. Required to enable SSO. |
 | `OIDC_CLIENT_SECRET` | | | Client secret from your OIDC provider. Required to enable SSO. |
 | `OIDC_ISSUER_URL` | | | Issuer URL of your OIDC provider, e.g. `https://authentik.example.com/application/o/my-app/`. Required to enable SSO. |

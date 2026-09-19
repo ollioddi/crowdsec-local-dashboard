@@ -4,7 +4,10 @@ import type {
 	CrowdSecAlert,
 	CrowdSecDecision,
 } from "@/lib/crowdsec-lapi/types";
+import { logger } from "@/lib/logging/logger";
 import { computeExpiresAt, lookupCountry } from "./transform";
+
+const log = logger("lapi-sync");
 
 export const BATCH_SIZE = 500;
 
@@ -69,6 +72,14 @@ export async function updateHostBanCounts(ips: string[]): Promise<void> {
  * `lastSeen` only moves forward for decisions the DB has not seen before, so a
  * restart (which replays every active decision) does not rewrite it.
  */
+export async function findKnownHostIps(ips: string[]): Promise<Set<string>> {
+	const hosts = await prisma.host.findMany({
+		where: { ip: { in: ips } },
+		select: { ip: true },
+	});
+	return new Set(hosts.map((h) => h.ip));
+}
+
 export async function upsertHosts(
 	decisions: CrowdSecDecision[],
 	decisionToAlerts: Map<number, CrowdSecAlert[]>,
@@ -315,9 +326,12 @@ export async function pruneOldDecisions(
 		where: { decisions: { none: {} }, alerts: { none: {} } },
 	});
 
-	console.log(
-		`[lapi-sync] Pruned ${toPrune.length} decisions, ${prunedAlerts} alerts, ${prunedHosts} hosts (retention limit: ${retentionLimit})`,
-	);
+	log.info("Pruned {decisions} decisions, {alerts} alerts, {hosts} hosts", {
+		decisions: toPrune.length,
+		alerts: prunedAlerts,
+		hosts: prunedHosts,
+		retentionLimit,
+	});
 
 	return [...new Set(toPrune.map((d) => d.hostIp))];
 }

@@ -8,6 +8,9 @@
 
 import { prisma } from "@/db";
 import { auth } from "@/lib/auth/auth.server";
+import { logger } from "@/lib/logging/logger";
+
+const log = logger("users");
 
 /**
  * Creates a user record and its associated credential account.
@@ -42,4 +45,5 @@ export async function createUserAccount(
 			password: hash,
 		},
 	});
+	log.info("User {username} created", { username });
 }

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { logger } from "@/lib/logging/logger";
 import { authMiddleware } from "./auth/auth.middleware";
 
 /**
@@ -76,15 +77,23 @@ export type DecisionAlertDetail = Awaited<
 export const deleteDecisionFn = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.validator(z.object({ id: z.number() }))
-	.handler(async ({ data }) => {
+	.handler(async ({ data, context }) => {
 		const { prisma } = await import("@/db");
 		const { getLapiClient } = await import("@/lib/crowdsec-lapi");
 		const { broadcastCurrentState } = await import("@/lib/crowdsec-lapi/sync");
+		const log = logger("decisions");
 
+		const decision = await prisma.decision.findUnique({
+			where: { id: data.id },
+			select: { hostIp: true },
+		});
 		const result = await getLapiClient().deleteDecisionById(data.id);
-		if (!result.deleted) {
-			console.log(`[decision-delete] ${data.id} already gone from LAPI`);
-		}
+		log.info("Decision {id} for {ip} removed by {by}", {
+			id: data.id,
+			ip: decision?.hostIp,
+			by: context.session.user.name,
+			stillInLapi: result.deleted,
+		});
 
 		const expiresAt = new Date();
 		await prisma.decision.updateMany({

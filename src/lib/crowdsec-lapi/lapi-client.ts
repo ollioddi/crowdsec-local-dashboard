@@ -1,3 +1,4 @@
+import { errorFields, logger } from "@/lib/logging/logger";
 import {
 	type AlertFilters,
 	type ConnectionHealth,
@@ -9,6 +10,8 @@ import {
 	LapiConfigSchema,
 	type WatcherAuthResponse,
 } from "./types";
+
+const log = logger("lapi");
 
 /** Query filters accepted by `GET /v1/decisions`. All fields are optional. */
 export type DecisionFilters = {
@@ -165,7 +168,10 @@ export class LapiClient {
 
 			return { status: "OK", error: null };
 		} catch (error) {
-			console.error("Error connecting to LAPI:", error);
+			log.error(
+				"Could not connect to LAPI: {errorMessage}",
+				errorFields(error),
+			);
 			return { status: "ERROR", error: "SECURITY_ENGINE_UNREACHABLE" };
 		}
 	}

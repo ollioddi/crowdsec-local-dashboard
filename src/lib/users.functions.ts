@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import z from "zod";
+import { logger } from "@/lib/logging/logger";
 import { authMiddleware } from "./auth/auth.middleware";
 
 export const getUsersFn = createServerFn({ method: "GET" })
@@ -80,6 +81,13 @@ export const deleteUserFn = createServerFn({ method: "POST" })
 			return { error: "Cannot delete the admin user" };
 		}
 
-		await prisma.user.delete({ where: { id: data.id } });
+		const deleted = await prisma.user.delete({
+			where: { id: data.id },
+			select: { username: true },
+		});
+		logger("users").info("User {username} deleted by {by}", {
+			username: deleted.username,
+			by: context.session.user.name,
+		});
 		return { success: true };
 	});

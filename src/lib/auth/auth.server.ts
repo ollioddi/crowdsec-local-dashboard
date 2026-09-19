@@ -6,6 +6,9 @@ import { username } from "better-auth/plugins/username";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { prisma } from "@/db";
 import { env } from "@/env";
+import { logger } from "@/lib/logging/logger";
+
+const log = logger("auth");
 
 const oidcConfig: GenericOAuthConfig[] =
 	env.OIDC_CLIENT_ID && env.OIDC_CLIENT_SECRET && env.OIDC_ISSUER_URL
@@ -47,6 +50,25 @@ export const auth = betterAuth({
 	},
 	emailAndPassword: {
 		enabled: true,
+	},
+	logger: {
+		level: "warn",
+		log: (level, message, ...args) => log[level](message, { args }),
+	},
+	databaseHooks: {
+		session: {
+			create: {
+				after: async (session) => {
+					const user = await prisma.user.findUnique({
+						where: { id: session.userId },
+						select: { username: true },
+					});
+					log.info("{username} signed in", {
+						username: user?.username ?? session.userId,
+					});
+				},
+			},
+		},
 	},
 	plugins: [
 		tanstackStartCookies(),

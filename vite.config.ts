@@ -8,7 +8,8 @@ import { defineConfig } from "vite";
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
 	plugins: [
-		devtools(),
+		// Enhanced logs rewrite server console output as two-line "LOG file:line" blocks
+		devtools({ enhancedLogs: { enabled: false } }),
 		nitro({
 			rollupConfig: {
 				// Packages that must not be bundled into the server output:
