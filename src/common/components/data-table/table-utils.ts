@@ -75,6 +75,20 @@ export function getDefaultColumnVisibility<TData extends RowData>(
 
 export const EXPAND_COLUMN_ID = "_expand";
 
+/**
+ * Action columns hold the icon buttons a row shows when collapsed. The expanded
+ * panel carries the same actions as labelled buttons, so they are hidden there.
+ */
+export function isActionColumn<TData extends RowData>(
+	column: DataTableColumn<TData>,
+): boolean {
+	if (column.id === EXPAND_COLUMN_ID) return false;
+	const { header, meta } = column.columnDef;
+	if (meta?.filterOnly) return false;
+	if (meta?.card) return meta.card === "action";
+	return typeof header !== "string" || header === "";
+}
+
 /** Global filter that only searches columns whose meta has `globalFilter: true`. */
 export function globalFilterFn<TData extends RowData>(
 	row: DataTableRow<TData>,

@@ -1,7 +1,8 @@
 import { type RowData, useTable } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { Button } from "@/common/components/ui/button";
 import {
 	Table,
 	TableHead,
@@ -57,6 +58,8 @@ export function DataTable<TData extends RowData>({
 	className,
 }: Readonly<DataTableProps<TData>>) {
 	const isMobile = useIsMobile();
+	// Rows scroll in here, not the window
+	const scrollRef = useRef<HTMLDivElement>(null);
 	const url = useDataTableUrlState({
 		search,
 		navigate,
@@ -71,19 +74,20 @@ export function DataTable<TData extends RowData>({
 		id: EXPAND_COLUMN_ID,
 		size: 40,
 		cell: ({ row }) => (
-			<button
-				type="button"
+			<Button
+				variant="ghost"
+				size="icon-sm"
 				aria-label={row.getIsExpanded() ? "Collapse row" : "Expand row"}
-				className="flex h-full w-full items-center justify-center p-1"
+				aria-expanded={row.getIsExpanded()}
 				onClick={() => row.toggleExpanded()}
 			>
 				<ChevronDown
 					className={cn(
-						"h-4 w-4 text-muted-foreground transition-transform duration-200",
+						"size-4 text-muted-foreground transition-transform duration-200",
 						row.getIsExpanded() && "rotate-180",
 					)}
 				/>
-			</button>
+			</Button>
 		),
 	};
 
@@ -129,57 +133,85 @@ export function DataTable<TData extends RowData>({
 	const totalItems = table.getFilteredRowModel().rows.length;
 
 	return (
-		<div className={cn("flex flex-col gap-4", className)}>
-			<DataTableToolbar
-				table={table}
-				searchPlaceholder={searchPlaceholder}
-				showColumnSelector={!isMobile}
-				onResetFilters={url.resetFilters}
-				extra={toolbarExtra}
-			/>
-			{isMobile ? (
-				<DataTableCards
+		<div
+			className={cn(
+				"flex min-h-0 flex-1 flex-col gap-3 overscroll-contain",
+				className,
+			)}
+		>
+			<div className="shrink-0">
+				<DataTableToolbar
 					table={table}
-					renderSubComponent={renderSubComponent}
-					emptyState={emptyState}
+					searchPlaceholder={searchPlaceholder}
+					showColumnSelector={!isMobile}
+					onResetFilters={url.resetFilters}
+					extra={toolbarExtra}
 				/>
+			</div>
+
+			{isMobile ? (
+				<div
+					ref={scrollRef}
+					data-scroll-container
+					className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+				>
+					<DataTableCards
+						table={table}
+						scrollRef={scrollRef}
+						renderSubComponent={renderSubComponent}
+						emptyState={emptyState}
+					/>
+				</div>
 			) : (
 				<div
-					className="rounded-lg border overflow-x-auto"
-					style={{ containerType: "inline-size" }}
+					ref={scrollRef}
+					data-scroll-container
+					className="min-h-0 flex-1 overflow-auto overscroll-contain rounded-lg border"
 				>
-					<Table className="min-w-0">
-						<TableHeader className="bg-muted">
-							{table.getHeaderGroups().map((headerGroup) => (
-								<TableRow key={headerGroup.id}>
-									{headerGroup.headers.map((header) => (
-										<TableHead
-											key={header.id}
-											style={{ width: header.getSize() }}
-										>
-											<DataTableHeaderCell header={header} />
-										</TableHead>
-									))}
-								</TableRow>
-							))}
-						</TableHeader>
-						<DataTableRows
-							emptyState={emptyState}
-							renderSubComponent={renderSubComponent}
-							table={table}
-						/>
-					</Table>
+					{/* The query context sits inside the scroller, so 100cqi is the
+					    visible width excluding the scrollbar, while the table itself
+					    may be wider and scroll under it. */}
+					<div style={{ containerType: "inline-size" }}>
+						<Table className="min-w-0">
+							<TableHeader className="sticky top-0 z-20 bg-muted shadow-[inset_0_-1px_0_var(--border)]">
+								{table.getHeaderGroups().map((headerGroup) => (
+									<TableRow key={headerGroup.id} className="border-0">
+										{headerGroup.headers.map((header) => (
+											<TableHead
+												key={header.id}
+												style={{ width: header.getSize() }}
+											>
+												<DataTableHeaderCell header={header} />
+											</TableHead>
+										))}
+									</TableRow>
+								))}
+							</TableHeader>
+							<DataTableRows
+								emptyState={emptyState}
+								renderSubComponent={renderSubComponent}
+								scrollRef={scrollRef}
+								table={table}
+							/>
+						</Table>
+					</div>
 				</div>
 			)}
-			<PaginationBar
-				pagination={{
-					...url.state.pagination,
-					totalItems,
-					totalPages: table.getPageCount(),
-				}}
-				onChange={table.setPagination}
-				totalItemsPreFiltered={totalItemsPreFiltered}
-			/>
+
+			<div className="shrink-0">
+				<PaginationBar
+					pagination={{
+						...url.state.pagination,
+						totalItems,
+						totalPages: table.getPageCount(),
+					}}
+					onChange={(next) => {
+						scrollRef.current?.scrollTo({ top: 0 });
+						table.setPagination(next);
+					}}
+					totalItemsPreFiltered={totalItemsPreFiltered}
+				/>
+			</div>
 		</div>
 	);
 }

@@ -76,11 +76,11 @@ const AppShell = ({ children }: Readonly<{ children: ReactNode }>) => {
 						<Toaster position="top-right" />
 						<AppSidebar />
 						<SidebarInset>
-							<header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
-								<SidebarTrigger className="-ml-1" />
+							<header className="flex h-12 shrink-0 items-center gap-2 border-b px-2 pt-[env(safe-area-inset-top)] sm:px-4">
+								<SidebarTrigger className="-ml-1 size-9 sm:size-8" />
 							</header>
 							<SyncStatusBanner status={syncStatus} />
-							<main className="flex-1 overflow-auto">{children}</main>
+							<div className="flex min-h-0 flex-1 flex-col">{children}</div>
 						</SidebarInset>
 					</SidebarProvider>
 				</SessionProvider>

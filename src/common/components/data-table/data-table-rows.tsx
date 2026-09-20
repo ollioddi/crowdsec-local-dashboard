@@ -1,9 +1,11 @@
 import { useHydrated } from "@tanstack/react-router";
 import { flexRender, type RowData, Subscribe } from "@tanstack/react-table";
-import type { ReactElement, ReactNode } from "react";
+import type { ReactElement, ReactNode, RefObject } from "react";
 import { TableBody, TableCell, TableRow } from "@/common/components/ui/table";
+import { cn } from "@/common/lib/utils";
 import type { DataTableInstance, DataTableRow } from "./table-features";
-import { useWindowVirtual } from "./use-window-virtual";
+import { isActionColumn } from "./table-utils";
+import { useVirtualRows } from "./use-virtual-rows";
 
 type RenderSubComponent<TData extends RowData> = (
 	row: DataTableRow<TData>,
@@ -11,18 +13,23 @@ type RenderSubComponent<TData extends RowData> = (
 
 interface DataTableRowsProps<TData extends RowData> {
 	table: DataTableInstance<TData>;
+	scrollRef: RefObject<HTMLDivElement | null>;
 	emptyState?: ReactNode;
 	renderSubComponent?: RenderSubComponent<TData>;
 }
 
 const VIRTUALIZATION_THRESHOLD = 100;
-const ESTIMATED_ROW_HEIGHT = 72;
+const ESTIMATED_ROW_HEIGHT = 53;
 const ESTIMATED_EXPANDED_HEIGHT = 400;
 const INITIAL_ROWS_TO_RENDER = 30;
+
+/** Keeps the last row's border in both paths, so 50 and 500 rows match. */
+const KEEP_LAST_BORDER = "[&_tr:last-child]:border-b";
 
 /** The table body: one <tbody> for small pages, virtualized groups for large ones */
 const DataTableRows = <TData extends RowData>({
 	table,
+	scrollRef,
 	emptyState,
 	renderSubComponent,
 }: Readonly<DataTableRowsProps<TData>>) => {
@@ -45,7 +52,7 @@ const DataTableRows = <TData extends RowData>({
 
 	if (rows.length <= VIRTUALIZATION_THRESHOLD) {
 		return (
-			<TableBody>
+			<TableBody className={KEEP_LAST_BORDER}>
 				{rows.map((row) => (
 					<TableRowWithExpansion
 						key={row.id}
@@ -63,6 +70,7 @@ const DataTableRows = <TData extends RowData>({
 			hydrated={hydrated}
 			renderSubComponent={renderSubComponent}
 			rows={rows}
+			scrollRef={scrollRef}
 		/>
 	);
 };
@@ -74,14 +82,17 @@ const VirtualizedRows = <TData extends RowData>({
 	columnsLength,
 	hydrated,
 	renderSubComponent,
+	scrollRef,
 }: {
 	rows: DataTableRow<TData>[];
 	columnsLength: number;
 	hydrated: boolean;
 	renderSubComponent?: RenderSubComponent<TData>;
+	scrollRef: RefObject<HTMLDivElement | null>;
 }) => {
 	const { anchorRef, items, measureElement, topPadding, bottomPadding } =
-		useWindowVirtual<HTMLTableSectionElement>({
+		useVirtualRows<HTMLTableSectionElement, HTMLDivElement>({
+			scrollRef,
 			count: rows.length,
 			enabled: hydrated,
 			estimateSize: (index) =>
@@ -93,7 +104,7 @@ const VirtualizedRows = <TData extends RowData>({
 
 	if (!hydrated || items.length === 0) {
 		return (
-			<TableBody ref={anchorRef}>
+			<TableBody ref={anchorRef} className={KEEP_LAST_BORDER}>
 				{rows.slice(0, INITIAL_ROWS_TO_RENDER).map((row) => (
 					<TableRowWithExpansion
 						key={row.id}
@@ -165,10 +176,35 @@ const TableRowWithExpansion = <TData extends RowData>({
 			const visibleCells = row.getVisibleCells();
 			return (
 				<>
-					<TableRow>
+					<TableRow
+						data-state={isExpanded ? "expanded" : undefined}
+						className={cn(
+							"data-[state=expanded]:bg-muted/40",
+							renderSubComponent && "cursor-pointer",
+						)}
+						onClick={
+							renderSubComponent
+								? (event) => {
+										// The row is a shortcut for the chevron, which stays the
+										// keyboard-accessible control. Anything already clickable
+										// keeps its own action.
+										if (
+											(event.target as HTMLElement).closest(
+												"a, button, input, select, [role='button']",
+											)
+										) {
+											return;
+										}
+										row.toggleExpanded();
+									}
+								: undefined
+						}
+					>
 						{visibleCells.map((cell) => (
 							<TableCell key={cell.id}>
-								{flexRender(cell.column.columnDef.cell, cell.getContext())}
+								{isExpanded && isActionColumn(cell.column)
+									? null
+									: flexRender(cell.column.columnDef.cell, cell.getContext())}
 							</TableCell>
 						))}
 					</TableRow>

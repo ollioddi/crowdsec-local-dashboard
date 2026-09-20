@@ -1,5 +1,5 @@
 import type { PaginationState } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { type FC, type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/common/components/ui/button";
 import {
@@ -30,7 +30,6 @@ export interface ExtendedPagination {
 // --- Constants ---
 
 const DEFAULT_PAGE_PRESETS = [5, 10, 25, 50, 100, 250, 500, 1000];
-const SCROLL_THRESHOLD = 600;
 
 // --- Helper functions ---
 
@@ -202,46 +201,7 @@ function PageNavigation({
 	);
 }
 
-interface ScrollToTopButtonProps {
-	visible: boolean;
-}
-
-function ScrollToTopButton({ visible }: Readonly<ScrollToTopButtonProps>) {
-	if (!visible) {
-		return null;
-	}
-
-	const scrollToTop = () => {
-		window.scrollTo({ behavior: "smooth", top: 0 });
-	};
-
-	return (
-		<Button
-			className="hidden lg:flex"
-			onClick={scrollToTop}
-			size="sm"
-			variant="outline"
-		>
-			Scroll to top <ChevronUp className="ml-2 h-4 w-4" />
-		</Button>
-	);
-}
-
 // --- Hooks ---
-
-function useScrollVisibility(threshold: number): boolean {
-	const [visible, setVisible] = useState(false);
-
-	useEffect(() => {
-		const handleScroll = () => {
-			setVisible(window.scrollY > threshold);
-		};
-		window.addEventListener("scroll", handleScroll);
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, [threshold]);
-
-	return visible;
-}
 
 function usePageNumbers(pageIndex: number, totalPages: number): PageElement[] {
 	const [pageNumbers, setPageNumbers] = useState<PageElement[]>([]);
@@ -274,7 +234,6 @@ export const PaginationBar: FC<PaginationBarProperties> = ({
 
 	// Hooks
 	const pageNumbers = usePageNumbers(pageIndex, totalPages);
-	const showScrollToTop = useScrollVisibility(SCROLL_THRESHOLD);
 
 	// Derived values
 	const adjustedPageSizes = getAdjustedPageSizes(totalItems, pageSizePresets);
@@ -295,7 +254,7 @@ export const PaginationBar: FC<PaginationBarProperties> = ({
 	};
 
 	return (
-		<div className="sticky bottom-0 z-20 w-full bg-background">
+		<div className="w-full border-t bg-background pb-[env(safe-area-inset-bottom)]">
 			{header}
 			{/* Mobile: two rows. Desktop: single row. */}
 			<div className="flex w-full flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
@@ -325,8 +284,6 @@ export const PaginationBar: FC<PaginationBarProperties> = ({
 						pageNumbers={pageNumbers}
 						totalPages={totalPages}
 					/>
-
-					<ScrollToTopButton visible={showScrollToTop} />
 				</div>
 			</div>
 		</div>
