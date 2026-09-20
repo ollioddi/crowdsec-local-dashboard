@@ -6,23 +6,23 @@ import {
 	useLoaderData,
 } from "@tanstack/react-router";
 import { type ReactNode, useCallback, useEffect } from "react";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SyncStatusBanner } from "@/components/sync-status-banner";
+import { getSessionFn } from "@/common/auth/auth.functions";
+import { AppSidebar } from "@/common/components/app-sidebar";
 import {
 	SidebarInset,
 	SidebarProvider,
 	SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { SessionProvider } from "@/context/session-provider";
-import { ThemeProvider } from "@/context/theme-provider";
-import { useSSEConnection } from "@/hooks/use-sse-connection";
-import { getSessionFn } from "@/lib/auth/auth.functions";
+} from "@/common/components/ui/sidebar";
+import { Toaster } from "@/common/components/ui/sonner";
+import { TooltipProvider } from "@/common/components/ui/tooltip";
+import { SessionProvider } from "@/common/context/session-provider";
+import { ThemeProvider } from "@/common/context/theme-provider";
+import { useSSEConnection } from "@/common/hooks/use-sse-connection";
 import {
 	type SyncStatus,
 	syncStatusQueryOptions,
-} from "@/lib/sync-status.functions";
+} from "@/features/sync/api/sync-status.functions";
+import { SyncStatusBanner } from "@/features/sync/components/sync-status-banner";
 
 export const Route = createFileRoute("/_app")({
 	component: AppLayout,

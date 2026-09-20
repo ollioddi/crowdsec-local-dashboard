@@ -1,14 +1,14 @@
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
-import { prisma } from "@/db";
-import { env } from "@/env";
-import { syncDecisions } from "@/lib/crowdsec-lapi/sync";
+import { prisma } from "@/common/lib/db";
+import { env } from "@/common/lib/env";
+import { errorFields, initLogging, logger } from "@/common/lib/logging/logger";
+import { closeAllSSEConnections } from "@/common/lib/sse.server";
+import { APP_VERSION } from "@/common/lib/version";
 import {
 	markSyncConfigured,
 	recordSyncResult,
-} from "@/lib/crowdsec-lapi/sync/status";
-import { errorFields, initLogging, logger } from "@/lib/logging/logger";
-import { closeAllSSEConnections } from "@/lib/sse.server";
-import { APP_VERSION } from "@/lib/version";
+} from "@/features/sync/lib/status";
+import { syncDecisions } from "@/features/sync/lib/sync";
 
 declare global {
 	// Survive Vite SSR module reloads in dev so only one poller and one set of

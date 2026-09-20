@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createSSEHandler } from "@/lib/sse.server";
+import { createSSEHandler } from "@/common/lib/sse.server";
 
 export const Route = createFileRoute("/sse/decisions")({
 	server: {
