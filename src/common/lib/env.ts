@@ -10,7 +10,6 @@ export const env = createEnv({
 		// would be incorrect (e.g. BETTER_AUTH_URL=https://dashboard.example.com).
 		BETTER_AUTH_URL: z.url().optional(),
 		BETTER_AUTH_SECRET: z.string().min(1),
-		SERVER_URL: z.url().optional(),
 		LAPI_URL: z.url().optional(),
 		LAPI_MACHINE_ID: z.string().min(1).optional(),
 		LAPI_MACHINE_PASSWORD: z.string().min(1).optional(),
@@ -27,16 +26,6 @@ export const env = createEnv({
 		OIDC_ISSUER_URL: z.url().optional(),
 		OIDC_BUTTON_LABEL: z.string().min(1).optional(),
 		OIDC_AUTO_REDIRECT: z.stringbool().optional(),
-	},
-
-	/**
-	 * The prefix that client-side variables must have. This is enforced both at
-	 * a type-level and at runtime.
-	 */
-	clientPrefix: "VITE_",
-
-	client: {
-		VITE_APP_TITLE: z.string().min(1).optional(),
 	},
 
 	/**
