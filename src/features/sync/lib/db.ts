@@ -151,9 +151,23 @@ export async function ensureHostsExist(
 	}
 }
 
+/** Parses a LAPI timestamp, or null when missing or malformed. */
+function toDate(value: string | undefined): Date | null {
+	if (!value) return null;
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/** Applied on update too, so older rows pick these up when re-synced. */
 function toDbExtract(alert: CrowdSecAlert) {
 	const { entries, entryType } = extractAlertData(alert);
-	return { entries: JSON.stringify(entries), entryType };
+	return {
+		entries: JSON.stringify(entries),
+		entryType,
+		startAt: toDate(alert.start_at),
+		stopAt: toDate(alert.stop_at),
+		eventsCount: alert.events_count ?? null,
+	};
 }
 
 /**
@@ -217,6 +231,8 @@ export async function upsertActiveDecisions(
 						origin: d.origin,
 						scenario: d.scenario,
 						duration: d.duration,
+						scope: d.scope,
+						simulated: d.simulated ?? false,
 						createdAt: latestAlertTime(alertsForDecision) ?? undefined,
 						expiresAt: computeExpiresAt(d),
 						active: true,
@@ -226,6 +242,8 @@ export async function upsertActiveDecisions(
 						type: d.type,
 						origin: d.origin,
 						scenario: d.scenario,
+						scope: d.scope,
+						simulated: d.simulated ?? false,
 						active: true,
 						...(alertConnect.length > 0 && {
 							alerts: { connect: alertConnect },
@@ -253,11 +271,15 @@ export async function upsertInactiveDecisions(
 						origin: d.origin,
 						scenario: d.scenario,
 						duration: d.duration,
+						scope: d.scope,
+						simulated: d.simulated ?? false,
 						expiresAt: computeExpiresAt(d),
 						active: false,
 					},
 					update: {
 						active: false,
+						scope: d.scope,
+						simulated: d.simulated ?? false,
 						// Negative remaining durations land in the past, which is correct
 						expiresAt: computeExpiresAt(d),
 					},

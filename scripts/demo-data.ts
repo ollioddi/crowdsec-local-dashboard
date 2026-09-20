@@ -371,12 +371,20 @@ async function seedDecisions() {
 			update: {},
 		});
 
+		// Attack span: most scenarios are bursts, some pace themselves for hours
+		const spanSeconds = rand() < 0.75 ? between(2, 90) : between(1800, 21_600);
+		const stopAt = new Date(createdAt.getTime());
+		const startAt = new Date(stopAt.getTime() - spanSeconds * 1000);
+
 		await prisma.alert.create({
 			data: {
 				id: alertId,
 				scenario: scenario.name,
-				message: `Ip ${host.ip} performed '${scenario.name}' (${events.length} events over ${between(2, 90)}s)`,
+				message: `Ip ${host.ip} performed '${scenario.name}' (${events.length} events over ${spanSeconds}s)`,
 				createdAt,
+				startAt,
+				stopAt,
+				eventsCount: events.length,
 				hostIp: host.ip,
 				entries: JSON.stringify(entries),
 				entryType,
@@ -392,6 +400,8 @@ async function seedDecisions() {
 				origin: rand() < 0.9 ? "crowdsec" : "cscli",
 				scenario: scenario.name,
 				duration,
+				scope: "Ip",
+				simulated: rand() < 0.06, // a few, so the badge shows in demos
 				createdAt,
 				expiresAt,
 				active,

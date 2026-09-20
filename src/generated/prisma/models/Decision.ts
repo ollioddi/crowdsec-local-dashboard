@@ -41,6 +41,8 @@ export type DecisionMinAggregateOutputType = {
   origin: $Enums.DecisionOrigin | null
   scenario: string | null
   duration: string | null
+  scope: string | null
+  simulated: boolean | null
   createdAt: Date | null
   expiresAt: Date | null
   active: boolean | null
@@ -53,6 +55,8 @@ export type DecisionMaxAggregateOutputType = {
   origin: $Enums.DecisionOrigin | null
   scenario: string | null
   duration: string | null
+  scope: string | null
+  simulated: boolean | null
   createdAt: Date | null
   expiresAt: Date | null
   active: boolean | null
@@ -65,6 +69,8 @@ export type DecisionCountAggregateOutputType = {
   origin: number
   scenario: number
   duration: number
+  scope: number
+  simulated: number
   createdAt: number
   expiresAt: number
   active: number
@@ -87,6 +93,8 @@ export type DecisionMinAggregateInputType = {
   origin?: true
   scenario?: true
   duration?: true
+  scope?: true
+  simulated?: true
   createdAt?: true
   expiresAt?: true
   active?: true
@@ -99,6 +107,8 @@ export type DecisionMaxAggregateInputType = {
   origin?: true
   scenario?: true
   duration?: true
+  scope?: true
+  simulated?: true
   createdAt?: true
   expiresAt?: true
   active?: true
@@ -111,6 +121,8 @@ export type DecisionCountAggregateInputType = {
   origin?: true
   scenario?: true
   duration?: true
+  scope?: true
+  simulated?: true
   createdAt?: true
   expiresAt?: true
   active?: true
@@ -210,6 +222,8 @@ export type DecisionGroupByOutputType = {
   origin: $Enums.DecisionOrigin
   scenario: string
   duration: string
+  scope: string
+  simulated: boolean
   createdAt: Date
   expiresAt: Date | null
   active: boolean
@@ -245,6 +259,8 @@ export type DecisionWhereInput = {
   origin?: Prisma.EnumDecisionOriginFilter<"Decision"> | $Enums.DecisionOrigin
   scenario?: Prisma.StringFilter<"Decision"> | string
   duration?: Prisma.StringFilter<"Decision"> | string
+  scope?: Prisma.StringFilter<"Decision"> | string
+  simulated?: Prisma.BoolFilter<"Decision"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Decision"> | Date | string
   expiresAt?: Prisma.DateTimeNullableFilter<"Decision"> | Date | string | null
   active?: Prisma.BoolFilter<"Decision"> | boolean
@@ -259,6 +275,8 @@ export type DecisionOrderByWithRelationInput = {
   origin?: Prisma.SortOrder
   scenario?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  scope?: Prisma.SortOrder
+  simulated?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
@@ -276,6 +294,8 @@ export type DecisionWhereUniqueInput = Prisma.AtLeast<{
   origin?: Prisma.EnumDecisionOriginFilter<"Decision"> | $Enums.DecisionOrigin
   scenario?: Prisma.StringFilter<"Decision"> | string
   duration?: Prisma.StringFilter<"Decision"> | string
+  scope?: Prisma.StringFilter<"Decision"> | string
+  simulated?: Prisma.BoolFilter<"Decision"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Decision"> | Date | string
   expiresAt?: Prisma.DateTimeNullableFilter<"Decision"> | Date | string | null
   active?: Prisma.BoolFilter<"Decision"> | boolean
@@ -290,6 +310,8 @@ export type DecisionOrderByWithAggregationInput = {
   origin?: Prisma.SortOrder
   scenario?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  scope?: Prisma.SortOrder
+  simulated?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
@@ -310,6 +332,8 @@ export type DecisionScalarWhereWithAggregatesInput = {
   origin?: Prisma.EnumDecisionOriginWithAggregatesFilter<"Decision"> | $Enums.DecisionOrigin
   scenario?: Prisma.StringWithAggregatesFilter<"Decision"> | string
   duration?: Prisma.StringWithAggregatesFilter<"Decision"> | string
+  scope?: Prisma.StringWithAggregatesFilter<"Decision"> | string
+  simulated?: Prisma.BoolWithAggregatesFilter<"Decision"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Decision"> | Date | string
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Decision"> | Date | string | null
   active?: Prisma.BoolWithAggregatesFilter<"Decision"> | boolean
@@ -321,6 +345,8 @@ export type DecisionCreateInput = {
   origin: $Enums.DecisionOrigin
   scenario: string
   duration: string
+  scope?: string
+  simulated?: boolean
   createdAt?: Date | string
   expiresAt?: Date | string | null
   active?: boolean
@@ -335,6 +361,8 @@ export type DecisionUncheckedCreateInput = {
   origin: $Enums.DecisionOrigin
   scenario: string
   duration: string
+  scope?: string
+  simulated?: boolean
   createdAt?: Date | string
   expiresAt?: Date | string | null
   active?: boolean
@@ -347,6 +375,8 @@ export type DecisionUpdateInput = {
   origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -361,6 +391,8 @@ export type DecisionUncheckedUpdateInput = {
   origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -374,6 +406,8 @@ export type DecisionCreateManyInput = {
   origin: $Enums.DecisionOrigin
   scenario: string
   duration: string
+  scope?: string
+  simulated?: boolean
   createdAt?: Date | string
   expiresAt?: Date | string | null
   active?: boolean
@@ -385,6 +419,8 @@ export type DecisionUpdateManyMutationInput = {
   origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -397,6 +433,8 @@ export type DecisionUncheckedUpdateManyInput = {
   origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -419,6 +457,8 @@ export type DecisionCountOrderByAggregateInput = {
   origin?: Prisma.SortOrder
   scenario?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  scope?: Prisma.SortOrder
+  simulated?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   active?: Prisma.SortOrder
@@ -435,6 +475,8 @@ export type DecisionMaxOrderByAggregateInput = {
   origin?: Prisma.SortOrder
   scenario?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  scope?: Prisma.SortOrder
+  simulated?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   active?: Prisma.SortOrder
@@ -447,6 +489,8 @@ export type DecisionMinOrderByAggregateInput = {
   origin?: Prisma.SortOrder
   scenario?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  scope?: Prisma.SortOrder
+  simulated?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   active?: Prisma.SortOrder
@@ -550,6 +594,8 @@ export type DecisionCreateWithoutHostInput = {
   origin: $Enums.DecisionOrigin
   scenario: string
   duration: string
+  scope?: string
+  simulated?: boolean
   createdAt?: Date | string
   expiresAt?: Date | string | null
   active?: boolean
@@ -562,6 +608,8 @@ export type DecisionUncheckedCreateWithoutHostInput = {
   origin: $Enums.DecisionOrigin
   scenario: string
   duration: string
+  scope?: string
+  simulated?: boolean
   createdAt?: Date | string
   expiresAt?: Date | string | null
   active?: boolean
@@ -603,6 +651,8 @@ export type DecisionScalarWhereInput = {
   origin?: Prisma.EnumDecisionOriginFilter<"Decision"> | $Enums.DecisionOrigin
   scenario?: Prisma.StringFilter<"Decision"> | string
   duration?: Prisma.StringFilter<"Decision"> | string
+  scope?: Prisma.StringFilter<"Decision"> | string
+  simulated?: Prisma.BoolFilter<"Decision"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Decision"> | Date | string
   expiresAt?: Prisma.DateTimeNullableFilter<"Decision"> | Date | string | null
   active?: Prisma.BoolFilter<"Decision"> | boolean
@@ -614,6 +664,8 @@ export type DecisionCreateWithoutAlertsInput = {
   origin: $Enums.DecisionOrigin
   scenario: string
   duration: string
+  scope?: string
+  simulated?: boolean
   createdAt?: Date | string
   expiresAt?: Date | string | null
   active?: boolean
@@ -627,6 +679,8 @@ export type DecisionUncheckedCreateWithoutAlertsInput = {
   origin: $Enums.DecisionOrigin
   scenario: string
   duration: string
+  scope?: string
+  simulated?: boolean
   createdAt?: Date | string
   expiresAt?: Date | string | null
   active?: boolean
@@ -659,6 +713,8 @@ export type DecisionCreateManyHostInput = {
   origin: $Enums.DecisionOrigin
   scenario: string
   duration: string
+  scope?: string
+  simulated?: boolean
   createdAt?: Date | string
   expiresAt?: Date | string | null
   active?: boolean
@@ -670,6 +726,8 @@ export type DecisionUpdateWithoutHostInput = {
   origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -682,6 +740,8 @@ export type DecisionUncheckedUpdateWithoutHostInput = {
   origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -694,6 +754,8 @@ export type DecisionUncheckedUpdateManyWithoutHostInput = {
   origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -705,6 +767,8 @@ export type DecisionUpdateWithoutAlertsInput = {
   origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -718,6 +782,8 @@ export type DecisionUncheckedUpdateWithoutAlertsInput = {
   origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -730,6 +796,8 @@ export type DecisionUncheckedUpdateManyWithoutAlertsInput = {
   origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -773,6 +841,8 @@ export type DecisionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   origin?: boolean
   scenario?: boolean
   duration?: boolean
+  scope?: boolean
+  simulated?: boolean
   createdAt?: boolean
   expiresAt?: boolean
   active?: boolean
@@ -788,6 +858,8 @@ export type DecisionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   origin?: boolean
   scenario?: boolean
   duration?: boolean
+  scope?: boolean
+  simulated?: boolean
   createdAt?: boolean
   expiresAt?: boolean
   active?: boolean
@@ -801,6 +873,8 @@ export type DecisionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   origin?: boolean
   scenario?: boolean
   duration?: boolean
+  scope?: boolean
+  simulated?: boolean
   createdAt?: boolean
   expiresAt?: boolean
   active?: boolean
@@ -814,12 +888,14 @@ export type DecisionSelectScalar = {
   origin?: boolean
   scenario?: boolean
   duration?: boolean
+  scope?: boolean
+  simulated?: boolean
   createdAt?: boolean
   expiresAt?: boolean
   active?: boolean
 }
 
-export type DecisionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "hostIp" | "type" | "origin" | "scenario" | "duration" | "createdAt" | "expiresAt" | "active", ExtArgs["result"]["decision"]>
+export type DecisionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "hostIp" | "type" | "origin" | "scenario" | "duration" | "scope" | "simulated" | "createdAt" | "expiresAt" | "active", ExtArgs["result"]["decision"]>
 export type DecisionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   host?: boolean | Prisma.HostDefaultArgs<ExtArgs>
   alerts?: boolean | Prisma.Decision$alertsArgs<ExtArgs>
@@ -845,6 +921,8 @@ export type $DecisionPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     origin: $Enums.DecisionOrigin
     scenario: string
     duration: string
+    scope: string
+    simulated: boolean
     createdAt: Date
     expiresAt: Date | null
     active: boolean
@@ -1279,6 +1357,8 @@ export interface DecisionFieldRefs {
   readonly origin: Prisma.FieldRef<"Decision", 'DecisionOrigin'>
   readonly scenario: Prisma.FieldRef<"Decision", 'String'>
   readonly duration: Prisma.FieldRef<"Decision", 'String'>
+  readonly scope: Prisma.FieldRef<"Decision", 'String'>
+  readonly simulated: Prisma.FieldRef<"Decision", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Decision", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"Decision", 'DateTime'>
   readonly active: Prisma.FieldRef<"Decision", 'Boolean'>

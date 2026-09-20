@@ -10,6 +10,8 @@ export const DecisionModelSchema = z.object({
     origin: DecisionOriginSchema,
     scenario: z.string(),
     duration: z.string(),
+    scope: z.string(),
+    simulated: z.boolean(),
     createdAt: z.date(),
     expiresAt: z.date().nullable(),
     active: z.boolean(),

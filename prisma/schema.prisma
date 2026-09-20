@@ -111,6 +111,8 @@ model Decision {
   origin     DecisionOrigin  // crowdsec, cscli
   scenario   String
   duration   String   // original duration (e.g. "4h")
+  scope      String   @default("Ip")    // Ip, Range, Country
+  simulated  Boolean  @default(false)  // reported by LAPI, enforced by nobody
   createdAt  DateTime @default(now())
   expiresAt  DateTime? // calculated: createdAt + duration
   active     Boolean  @default(true)
@@ -128,6 +130,11 @@ model Alert {
   createdAt   DateTime
   entries     String         @default("[]") // JSON string[] of event highlights
   entryType   AlertEntryType @default(none) // discriminates what entries[] contains
+
+  // Attack window: tells a burst scanner from a slow crawler
+  startAt     DateTime?
+  stopAt      DateTime?
+  eventsCount Int? // LAPI's count, can exceed events[]
 
   // Link to Host
   hostIp      String

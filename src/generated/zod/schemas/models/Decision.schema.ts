@@ -9,6 +9,8 @@ export const DecisionSchema = z.object({
   origin: DecisionOriginSchema,
   scenario: z.string(),
   duration: z.string(),
+  scope: z.string().default("Ip"),
+  simulated: z.boolean(),
   createdAt: z.date(),
   expiresAt: z.date().nullish(),
   active: z.boolean().default(true),

@@ -61,6 +61,10 @@ export const getDecisionAlertsFn = createServerFn({ method: "GET" })
 			scenario: alert.scenario,
 			message: alert.message,
 			createdAt: alert.createdAt,
+			startAt: alert.startAt,
+			stopAt: alert.stopAt,
+			/** LAPI's count, which can exceed the events it actually returned. */
+			eventsCount: alert.eventsCount,
 			entries: JSON.parse(alert.entries) as string[],
 			entryType: alert.entryType,
 			events: (JSON.parse(alert.events) as AlertEventRaw[]).map(

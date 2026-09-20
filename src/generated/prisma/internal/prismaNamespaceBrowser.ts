@@ -157,6 +157,8 @@ export const DecisionScalarFieldEnum = {
   origin: 'origin',
   scenario: 'scenario',
   duration: 'duration',
+  scope: 'scope',
+  simulated: 'simulated',
   createdAt: 'createdAt',
   expiresAt: 'expiresAt',
   active: 'active'
@@ -172,6 +174,9 @@ export const AlertScalarFieldEnum = {
   createdAt: 'createdAt',
   entries: 'entries',
   entryType: 'entryType',
+  startAt: 'startAt',
+  stopAt: 'stopAt',
+  eventsCount: 'eventsCount',
   hostIp: 'hostIp',
   events: 'events'
 } as const
