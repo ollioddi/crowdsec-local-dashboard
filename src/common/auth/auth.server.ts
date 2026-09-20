@@ -36,6 +36,10 @@ const oidcConfig: GenericOAuthConfig[] =
 			]
 		: [];
 
+// Fixed at startup, so it cannot follow the request. Better Auth's own default
+// keys off NODE_ENV, which breaks plain-HTTP access.
+const useSecureCookies = env.BETTER_AUTH_URL?.startsWith("https://") ?? false;
+
 export const auth = betterAuth({
 	// baseURL is intentionally omitted: Better Auth reads BETTER_AUTH_URL from
 	// process.env directly, and falls back to inferring from the request origin.
@@ -47,6 +51,7 @@ export const auth = betterAuth({
 		// The dashboard runs behind a reverse proxy; without this the origin
 		// check compares against the container's own URL and rejects logins.
 		trustedProxyHeaders: true,
+		useSecureCookies,
 	},
 	emailAndPassword: {
 		enabled: true,
@@ -78,3 +83,17 @@ export const auth = betterAuth({
 });
 
 export type Session = typeof auth.$Infer.Session;
+
+let warnedAboutSecureCookies = false;
+
+/** Warns once when an HTTPS deployment is missing the Secure cookie flag. */
+export const warnIfCookieNotSecure = (headers: Headers) => {
+	if (warnedAboutSecureCookies || useSecureCookies) return;
+	if (headers.get("x-forwarded-proto") !== "https") return;
+	warnedAboutSecureCookies = true;
+	const host = headers.get("x-forwarded-host") ?? headers.get("host");
+	log.warn(
+		"Served over HTTPS but BETTER_AUTH_URL is unset, so the session cookie is not marked Secure. Set BETTER_AUTH_URL={suggestion} to harden it.",
+		{ suggestion: host ? `https://${host}` : "https://your-dashboard-host" },
+	);
+};

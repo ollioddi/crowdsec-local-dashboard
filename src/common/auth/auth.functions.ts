@@ -18,8 +18,11 @@ export const loginSchema = z.object({
  */
 export const getSessionFn = createServerFn({ method: "GET" }).handler(
 	async (): Promise<Session | null> => {
-		const { auth } = await import("@/common/auth/auth.server");
+		const { auth, warnIfCookieNotSecure } = await import(
+			"@/common/auth/auth.server"
+		);
 		const headers = getRequestHeaders();
+		warnIfCookieNotSecure(headers);
 		const session = await auth.api.getSession({ headers });
 		return session;
 	},

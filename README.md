@@ -146,7 +146,7 @@ Refer to the sample `.env.example` file for guidance on setting these environmen
 |---|---|---|---|
 | `DATABASE_URL` | | `file:/data/app.db` | SQLite path. Defaults to the persistent volume - no need to change. |
 | `BETTER_AUTH_SECRET` | | _(generated)_ | Secret used to sign sessions. The container generates one on first start and keeps it in the volume at `/data/auth-secret`. Set it to choose your own, and always set it for `pnpm dev`. Generate with `openssl rand -base64 32`. |
-| `BETTER_AUTH_URL` | | _(inferred from the proxy headers)_ | The public URL of the dashboard, e.g. `https://dashboard.example.com`. Set it if your reverse proxy does not send `X-Forwarded-Host` and `X-Forwarded-Proto`, or if logins fail with "Invalid origin". |
+| `BETTER_AUTH_URL` | | _(inferred from the proxy headers)_ | The public URL of the dashboard, e.g. `https://dashboard.example.com`. Leave it unset for plain HTTP at `http://<host>:3000`. Set it when you serve over HTTPS, so the session cookie is marked `Secure` - the flag is picked at startup, so without this it stays unmarked even behind an HTTPS proxy, and the dashboard warns when it notices. Also set it if logins fail with "Invalid origin". |
 | `LAPI_URL` | Yes | | CrowdSec LAPI base URL including port, e.g. `http://192.168.1.100:8080`. |
 | `LAPI_MACHINE_ID` | Yes | | Machine ID for watcher authentication. |
 | `LAPI_MACHINE_PASSWORD` | Yes | | Machine password for watcher authentication. |
