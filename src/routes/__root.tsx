@@ -8,12 +8,16 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { useEffect } from "react";
 import { APP_NAME } from "@/common/lib/version";
 import appCss from "../styles.css?url";
 
 interface MyRouterContext {
 	queryClient: QueryClient;
 }
+
+/** Pre-paint theme-color. ThemeProvider swaps in the exact token on hydration. */
+const THEME_COLORS = { light: "#ffffff", dark: "#1a1a1a" } as const;
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
 	head: () => ({
@@ -22,9 +26,20 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				charSet: "utf-8",
 			},
 			{
+				// viewport-fit=cover paints into the notch; safe-area insets pad it back
 				name: "viewport",
-				content: "width=device-width, initial-scale=1",
+				content: "width=device-width, initial-scale=1, viewport-fit=cover",
 			},
+			{ name: "application-name", content: "CrowdSec Local Dashboard" },
+			{ name: "apple-mobile-web-app-capable", content: "yes" },
+			{ name: "apple-mobile-web-app-title", content: "CrowdSec" },
+			{
+				name: "apple-mobile-web-app-status-bar-style",
+				content: "black-translucent",
+			},
+			{ name: "mobile-web-app-capable", content: "yes" },
+			// One tag: head management dedupes by name. Set by the inline script.
+			{ name: "theme-color", content: THEME_COLORS.dark },
 			{
 				title: APP_NAME,
 			},
@@ -70,6 +85,30 @@ function NotFound() {
 	);
 }
 
+/** Production only: in dev the worker would serve stale Vite chunks. */
+function ServiceWorker() {
+	useEffect(() => {
+		if (!("serviceWorker" in navigator)) return;
+
+		if (import.meta.env.PROD) {
+			navigator.serviceWorker.register("/sw.js").catch(() => {
+				// A worker that fails to register only costs offline support
+			});
+			return;
+		}
+
+		// Running a production build once on the dev port leaves a worker behind
+		// that keeps intercepting `pnpm dev` on that origin.
+		navigator.serviceWorker.getRegistrations().then(async (registrations) => {
+			for (const registration of registrations) await registration.unregister();
+			if (registrations.length > 0 && "caches" in globalThis) {
+				for (const key of await caches.keys()) await caches.delete(key);
+			}
+		});
+	}, []);
+	return null;
+}
+
 function RootDocument({ children }: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
@@ -78,15 +117,19 @@ function RootDocument({ children }: Readonly<{ children: React.ReactNode }>) {
 				{/* Inline script to set initial theme class before React hydration to prevent flash */}
 				<script>
 					{`(function(){
-				const theme = localStorage.getItem('content-admin-ui-theme');
+				const theme = localStorage.getItem('crowdsec-dashboard-theme');
 				const documentElement = document.documentElement;
 				const prefersDark = matchMedia('(prefers-color-scheme:dark)').matches;
-				if (theme === 'dark' || ((!theme || theme === 'system') && prefersDark)) documentElement.classList.add('dark');
-				else documentElement.classList.add('light');
+				const dark = theme === 'dark' || ((!theme || theme === 'system') && prefersDark);
+				documentElement.classList.add(dark ? 'dark' : 'light');
+				documentElement.style.colorScheme = dark ? 'dark' : 'light';
+				const meta = document.querySelector('meta[name="theme-color"]');
+				if (meta) meta.content = dark ? '${THEME_COLORS.dark}' : '${THEME_COLORS.light}';
 				})();`}
 				</script>
 			</head>
 			<body>
+				<ServiceWorker />
 				{children}
 				<TanStackDevtools
 					config={{

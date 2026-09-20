@@ -1,60 +1,50 @@
 {
-  "name": "Crowdsec Dashboard",
-  "short_name": "CS Dashboard",
+  "id": "/",
+  "name": "CrowdSec Local Dashboard",
+  "short_name": "CrowdSec",
+  "description": "View and manage the decisions your CrowdSec instance is enforcing.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/decisions",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "categories": ["security", "utilities"],
   "icons": [
+    { "src": "icons/icon-48x48.png", "sizes": "48x48", "type": "image/png" },
+    { "src": "icons/icon-72x72.png", "sizes": "72x72", "type": "image/png" },
+    { "src": "icons/icon-96x96.png", "sizes": "96x96", "type": "image/png" },
+    { "src": "icons/icon-128x128.png", "sizes": "128x128", "type": "image/png" },
+    { "src": "icons/icon-144x144.png", "sizes": "144x144", "type": "image/png" },
+    { "src": "icons/icon-152x152.png", "sizes": "152x152", "type": "image/png" },
+    { "src": "icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-256x256.png", "sizes": "256x256", "type": "image/png" },
+    { "src": "icons/icon-384x384.png", "sizes": "384x384", "type": "image/png" },
+    { "src": "icons/icon-512x512.png", "sizes": "512x512", "type": "image/png" },
     {
-      "src": "icons/icon-48x48.png",
-      "sizes": "48x48",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-256x256.png",
-      "sizes": "256x256",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-512x512.png",
+      "src": "icons/maskable-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000"
+  "shortcuts": [
+    {
+      "name": "Decisions",
+      "short_name": "Decisions",
+      "description": "Everything CrowdSec is currently enforcing",
+      "url": "/decisions?filters=%7B%22status%22%3A%7B%22operator%22%3A%22isAnyOf%22%2C%22value%22%3A%5B%22Active%22%5D%7D%7D",
+      "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Hosts",
+      "short_name": "Hosts",
+      "description": "Every IP CrowdSec has seen",
+      "url": "/hosts",
+      "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
 }

@@ -21,13 +21,24 @@
   --animate-gradient-flow: gradient-flow 10s ease 0s infinite normal none running;
 }
 
+html {
+  /* The shell is a fixed-height viewport; only the table body scrolls, so the
+     page cannot rubber-band and reveal the browser toolbars in standalone. */
+  height: 100%;
+  overscroll-behavior-y: none;
+}
+
 body {
   @apply m-0;
+  height: 100%;
+  overscroll-behavior-y: none;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Grey flash on tap is the clearest "this is a web page" tell */
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Tailwind v4 preflight drops the pointer cursor on buttons. */
@@ -37,6 +48,24 @@ summary,
 label:has(input[type='checkbox']),
 label:has(input[type='radio']) {
   cursor: pointer;
+}
+
+/* Navigation and controls should not be selectable on long-press; data still
+   is, because copying an IP out of a row matters. */
+@media (pointer: coarse) {
+  button,
+  [role='button'],
+  [data-slot='sidebar-menu-button'],
+  th {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+/* Momentum scrolling inside the table body rather than the document */
+[data-scroll-container] {
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Overlay-style scrollbars: the native ones sit hard against the content and
@@ -74,11 +103,6 @@ label:has(input[type='radio']) {
   display: none;
   width: 0;
   height: 0;
-}
-
-code {
-  font-family:
-    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
 code {

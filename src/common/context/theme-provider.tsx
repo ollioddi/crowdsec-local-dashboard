@@ -55,17 +55,16 @@ export function ThemeProvider({
 
 		root.classList.remove("light", "dark");
 
-		if (theme === "system") {
-			const systemTheme = globalThis.matchMedia("(prefers-color-scheme: dark)")
-				.matches
-				? "dark"
-				: "light";
+		const resolved =
+			theme === "system"
+				? globalThis.matchMedia("(prefers-color-scheme: dark)").matches
+					? "dark"
+					: "light"
+				: theme;
 
-			root.classList.add(systemTheme);
-			return;
-		}
-
-		root.classList.add(theme);
+		root.classList.add(resolved);
+		// Installed PWAs paint their status and title bars from this
+		syncThemeColor(resolved);
 	}, [theme]);
 
 	const value = useMemo(
@@ -86,6 +85,19 @@ export function ThemeProvider({
 			{children}
 		</ThemeProviderContext.Provider>
 	);
+}
+
+/** Keeps theme-color in step so an installed app's status bar matches. */
+function syncThemeColor(resolved: "dark" | "light") {
+	const color = getComputedStyle(document.documentElement)
+		.getPropertyValue("--background")
+		.trim();
+	if (!color) return;
+	const meta = document.querySelector<HTMLMetaElement>(
+		'meta[name="theme-color"]',
+	);
+	if (meta) meta.content = color;
+	document.documentElement.style.colorScheme = resolved;
 }
 
 // ============ Hook ============
