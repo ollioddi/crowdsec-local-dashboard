@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DataTable } from "@/common/components/data-table/data-table";
 import type { DataTableRow } from "@/common/components/data-table/table-features";
 import { LiveIndicator } from "@/common/components/live-indicator";
+import { PageHeader } from "@/common/components/page-header";
 import { useSSEConnection } from "@/common/hooks/use-sse-connection";
 import { useTitle } from "@/common/hooks/use-title";
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/features/decisions/api/decisions.types";
 import { createColumns } from "@/features/decisions/components/columns";
 import { DecisionExpandedRow } from "@/features/decisions/components/decision-expanded-row";
+import { DeleteDecisionDialog } from "@/features/decisions/components/delete-decision-dialog";
 
 export const decisionsQueryOptions = {
 	queryKey: ["decisions"],
@@ -29,7 +31,11 @@ export function DecisionsPage() {
 	const queryClient = useQueryClient();
 	const search = useSearch({ from: "/_app/decisions" });
 	const navigate = useNavigate({ from: "/decisions" });
-	const { data } = useQuery(decisionsQueryOptions);
+	const { data, dataUpdatedAt } = useQuery(decisionsQueryOptions);
+	const [pendingDelete, setPendingDelete] = useState<DecisionWithHost | null>(
+		null,
+	);
+
 	// Hosts arrive as a lookup; every row for an IP shares one host object
 	const decisions = useMemo(() => joinDecisionHosts(data), [data]);
 	useTitle(`Decisions (${decisions.length})`);
@@ -95,19 +101,24 @@ export function DecisionsPage() {
 		},
 	});
 
-	const handleDelete = (id: number, collapse?: () => void) => {
-		deleteDecision(id, { onSuccess: () => collapse?.() });
-	};
 	const deletingId = isPending ? variables : undefined;
 
+	const activeCount = decisions.filter((d) => d.active).length;
+
 	return (
-		<div className="container mx-auto py-6 px-4">
-			<div className="mb-6">
-				<h1 className="text-2xl font-bold tracking-tight">Decisions</h1>
-				<p className="text-muted-foreground">{decisions.length} decisions</p>
-			</div>
+		<div className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4 sm:px-6">
+			<PageHeader
+				title="Decisions"
+				summary={[
+					{ label: "active", value: activeCount, highlight: true },
+					{ label: "total", value: decisions.length },
+				]}
+				actions={
+					<LiveIndicator connected={connected} updatedAt={dataUpdatedAt} />
+				}
+			/>
 			<DataTable
-				columns={createColumns(handleDelete, deletingId)}
+				columns={createColumns(setPendingDelete, deletingId)}
 				data={decisions}
 				search={search}
 				navigate={navigate}
@@ -117,11 +128,18 @@ export function DecisionsPage() {
 				renderSubComponent={(row: DataTableRow<DecisionWithHost>) => (
 					<DecisionExpandedRow
 						row={row}
-						onDelete={handleDelete}
+						onRequestDelete={setPendingDelete}
 						deletingId={deletingId}
 					/>
 				)}
-				toolbarExtra={<LiveIndicator connected={connected} />}
+			/>
+			<DeleteDecisionDialog
+				decision={pendingDelete}
+				onOpenChange={(open) => !open && setPendingDelete(null)}
+				onConfirm={(decision) => {
+					setPendingDelete(null);
+					deleteDecision(decision.id);
+				}}
 			/>
 		</div>
 	);

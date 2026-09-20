@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, Loader2, Trash2 } from "lucide-react";
+import { ExternalLink, Info, Loader2, Trash2 } from "lucide-react";
 import moment from "moment";
 import type { ReactNode } from "react";
 import type { DataTableRow } from "@/common/components/data-table/table-features";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
 import { Skeleton } from "@/common/components/ui/skeleton";
-import { countryFlag } from "@/common/lib/country-flag";
+import { countryFlag, countryName } from "@/common/lib/country-flag";
 import {
 	type DecisionAlertDetail,
 	getDecisionAlertsFn,
@@ -45,30 +45,99 @@ function Field({
 }: Readonly<{ label: string; children: ReactNode }>) {
 	return (
 		<div className="min-w-0">
-			<p className="mb-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+			<p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
 				{label}
 			</p>
-			<span className="break-all text-sm">{children}</span>
+			<span className="break-words text-sm">{children}</span>
 		</div>
 	);
 }
 
+/** Rounds to the unit the value was almost certainly expressed in. */
+function formatSpan(ms: number): string {
+	const seconds = Math.round(ms / 1000);
+	if (seconds < 60) return `${seconds}s`;
+	const minutes = Math.round(ms / 60_000);
+	if (minutes % 1440 === 0) return `${minutes / 1440}d`;
+	if (minutes % 60 === 0) return `${minutes / 60}h`;
+	const hours = Math.floor(minutes / 60);
+	return hours > 0 ? `${hours}h ${minutes % 60}m` : `${minutes}m`;
+}
+
+/** Whole units in words, since a configured ban is read, not scanned. */
+function humanSpan(ms: number): string {
+	const plural = (n: number, unit: string) =>
+		`${n} ${unit}${n === 1 ? "" : "s"}`;
+	const minutes = Math.round(ms / 60_000);
+	if (minutes % 1440 === 0) return plural(minutes / 1440, "day");
+	if (minutes % 60 === 0) return plural(minutes / 60, "hour");
+	if (minutes < 60) return plural(minutes, "minute");
+	return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+}
+
+/**
+ * LAPI only ever reports time remaining, on both the stream and the alerts
+ * endpoint, so the decided length is the span from the triggering alert to the
+ * expiry. Unknowable for a decision with no linked alert.
+ */
+function banLength(
+	decision: DecisionWithHost,
+	alerts: DecisionAlertDetail[],
+): string | null {
+	if (!decision.expiresAt || alerts.length === 0) return null;
+	const start = Math.min(
+		...alerts.map((alert) => new Date(alert.createdAt).getTime()),
+	);
+	const ms = new Date(decision.expiresAt).getTime() - start;
+	return ms > 0 ? humanSpan(ms) : null;
+}
+
+/** How long the attack ran: burst scanner versus slow crawler. */
+function attackSpan(alert: DecisionAlertDetail): string | null {
+	if (!alert.startAt || !alert.stopAt) return null;
+	const start = moment(alert.startAt);
+	const stop = moment(alert.stopAt);
+	if (!start.isValid() || !stop.isValid()) return null;
+	const ms = stop.diff(start);
+	if (ms < 0) return null;
+	if (ms < 1000) return "in under a second";
+	return `over ${formatSpan(ms)}`;
+}
+
+/** User agents behind an alert. */
+function userAgents(alert: DecisionAlertDetail): string[] {
+	const seen = new Set<string>();
+	for (const event of alert.events) {
+		if (event.eventType === "http" && event.httpUserAgent) {
+			seen.add(event.httpUserAgent);
+		}
+	}
+	return [...seen];
+}
+
 function AlertEvidence({ alert }: Readonly<{ alert: DecisionAlertDetail }>) {
 	const firstEvent = alert.events[0];
+	const agents = userAgents(alert);
+	const span = attackSpan(alert);
+	// LAPI's own count can exceed the events it actually returned
+	const count = alert.eventsCount ?? alert.events.length;
 
 	return (
-		<div className="space-y-2">
-			<div className="flex items-center gap-2">
+		<div className="space-y-2 rounded-lg border bg-muted/20 p-2.5">
+			<div className="flex flex-wrap items-center gap-x-2 gap-y-1">
 				<span className="text-xs font-semibold">
 					{shortScenario(alert.scenario)}
 				</span>
 				<span className="text-xs text-muted-foreground">
-					· {alert.events.length} event{alert.events.length === 1 ? "" : "s"}
+					{count} event{count === 1 ? "" : "s"}
+					{span && ` ${span}`}
+					{" · "}
+					{moment(alert.createdAt).format("DD/MM HH:mm")}
 				</span>
 			</div>
 
-			{alert.entryType === "paths" && alert.entries.length > 0 && (
-				<div className="max-h-48 space-y-0.5 overflow-y-auto rounded border p-1">
+			{alert.entryType === "paths" && (
+				<div className="max-h-48 space-y-0.5 overflow-y-auto overscroll-contain rounded border bg-background p-1">
 					{alert.events
 						.filter((e) => e.eventType === "http")
 						.map((event, idx) => (
@@ -103,20 +172,24 @@ function AlertEvidence({ alert }: Readonly<{ alert: DecisionAlertDetail }>) {
 			)}
 
 			{alert.entryType === "ports" && (
-				<div className="space-y-1.5 rounded border p-2 text-xs">
-					<p className="font-medium text-muted-foreground">
-						{alert.events.length} dropped connection
-						{alert.events.length === 1 ? "" : "s"}
-						{firstEvent?.eventType === "firewall_pf" &&
-							firstEvent.pfMachine &&
-							` · ${firstEvent.pfMachine}`}
+				<div className="space-y-1.5 text-xs">
+					<p className="text-muted-foreground">
+						{count} dropped connection{count === 1 ? "" : "s"}
+						{firstEvent?.eventType === "firewall_pf" && (
+							<>
+								{firstEvent.pfMachine && ` · ${firstEvent.pfMachine}`}
+								{firstEvent.pfInterface && ` · ${firstEvent.pfInterface}`}
+								{firstEvent.pfRuleNumber &&
+									` · rule ${firstEvent.pfRuleNumber}`}
+							</>
+						)}
 					</p>
 					{alert.entries.length > 0 && (
 						<div className="flex flex-wrap gap-1">
 							{alert.entries.map((port) => (
 								<span
 									key={port}
-									className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]"
+									className="rounded bg-background px-1.5 py-0.5 font-mono text-[11px]"
 								>
 									{port}
 								</span>
@@ -127,30 +200,54 @@ function AlertEvidence({ alert }: Readonly<{ alert: DecisionAlertDetail }>) {
 			)}
 
 			{alert.entryType === "usernames" && alert.entries.length > 0 && (
-				<div className="max-h-32 space-y-0.5 overflow-y-auto rounded border p-1">
+				<div className="flex flex-wrap gap-1">
 					{alert.entries.map((user) => (
-						<div
+						<span
 							key={user}
-							className="flex items-center gap-2 px-1 py-0.5 text-xs"
+							className="rounded bg-background px-1.5 py-0.5 font-mono text-[11px]"
 						>
-							<span className="font-mono">{user}</span>
-						</div>
+							{user}
+						</span>
 					))}
 				</div>
+			)}
+
+			{agents.length > 0 && (
+				<p
+					className="truncate font-mono text-[11px] text-muted-foreground"
+					title={agents.join("\n")}
+				>
+					UA: {agents[0]}
+					{agents.length > 1 && ` +${agents.length - 1} more`}
+				</p>
 			)}
 		</div>
 	);
 }
 
+/** Blank space does not explain why there is no evidence. */
+function NoEvidence() {
+	return (
+		<p className="flex items-start gap-2 rounded-lg border border-dashed p-2.5 text-xs text-muted-foreground">
+			<Info className="mt-0.5 size-3.5 shrink-0" />
+			<span>
+				No alert evidence stored for this decision. CrowdSec keeps the
+				triggering log lines only for a limited window, and decisions from
+				blocklists or <code className="font-mono">cscli</code> never have any.
+			</span>
+		</p>
+	);
+}
+
 interface DecisionExpandedRowProps {
 	row: DataTableRow<DecisionWithHost>;
-	onDelete: (id: number, collapse?: () => void) => void;
+	onRequestDelete: (decision: DecisionWithHost) => void;
 	deletingId: number | undefined;
 }
 
 export function DecisionExpandedRow({
 	row,
-	onDelete,
+	onRequestDelete,
 	deletingId,
 }: Readonly<DecisionExpandedRowProps>) {
 	const decision = row.original;
@@ -164,80 +261,89 @@ export function DecisionExpandedRow({
 		staleTime: Infinity,
 	});
 
+	const length = banLength(decision, alerts);
+
 	return (
-		<div className="relative space-y-4 px-1 py-2">
+		<div className="relative space-y-3">
 			{isDeleting && (
 				<div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-[2px]">
 					<div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
 						<Loader2 className="size-4 animate-spin" />
-						<span>Deleting decision…</span>
+						<span>Removing decision…</span>
 					</div>
 				</div>
 			)}
 
-			<div className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-lg border bg-muted/30 p-3 sm:grid-cols-4">
-				<Field label="Location">
-					{host.country ? `${countryFlag(host.country)} ${host.country}` : "—"}
-				</Field>
-				<Field label="AS name">{host.asName ?? "—"}</Field>
-				<Field label="AS number">{host.asNumber ?? "—"}</Field>
-				<Field label="Created">
-					{moment(decision.createdAt).format("DD/MM/YYYY HH:mm")}
-				</Field>
-			</div>
+			{/* Evidence first: it is the reason the row was expanded */}
+			{isLoading ? (
+				<div className="space-y-2">
+					<Skeleton className="h-4 w-32" />
+					<Skeleton className="h-16 w-full" />
+				</div>
+			) : alerts.length > 0 ? (
+				<div className="space-y-2">
+					{alerts.map((alert) => (
+						<AlertEvidence key={alert.id} alert={alert} />
+					))}
+				</div>
+			) : (
+				<NoEvidence />
+			)}
 
-			<div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
-				<Field label="Scenario">{decision.scenario}</Field>
-				<Field label="Origin">
-					<Badge variant="outline">{decision.origin}</Badge>
-				</Field>
-				<Field label="Duration">{decision.duration}</Field>
-				<Field label="Expires">
-					{decision.expiresAt
-						? moment(decision.expiresAt).format("DD/MM/YYYY HH:mm")
+			{/* Only what the row or card does not already show */}
+			<div className="grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)_minmax(0,auto)]">
+				<Field label="Location">
+					{host.country
+						? `${countryFlag(host.country)} ${countryName(host.country)}`
 						: "—"}
 				</Field>
-			</div>
-
-			{(decision.alertCount ?? 0) > 0 && (
-				<div className="space-y-3">
-					<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-						Alert evidence
-					</p>
-					{isLoading ? (
-						<div className="space-y-2">
-							<Skeleton className="h-4 w-32" />
-							<Skeleton className="h-4 w-24" />
-							<Skeleton className="h-16 w-full" />
-						</div>
-					) : (
-						alerts.map((alert) => (
-							<AlertEvidence key={alert.id} alert={alert} />
-						))
+				<Field label="Network">
+					{host.asName ?? "—"}
+					{host.asNumber && (
+						<span className="whitespace-nowrap text-muted-foreground">
+							{" · "}AS{host.asNumber}
+						</span>
 					)}
-				</div>
-			)}
+				</Field>
+				<Field label="First seen">
+					{moment(decision.createdAt).format("DD/MM/YYYY HH:mm")}
+				</Field>
+				<Field label="Ban duration">
+					<span className="flex items-center gap-1.5">
+						<span
+							title={
+								length === null
+									? "No linked alert, so the decided length is unknown"
+									: undefined
+							}
+						>
+							{length ?? "—"}
+						</span>
+						<Badge variant="outline" className="px-1 py-0 text-[10px]">
+							{decision.origin}
+						</Badge>
+					</span>
+				</Field>
+			</div>
 
 			<div className="flex gap-2">
 				{decision.active && (
 					<Button
 						variant="destructive"
 						size="sm"
-						className="flex-1 sm:flex-none"
+						className="h-10 flex-1 sm:h-8 sm:flex-none"
 						icon={Trash2}
 						iconPlacement="left"
 						loading={isDeleting}
-						onClick={() =>
-							onDelete(decision.id, () => row.toggleExpanded(false))
-						}
+						onClick={() => onRequestDelete(decision)}
 					>
-						{isDeleting ? "Deleting…" : "Delete decision"}
+						Remove decision
 					</Button>
 				)}
 				<Button
 					variant="outline"
 					size="sm"
-					className="flex-1 sm:flex-none"
+					className="h-10 flex-1 sm:h-8 sm:flex-none"
 					asChild
 				>
 					<a

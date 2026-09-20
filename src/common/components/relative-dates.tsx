@@ -6,12 +6,12 @@ interface RelativeTimeProps {
 	date: string | Date | null | undefined;
 	/** Text shown when date is null/undefined. Defaults to "-" */
 	fallback?: string;
-	/** moment format string for the formatted date. Defaults to "DD/MM/YYYY HH:mm" */
+	/** moment format string for the exact date. Defaults to "DD/MM/YYYY HH:mm" */
 	format?: string;
 }
 
 /**
- * Renders a formatted date with a live-updating relative time string below it.
+ * Renders the exact timestamp with a live-updating relative time under it.
  *
  * @example
  * 11/02/2026 14:30
@@ -29,9 +29,9 @@ export function RelativeTime({
 	}
 
 	return (
-		<div className="flex flex-col">
-			<span className="text-sm font-medium">{moment(date).format(format)}</span>
-			<span className="text-sm text-muted-foreground">{relative}</span>
-		</div>
+		<span className="flex flex-col leading-tight">
+			<span className="text-sm">{moment(date).format(format)}</span>
+			<span className="text-xs text-muted-foreground">{relative}</span>
+		</span>
 	);
 }

@@ -28,6 +28,15 @@ const getServerSnapshot = () => "";
 
 type Snapshot = { version: number; time: number | null; value: string };
 
+/** "a few seconds ago" hides whether a live stream is still ticking. */
+function format(time: number, precise: boolean): string {
+	if (precise) {
+		const seconds = Math.max(0, Math.round((Date.now() - time) / 1000));
+		if (seconds < 60) return `${seconds}s ago`;
+	}
+	return moment(time).fromNow();
+}
+
 /**
  * A live "2 minutes ago" string. The snapshot must be cached per tick:
  * useSyncExternalStore re-reads it after commit, and recomputing from the clock
@@ -35,7 +44,9 @@ type Snapshot = { version: number; time: number | null; value: string };
  */
 export function useRelativeTime(
 	date: string | Date | null | undefined,
+	options?: { precise?: boolean },
 ): string {
+	const precise = options?.precise ?? false;
 	const time = date ? new Date(date).getTime() : null;
 	const cache = useRef<Snapshot>({ version: -1, time: null, value: "" });
 
@@ -44,11 +55,11 @@ export function useRelativeTime(
 			cache.current = {
 				version: tickVersion,
 				time,
-				value: time === null ? "" : moment(time).fromNow(),
+				value: time === null ? "" : format(time, precise),
 			};
 		}
 		return cache.current.value;
-	}, [time]);
+	}, [time, precise]);
 
 	return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

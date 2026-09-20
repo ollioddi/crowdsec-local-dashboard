@@ -3,6 +3,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { DataTable } from "@/common/components/data-table/data-table";
 import { LiveIndicator } from "@/common/components/live-indicator";
+import { PageHeader } from "@/common/components/page-header";
 import { useSSEConnection } from "@/common/hooks/use-sse-connection";
 import { useTitle } from "@/common/hooks/use-title";
 import {
@@ -22,7 +23,7 @@ export function HostsPage() {
 	const queryClient = useQueryClient();
 	const search = useSearch({ from: "/_app/hosts" });
 	const navigate = useNavigate({ from: "/hosts" });
-	const { data: hosts = [] } = useQuery(hostsQueryOptions);
+	const { data: hosts = [], dataUpdatedAt } = useQuery(hostsQueryOptions);
 	useTitle(`Hosts (${hosts.length})`);
 
 	const connected = useSSEConnection<HostWithCount[]>(
@@ -42,14 +43,22 @@ export function HostsPage() {
 		},
 	);
 
+	const bannedNow = hosts.filter((h) => h._count.decisions > 0).length;
+	const repeatOffenders = hosts.filter((h) => h.totalBans > 1).length;
+
 	return (
-		<div className="container mx-auto py-6 px-4">
-			<div className="mb-6">
-				<h1 className="text-2xl font-bold tracking-tight">Hosts</h1>
-				<p className="text-muted-foreground">
-					Discovered hosts ({hosts.length})
-				</p>
-			</div>
+		<div className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4 sm:px-6">
+			<PageHeader
+				title="Hosts"
+				summary={[
+					{ label: "banned now", value: bannedNow, highlight: true },
+					{ label: "repeat offenders", value: repeatOffenders },
+					{ label: "seen", value: hosts.length },
+				]}
+				actions={
+					<LiveIndicator connected={connected} updatedAt={dataUpdatedAt} />
+				}
+			/>
 			<DataTable
 				columns={columns}
 				data={hosts}
@@ -59,7 +68,6 @@ export function HostsPage() {
 				searchPlaceholder="Search IP…"
 				emptyState="No hosts discovered yet."
 				renderSubComponent={(row) => <HostExpandedRow row={row} />}
-				toolbarExtra={<LiveIndicator connected={connected} />}
 			/>
 		</div>
 	);

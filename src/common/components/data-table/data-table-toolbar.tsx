@@ -9,7 +9,6 @@ import {
 	Settings2,
 	X,
 } from "lucide-react";
-import type { ReactNode } from "react";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
 import {
@@ -31,7 +30,6 @@ interface DataTableToolbarProps<TData extends RowData> {
 	searchPlaceholder?: string;
 	showColumnSelector: boolean;
 	onResetFilters: () => void;
-	extra?: ReactNode;
 }
 
 export default function DataTableToolbar<TData extends RowData>({
@@ -39,7 +37,6 @@ export default function DataTableToolbar<TData extends RowData>({
 	searchPlaceholder = "Search…",
 	showColumnSelector,
 	onResetFilters,
-	extra,
 }: Readonly<DataTableToolbarProps<TData>>) {
 	const query = (table.state.globalFilter as string | undefined) ?? "";
 	const columnFilters = table.state.columnFilters;
@@ -84,7 +81,6 @@ export default function DataTableToolbar<TData extends RowData>({
 			<div className="ml-auto flex items-center gap-2">
 				<SortMenu table={table} />
 				{showColumnSelector && <ColumnSelector table={table} />}
-				{extra}
 			</div>
 		</div>
 	);

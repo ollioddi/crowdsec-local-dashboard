@@ -3,6 +3,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useSession } from "@/common/auth/auth-client";
 import { DataTable } from "@/common/components/data-table/data-table";
+import { PageHeader } from "@/common/components/page-header";
 import { useTitle } from "@/common/hooks/use-title";
 import { deleteUserFn, getUsersFn } from "@/features/users/api/users.functions";
 import { createColumns } from "@/features/users/components/columns";
@@ -42,14 +43,12 @@ export function UsersPage() {
 		: undefined;
 
 	return (
-		<div className="container mx-auto py-6 px-4">
-			<div className="mb-6">
-				<h1 className="text-2xl font-bold tracking-tight">Users</h1>
-				<p className="text-muted-foreground">
-					Manage dashboard users ({users.length})
-				</p>
-			</div>
-			<div className="grid gap-6 lg:grid-cols-[1fr_350px]">
+		<div className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4 sm:px-6">
+			<PageHeader
+				title="Users"
+				summary={[{ label: "accounts", value: users.length }]}
+			/>
+			<div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[1fr_350px]">
 				<DataTable
 					columns={createColumns(
 						deleteMutation.mutate,

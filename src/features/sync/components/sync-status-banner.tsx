@@ -1,5 +1,7 @@
-import { TriangleAlert } from "lucide-react";
+import { ChevronDown, TriangleAlert } from "lucide-react";
+import { useState } from "react";
 import { useRelativeTime } from "@/common/hooks/use-relative-time";
+import { cn } from "@/common/lib/utils";
 import type { SyncStatus } from "@/features/sync/api/sync-status.functions";
 
 export function SyncStatusBanner({
@@ -30,8 +32,6 @@ export function SyncStatusBanner({
 		);
 	}
 
-	// Decisions keep syncing without watcher credentials, but every expanded row
-	// is empty and no host gets ASN data.
 	if (status.alerts === "unconfigured") {
 		return (
 			<Banner tone="warning" title="Syncing decisions without alert evidence">
@@ -59,6 +59,7 @@ export function SyncStatusBanner({
 	return null;
 }
 
+/** One line by default, detail on tap. */
 function Banner({
 	tone,
 	title,
@@ -68,21 +69,36 @@ function Banner({
 	title: string;
 	children: React.ReactNode;
 }>) {
+	const [open, setOpen] = useState(false);
 	const toneClass =
 		tone === "error"
 			? "border-destructive/40 bg-destructive/10 text-destructive"
 			: "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400";
+
 	return (
 		<div
 			role="status"
 			data-slot="sync-banner"
-			className={`flex items-start gap-3 border-b px-4 py-2 text-sm ${toneClass}`}
+			className={cn("shrink-0 border-b text-sm", toneClass)}
 		>
-			<TriangleAlert className="mt-0.5 size-4 shrink-0" />
-			<div className="flex flex-col gap-0.5">
-				<span className="font-medium">{title}</span>
-				{children}
-			</div>
+			<button
+				type="button"
+				aria-expanded={open}
+				onClick={() => setOpen((value) => !value)}
+				className="flex w-full items-center gap-2 px-4 py-2 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+			>
+				<TriangleAlert className="size-4 shrink-0" />
+				<span className="min-w-0 flex-1 truncate font-medium">{title}</span>
+				<ChevronDown
+					className={cn(
+						"size-4 shrink-0 transition-transform",
+						open && "rotate-180",
+					)}
+				/>
+			</button>
+			{open && (
+				<div className="flex flex-col gap-0.5 px-4 pb-2 pl-10">{children}</div>
+			)}
 		</div>
 	);
 }

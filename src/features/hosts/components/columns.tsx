@@ -5,7 +5,7 @@ import { IPCopyBadge } from "@/common/components/ip-badge";
 import { RelativeTime } from "@/common/components/relative-dates";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
-import { countryFlag } from "@/common/lib/country-flag";
+import { countryFlag, countryName } from "@/common/lib/country-flag";
 import type { HostWithCount } from "@/features/hosts/api/hosts.functions";
 
 /** A host with no active decisions links to its expired ones, not an empty list */
@@ -44,7 +44,7 @@ export const columns: DataTableColumnDef<HostWithCount>[] = [
 		meta: { sortable: true, filter: "text", globalFilter: true, card: "title" },
 		cell: ({ row }) => (
 			<span className="flex items-center gap-2">
-				<span title={row.original.country ?? undefined}>
+				<span title={countryName(row.original.country) || undefined}>
 					{countryFlag(row.original.country)}
 				</span>
 				<IPCopyBadge ip={row.original.ip} />

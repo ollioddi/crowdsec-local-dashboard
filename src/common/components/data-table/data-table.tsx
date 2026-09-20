@@ -40,8 +40,6 @@ interface DataTableProps<TData extends RowData> {
 	renderSubComponent?: (row: DataTableRow<TData>) => ReactElement;
 	searchPlaceholder?: string;
 	emptyState?: ReactNode;
-	/** Extra toolbar content, such as a live indicator */
-	toolbarExtra?: ReactNode;
 	className?: string;
 }
 
@@ -54,7 +52,6 @@ export function DataTable<TData extends RowData>({
 	renderSubComponent,
 	searchPlaceholder,
 	emptyState,
-	toolbarExtra,
 	className,
 }: Readonly<DataTableProps<TData>>) {
 	const isMobile = useIsMobile();
@@ -145,7 +142,6 @@ export function DataTable<TData extends RowData>({
 					searchPlaceholder={searchPlaceholder}
 					showColumnSelector={!isMobile}
 					onResetFilters={url.resetFilters}
-					extra={toolbarExtra}
 				/>
 			</div>
 
