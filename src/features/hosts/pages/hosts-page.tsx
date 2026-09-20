@@ -23,7 +23,11 @@ export function HostsPage() {
 	const queryClient = useQueryClient();
 	const search = useSearch({ from: "/_app/hosts" });
 	const navigate = useNavigate({ from: "/hosts" });
-	const { data: hosts = [], dataUpdatedAt } = useQuery(hostsQueryOptions);
+	const {
+		data: hosts = [],
+		refetch,
+		dataUpdatedAt,
+	} = useQuery(hostsQueryOptions);
 	useTitle(`Hosts (${hosts.length})`);
 
 	const connected = useSSEConnection<HostWithCount[]>(
@@ -68,6 +72,7 @@ export function HostsPage() {
 				searchPlaceholder="Search IP…"
 				emptyState="No hosts discovered yet."
 				renderSubComponent={(row) => <HostExpandedRow row={row} />}
+				onRefresh={refetch}
 			/>
 		</div>
 	);

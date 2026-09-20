@@ -31,7 +31,7 @@ export function DecisionsPage() {
 	const queryClient = useQueryClient();
 	const search = useSearch({ from: "/_app/decisions" });
 	const navigate = useNavigate({ from: "/decisions" });
-	const { data, dataUpdatedAt } = useQuery(decisionsQueryOptions);
+	const { data, refetch, dataUpdatedAt } = useQuery(decisionsQueryOptions);
 	const [pendingDelete, setPendingDelete] = useState<DecisionWithHost | null>(
 		null,
 	);
@@ -132,6 +132,7 @@ export function DecisionsPage() {
 						deletingId={deletingId}
 					/>
 				)}
+				onRefresh={refetch}
 			/>
 			<DeleteDecisionDialog
 				decision={pendingDelete}

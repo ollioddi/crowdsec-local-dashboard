@@ -10,12 +10,14 @@ import {
 	TableRow,
 } from "@/common/components/ui/table";
 import { useIsMobile } from "@/common/hooks/use-mobile";
+import { usePullToRefresh } from "@/common/hooks/use-pull-to-refresh";
 import { cn } from "@/common/lib/utils";
 import DataTableCards from "./data-table-cards";
 import DataTableHeaderCell from "./data-table-header-cell";
 import DataTableRows from "./data-table-rows";
 import DataTableToolbar from "./data-table-toolbar";
 import PaginationBar from "./pagination-bar";
+import { PullToRefreshIndicator } from "./pull-to-refresh-indicator";
 import type { DataTableSearch } from "./search-schema";
 import {
 	type DataTableColumnDef,
@@ -40,6 +42,8 @@ interface DataTableProps<TData extends RowData> {
 	renderSubComponent?: (row: DataTableRow<TData>) => ReactElement;
 	searchPlaceholder?: string;
 	emptyState?: ReactNode;
+	/** Enables pull-to-refresh on touch devices */
+	onRefresh?: () => Promise<unknown> | undefined;
 	className?: string;
 }
 
@@ -52,6 +56,7 @@ export function DataTable<TData extends RowData>({
 	renderSubComponent,
 	searchPlaceholder,
 	emptyState,
+	onRefresh,
 	className,
 }: Readonly<DataTableProps<TData>>) {
 	const isMobile = useIsMobile();
@@ -126,6 +131,8 @@ export function DataTable<TData extends RowData>({
 		}
 	}, [expandedIds, rowIds, setExpanded]);
 
+	const pull = usePullToRefresh(scrollRef, onRefresh);
+
 	const totalItemsPreFiltered = table.getPreFilteredRowModel().rows.length;
 	const totalItems = table.getFilteredRowModel().rows.length;
 
@@ -151,6 +158,7 @@ export function DataTable<TData extends RowData>({
 					data-scroll-container
 					className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
 				>
+					<PullToRefreshIndicator {...pull} />
 					<DataTableCards
 						table={table}
 						scrollRef={scrollRef}
