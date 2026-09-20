@@ -146,6 +146,11 @@ export class LapiClient {
 
 	// --- Public methods ---
 
+	/** Alerts need watcher auth; without it getAlerts throws on every call. */
+	public get canFetchAlerts(): boolean {
+		return Boolean(this.machineId && this.machinePassword);
+	}
+
 	/**
 	 * Verifies connectivity and API key validity by issuing a HEAD request.
 	 * Never throws — returns a structured `ConnectionHealth` result instead.

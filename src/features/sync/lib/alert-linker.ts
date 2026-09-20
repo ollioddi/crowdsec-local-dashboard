@@ -4,6 +4,7 @@ import type {
 	CrowdSecDecision,
 } from "@/common/crowdsec-lapi/types";
 import { errorFields, logger } from "@/common/lib/logging/logger";
+import { describeError, recordAlertFetch } from "./status";
 
 const log = logger("lapi-sync");
 
@@ -34,14 +35,23 @@ function indexAlert(
  *
  * Strategy: query alerts by IP in chunks, then invert Alert.decisions[]
  * into a lookup map keyed by decision ID.
+ *
+ * Failures are not fatal but are reported to sync status: a missing watcher
+ * credential otherwise looks identical to "no evidence exists".
  */
 export async function buildDecisionToAlertMap(
 	decisions: CrowdSecDecision[],
 	client: LapiClient,
 ): Promise<Map<number, CrowdSecAlert[]>> {
 	const out = new Map<number, CrowdSecAlert[]>();
+
+	// syncDecisions records the unconfigured state, every poll
+	if (!client.canFetchAlerts) return out;
+
 	const wantedIds = new Set(decisions.map((d) => d.id));
 	const distinctIps = [...new Set(decisions.map((d) => d.value))];
+	let failures = 0;
+	let firstError: string | null = null;
 
 	for (let i = 0; i < distinctIps.length; i += ALERT_FETCH_CHUNK_SIZE) {
 		const chunk = distinctIps.slice(i, i + ALERT_FETCH_CHUNK_SIZE);
@@ -51,7 +61,9 @@ export async function buildDecisionToAlertMap(
 				client
 					.getAlerts({ ip, has_active_decision: true, origin: "crowdsec" })
 					.catch((e) => {
-						log.warn("Could not fetch alerts for {ip}: {errorMessage}", {
+						failures++;
+						firstError ??= describeError(e);
+						log.debug("Could not fetch alerts for {ip}: {errorMessage}", {
 							ip,
 							...errorFields(e),
 						});
@@ -65,6 +77,20 @@ export async function buildDecisionToAlertMap(
 				indexAlert(alert, wantedIds, out);
 			}
 		}
+	}
+
+	if (failures > 0) {
+		// One line per sync: a bad credential fails every IP
+		log.warn(
+			"Alert fetch failed for {failures} of {total} hosts: {errorMessage}",
+			{ failures, total: distinctIps.length, errorMessage: firstError },
+		);
+		recordAlertFetch({
+			state: "failing",
+			message: `Alert fetch failed for ${failures} of ${distinctIps.length} hosts: ${firstError}`,
+		});
+	} else {
+		recordAlertFetch({ state: "ok", message: null });
 	}
 
 	log.debug("Linked {linked} of {decisions} decisions to alerts", {

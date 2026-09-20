@@ -4,10 +4,7 @@ import { env } from "@/common/lib/env";
 import { errorFields, initLogging, logger } from "@/common/lib/logging/logger";
 import { closeAllSSEConnections } from "@/common/lib/sse.server";
 import { APP_VERSION } from "@/common/lib/version";
-import {
-	markSyncConfigured,
-	recordSyncResult,
-} from "@/features/sync/lib/status";
+import { recordSyncResult } from "@/features/sync/lib/status";
 import { syncDecisions } from "@/features/sync/lib/sync";
 
 declare global {
@@ -68,7 +65,6 @@ function startDecisionPolling() {
 		);
 		return;
 	}
-	markSyncConfigured();
 	log.info("Polling {url} every {intervalSec}s", {
 		url: env.LAPI_URL,
 		intervalSec: env.LAPI_POLL_INTERVAL,

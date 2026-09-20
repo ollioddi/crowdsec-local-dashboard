@@ -30,6 +30,32 @@ export function SyncStatusBanner({
 		);
 	}
 
+	// Decisions keep syncing without watcher credentials, but every expanded row
+	// is empty and no host gets ASN data.
+	if (status.alerts === "unconfigured") {
+		return (
+			<Banner tone="warning" title="Syncing decisions without alert evidence">
+				<span className="text-xs">{status.alertError}</span>
+				<span className="text-xs">
+					Add watcher credentials to see which requests, ports or usernames
+					triggered each decision.
+				</span>
+			</Banner>
+		);
+	}
+
+	if (status.alerts === "failing") {
+		return (
+			<Banner tone="warning" title="Cannot fetch alert evidence">
+				<span className="font-mono text-xs break-all">{status.alertError}</span>
+				<span className="text-xs">
+					Decisions are still syncing. Expanded rows and ASN data will be empty
+					until this recovers.
+				</span>
+			</Banner>
+		);
+	}
+
 	return null;
 }
 

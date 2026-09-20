@@ -16,8 +16,12 @@ import {
 	upsertHosts,
 	upsertInactiveDecisions,
 } from "./db";
+import { recordAlertFetch } from "./status";
 
 const log = logger("lapi-sync");
+
+const MISSING_WATCHER_CREDENTIALS =
+	"LAPI_MACHINE_ID and LAPI_MACHINE_PASSWORD are not set, so no alert evidence or ASN data can be fetched";
 
 /** First poll per process must be a full (startup=true) pull. */
 let isFirstFetch = true;
@@ -73,6 +77,13 @@ export async function syncDecisions(options?: {
 
 	try {
 		const client = getLapiClient();
+		// Checked every poll: alert status must not depend on a decision arriving
+		if (!client.canFetchAlerts) {
+			recordAlertFetch({
+				state: "unconfigured",
+				message: MISSING_WATCHER_CREDENTIALS,
+			});
+		}
 		const stream = await client.getDecisionStream({
 			startup: useStartup,
 			origins: "crowdsec,cscli",
