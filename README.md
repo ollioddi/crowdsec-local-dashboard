@@ -134,7 +134,8 @@ Check the [release notes](https://github.com/ollioddi/crowdsec-local-dashboard/r
 
 The SQLite database is stored in a Docker volume (`db`) and survives updates.
 
->[!NOTE] While in beta, I recommend using tagged releases rather than the main branch to avoid unexpected breaking changes. The app will notify when a new release is available (if you didn't disable the Github check).
+> [!NOTE]
+> While in beta, I recommend using tagged releases rather than the main branch to avoid unexpected breaking changes. The app will notify when a new release is available (if you didn't disable the Github check).
 
 ---
 
