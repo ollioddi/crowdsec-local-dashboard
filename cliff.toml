@@ -38,6 +38,8 @@ protect_breaking_commits = true
 commit_parsers = [
   { message = "^[a-z]+(\\(.+\\))?!:", group = "<!-- 0 -->⚠ Breaking changes" },
   { footer = "^BREAKING[ -]CHANGE", group = "<!-- 0 -->⚠ Breaking changes" },
+  # Opt a single commit out of the notes with a "Changelog: skip" trailer
+  { footer = "^Changelog:\\s*skip", skip = true },
   { message = "^feat", group = "<!-- 1 -->Features" },
   { message = "^fix", group = "<!-- 2 -->Bug fixes" },
   { message = "^perf", group = "<!-- 3 -->Performance" },

@@ -25,6 +25,16 @@ feat(config)!: rename LAPI_TOKEN to LAPI_BOUNCER_API_TOKEN
 BREAKING CHANGE: set LAPI_BOUNCER_API_TOKEN in your environment; LAPI_TOKEN is ignored.
 ```
 
+A commit that would otherwise be listed can be kept out of the notes with a
+`Changelog: skip` trailer. Use it for work that only concerns contributors,
+such as the screenshot tooling:
+
+```
+docs(readme): refresh the screenshots
+
+Changelog: skip
+```
+
 Preview what the next release would contain:
 
 ```sh
