@@ -43,7 +43,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git commit -m "docs(changelog): $TAG [skip ci]"
+          git commit -m "docs(changelog): $TAG"
           git push --force origin "$branch"
 
           # A PR opened with the workflow token gets no CI run, so the ruleset
