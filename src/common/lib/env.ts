@@ -15,8 +15,10 @@ export const env = createEnv({
 		LAPI_MACHINE_PASSWORD: z.string().min(1).optional(),
 		LAPI_BOUNCER_API_TOKEN: z.string().min(1).optional(),
 		LAPI_POLL_INTERVAL: z.coerce.number().positive().default(60),
-		// Max decisions kept in the DB (oldest inactive pruned first). 0 disables pruning.
-		DECISION_RETENTION_COUNT: z.coerce.number().int().min(0).default(5000),
+		// Oldest inactive pruned first. 0 keeps everything.
+		DECISION_RETENTION_COUNT: z.coerce.number().int().min(0).default(20000),
+		// Applied before the count limit. 0 disables.
+		DECISION_RETENTION_DAYS: z.coerce.number().int().min(0).default(0),
 		LOG_LEVEL: z.enum(LOG_LEVELS).default("info"),
 		LOG_FORMAT: z.enum(LOG_FORMATS).default("human"),
 		UPDATE_CHECK: z.stringbool().default(true),

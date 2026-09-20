@@ -127,8 +127,11 @@ export async function syncDecisions(options?: {
 		isFirstFetch = false;
 		needsFullSync = false;
 
-		if (env.DECISION_RETENTION_COUNT > 0) {
-			const prunedIps = await pruneOldDecisions(env.DECISION_RETENTION_COUNT);
+		if (env.DECISION_RETENTION_COUNT > 0 || env.DECISION_RETENTION_DAYS > 0) {
+			const prunedIps = await pruneOldDecisions(
+				env.DECISION_RETENTION_COUNT,
+				env.DECISION_RETENTION_DAYS,
+			);
 			if (prunedIps.length > 0) {
 				await updateHostBanCounts(prunedIps);
 				changed = true;

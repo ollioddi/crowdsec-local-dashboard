@@ -121,6 +121,7 @@ model Decision {
   @@index([hostIp])
   @@index([active])
   @@index([expiresAt])
+  @@index([active, createdAt]) // retention prunes oldest-inactive-first
 }
 
 model Alert {

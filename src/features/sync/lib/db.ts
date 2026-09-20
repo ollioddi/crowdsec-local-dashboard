@@ -319,43 +319,85 @@ export async function deactivateExpiredDecisions(): Promise<number> {
 	return result.count;
 }
 
+/** Deletes alerts and hosts that nothing references any more. */
+async function pruneOrphans(): Promise<{ alerts: number; hosts: number }> {
+	const { count: alerts } = await prisma.alert.deleteMany({
+		where: { decisions: { none: {} } },
+	});
+	const { count: hosts } = await prisma.host.deleteMany({
+		where: { decisions: { none: {} }, alerts: { none: {} } },
+	});
+	return { alerts, hosts };
+}
+
+/** Deletes the given decisions in batches and returns their host IPs. */
+async function deleteDecisions(
+	rows: Array<{ id: number; hostIp: string }>,
+): Promise<string[]> {
+	for (const batch of chunks(rows.map((row) => row.id))) {
+		await prisma.decision.deleteMany({ where: { id: { in: batch } } });
+	}
+	return rows.map((row) => row.hostIp);
+}
+
 /**
- * Prunes the oldest inactive decisions so the table stays at or below
- * `retentionLimit`, then removes alerts and hosts nothing references anymore.
+ * Prunes inactive decisions older than `maxAgeDays`, then trims what is left
+ * down to `retentionLimit`, then removes anything orphaned by that.
+ *
+ * Both limits are optional (0 disables). Age runs first and commits before
+ * the count pass, so the second query needs no `notIn` list, which would
+ * exceed SQLite's parameter limit at large retention values.
+ *
  * Returns the host IPs whose decisions were pruned so counts can be refreshed.
  */
 export async function pruneOldDecisions(
 	retentionLimit: number,
+	maxAgeDays = 0,
 ): Promise<string[]> {
-	const totalCount = await prisma.decision.count();
-	if (totalCount <= retentionLimit) return [];
+	const prunedIps: string[] = [];
+	let agedCount = 0;
 
-	const toPrune = await prisma.decision.findMany({
-		where: { active: false },
-		orderBy: { createdAt: "asc" },
-		take: totalCount - retentionLimit,
-		select: { id: true, hostIp: true },
-	});
-	if (toPrune.length === 0) return [];
+	if (maxAgeDays > 0) {
+		const cutoff = new Date(Date.now() - maxAgeDays * 86_400_000);
+		const aged = await prisma.decision.findMany({
+			where: { active: false, createdAt: { lt: cutoff } },
+			select: { id: true, hostIp: true },
+		});
+		agedCount = aged.length;
+		prunedIps.push(...(await deleteDecisions(aged)));
+	}
 
-	await prisma.decision.deleteMany({
-		where: { id: { in: toPrune.map((d) => d.id) } },
-	});
-	const { count: prunedAlerts } = await prisma.alert.deleteMany({
-		where: { decisions: { none: {} } },
-	});
-	const { count: prunedHosts } = await prisma.host.deleteMany({
-		where: { decisions: { none: {} }, alerts: { none: {} } },
-	});
+	let excessCount = 0;
+	if (retentionLimit > 0) {
+		const totalCount = await prisma.decision.count();
+		const excess = totalCount - retentionLimit;
+		if (excess > 0) {
+			const oldest = await prisma.decision.findMany({
+				where: { active: false },
+				orderBy: { createdAt: "asc" },
+				take: excess,
+				select: { id: true, hostIp: true },
+			});
+			excessCount = oldest.length;
+			prunedIps.push(...(await deleteDecisions(oldest)));
+		}
+	}
+
+	if (prunedIps.length === 0) return [];
+
+	const orphans = await pruneOrphans();
 
 	log.info("Pruned {decisions} decisions, {alerts} alerts, {hosts} hosts", {
-		decisions: toPrune.length,
-		alerts: prunedAlerts,
-		hosts: prunedHosts,
+		decisions: agedCount + excessCount,
+		aged: agedCount,
+		overLimit: excessCount,
+		alerts: orphans.alerts,
+		hosts: orphans.hosts,
 		retentionLimit,
+		maxAgeDays,
 	});
 
-	return [...new Set(toPrune.map((d) => d.hostIp))];
+	return [...new Set(prunedIps)];
 }
 
 /**
