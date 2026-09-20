@@ -1,5 +1,9 @@
 import type { ColumnVisibilityState, RowData } from "@tanstack/react-table";
-import type { DataTableColumnDef, DataTableRow } from "./table-features";
+import type {
+	DataTableColumn,
+	DataTableColumnDef,
+	DataTableRow,
+} from "./table-features";
 
 export type PageElement = number | "...";
 
@@ -43,6 +47,34 @@ export const calculatePages = (
 	return pages;
 };
 
+export function columnLabel<TData extends RowData>(
+	column: DataTableColumn<TData>,
+): string {
+	return typeof column.columnDef.header === "string"
+		? column.columnDef.header
+		: column.id;
+}
+
+/** Visibility from column meta: filter-only columns never show */
+export function getDefaultColumnVisibility<TData extends RowData>(
+	columns: ReadonlyArray<DataTableColumnDef<TData>>,
+): ColumnVisibilityState {
+	const visibility: ColumnVisibilityState = {};
+	for (const col of columns) {
+		const id =
+			col.id ??
+			("accessorKey" in col && typeof col.accessorKey === "string"
+				? col.accessorKey
+				: undefined);
+		if (!id) continue;
+		visibility[id] =
+			!col.meta?.filterOnly && col.meta?.visibleByDefault !== false;
+	}
+	return visibility;
+}
+
+export const EXPAND_COLUMN_ID = "_expand";
+
 /** Global filter that only searches columns whose meta has `globalFilter: true`. */
 export function globalFilterFn<TData extends RowData>(
 	row: DataTableRow<TData>,
@@ -60,31 +92,4 @@ export function globalFilterFn<TData extends RowData>(
 		}
 	}
 	return false;
-}
-
-/** Default visibility of each column from its `visibleByDefault` meta */
-export function getDefaultColumnVisibility<TData extends RowData>(
-	columns: ReadonlyArray<DataTableColumnDef<TData>>,
-	isMobile = false,
-): ColumnVisibilityState {
-	return columns.reduce<ColumnVisibilityState>((acc, col) => {
-		const columnId =
-			col.id ??
-			("accessorKey" in col && typeof col.accessorKey === "string"
-				? col.accessorKey
-				: undefined);
-		if (columnId == null) {
-			return acc;
-		}
-
-		const vbd = col.meta?.visibleByDefault;
-		const isObj = typeof vbd === "object" && vbd !== null;
-		const visibleDesktop = isObj ? vbd.desktop : vbd;
-		const visibleMobile = isObj ? vbd.mobile : vbd;
-
-		acc[columnId] = isMobile
-			? (visibleMobile ?? true)
-			: (visibleDesktop ?? true);
-		return acc;
-	}, {});
 }

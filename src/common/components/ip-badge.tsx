@@ -40,7 +40,10 @@ export function IPLinkBadge({ ip }: Readonly<{ ip: string }>) {
 
 	return (
 		<Badge variant="secondary" className="font-mono text-sm" title={ip} asChild>
-			<Link to="/hosts" search={{ hostIp: ip }}>
+			<Link
+				to="/hosts"
+				search={{ filters: { ip: { operator: "equals", value: ip } } }}
+			>
 				{display}
 				<ExternalLink className="ml-1.5 size-3" />
 			</Link>

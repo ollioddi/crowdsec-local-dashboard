@@ -10,7 +10,6 @@ import {
 	ArrowUpNarrowWide,
 } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
-import { useIsMobile } from "@/common/hooks/use-mobile";
 import { cn } from "@/common/lib/utils";
 import type { DataTableHeader } from "./table-features";
 
@@ -32,17 +31,12 @@ const DataTableHeaderCell = <TData extends RowData>({
 }>) => {
 	const column = header.column;
 	const meta = column.columnDef.meta;
-	const isMobile = useIsMobile();
 
 	if (header.isPlaceholder) {
 		return null;
 	}
 
-	// Use short mobile header if provided and on mobile, otherwise fall back to full header
-	const label =
-		isMobile && meta?.mobileHeader
-			? meta.mobileHeader
-			: flexRender(column.columnDef.header, header.getContext());
+	const label = flexRender(column.columnDef.header, header.getContext());
 
 	if (!meta?.sortable) {
 		return (

@@ -1,12 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSearch } from "@tanstack/react-router";
-import type { ColumnFiltersState } from "@tanstack/react-table";
-import { useCallback, useMemo } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { z } from "zod";
-import DataDisplayToolbar from "@/common/components/data-table/data-display-toolbar";
 import { DataTable } from "@/common/components/data-table/data-table";
 import type { DataTableRow } from "@/common/components/data-table/table-features";
+import { LiveIndicator } from "@/common/components/live-indicator";
 import { useSSEConnection } from "@/common/hooks/use-sse-connection";
 import {
 	type DecisionWithHost,
@@ -15,17 +12,6 @@ import {
 } from "@/features/decisions/api/decisions.functions";
 import { createColumns } from "@/features/decisions/components/columns";
 import { DecisionExpandedRow } from "@/features/decisions/components/decision-expanded-row";
-import {
-	DecisionOriginSchema,
-	DecisionTypeSchema,
-} from "@/generated/zod/schemas";
-
-export const decisionsSearchSchema = z.object({
-	hostIp: z.string().optional(),
-	type: DecisionTypeSchema.optional(),
-	origin: DecisionOriginSchema.optional(),
-	active: z.boolean().optional(),
-});
 
 export const decisionsQueryOptions = {
 	queryKey: ["decisions"],
@@ -35,24 +21,13 @@ export const decisionsQueryOptions = {
 
 export function DecisionsPage() {
 	const queryClient = useQueryClient();
-	const { hostIp, type, origin, active } = useSearch({
-		from: "/_app/decisions",
-	});
-
+	const search = useSearch({ from: "/_app/decisions" });
+	const navigate = useNavigate({ from: "/decisions" });
 	const { data: decisions = [] } = useQuery(decisionsQueryOptions);
 
-	// Build initial column filters from URL search params
-	const initialColumnFilters = useMemo<ColumnFiltersState>(() => {
-		const filters: ColumnFiltersState = [];
-		if (type) filters.push({ id: "type", value: [type] });
-		if (origin) filters.push({ id: "origin", value: [origin] });
-		if (active !== undefined)
-			filters.push({ id: "status", value: [active ? "Active" : "Expired"] });
-		return filters;
-	}, [type, origin, active]);
-
-	const handleDecisionsMessage = useCallback(
-		(incoming: DecisionWithHost[]) => {
+	const connected = useSSEConnection<DecisionWithHost[]>(
+		"/sse/decisions",
+		(incoming) => {
 			queryClient.setQueryData<DecisionWithHost[]>(["decisions"], (old) => {
 				const incomingIds = new Set(incoming.map((d) => d.id));
 				if (old) {
@@ -73,12 +48,6 @@ export function DecisionsPage() {
 				return [...incoming, ...inactive];
 			});
 		},
-		[queryClient],
-	);
-
-	const connected = useSSEConnection<DecisionWithHost[]>(
-		"/sse/decisions",
-		handleDecisionsMessage,
 	);
 
 	const {
@@ -109,61 +78,33 @@ export function DecisionsPage() {
 		},
 	});
 
-	const handleDelete = useCallback(
-		(id: number, collapse?: () => void) => {
-			deleteDecision(id, { onSuccess: () => collapse?.() });
-		},
-		[deleteDecision],
-	);
-
+	const handleDelete = (id: number, collapse?: () => void) => {
+		deleteDecision(id, { onSuccess: () => collapse?.() });
+	};
 	const deletingId = isPending ? variables : undefined;
-
-	const columns = useMemo(
-		() => createColumns(handleDelete, deletingId),
-		[handleDelete, deletingId],
-	);
-
-	const renderSubComponent = useCallback(
-		(row: DataTableRow<DecisionWithHost>) => (
-			<DecisionExpandedRow
-				row={row}
-				onDelete={handleDelete}
-				deletingId={deletingId}
-			/>
-		),
-		[handleDelete, deletingId],
-	);
 
 	return (
 		<div className="container mx-auto py-6 px-4">
 			<div className="mb-6">
-				<div className="flex items-center gap-3">
-					<h1 className="text-2xl font-bold tracking-tight">Decisions</h1>
-				</div>
+				<h1 className="text-2xl font-bold tracking-tight">Decisions</h1>
 				<p className="text-muted-foreground">{decisions.length} decisions</p>
 			</div>
 			<DataTable
-				columns={columns}
+				columns={createColumns(handleDelete, deletingId)}
 				data={decisions}
-				initialColumnFilters={initialColumnFilters}
-				initialSorting={[{ id: "status", desc: false }]}
-				initialGlobalFilter={hostIp}
+				search={search}
+				navigate={navigate}
+				getRowId={(decision) => String(decision.id)}
+				searchPlaceholder="Search IP or scenario…"
 				emptyState="No decisions."
-				renderSubComponent={renderSubComponent}
-				header={(table) => (
-					<DataDisplayToolbar
-						table={table}
-						searchPlaceholder="Filter by IP…"
-						extra={
-							<div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-								<span
-									className={`inline-block size-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`}
-								/>
-								{connected ? "Live" : "Disconnected"}
-							</div>
-						}
+				renderSubComponent={(row: DataTableRow<DecisionWithHost>) => (
+					<DecisionExpandedRow
+						row={row}
+						onDelete={handleDelete}
+						deletingId={deletingId}
 					/>
 				)}
+				toolbarExtra={<LiveIndicator connected={connected} />}
 			/>
 		</div>
 	);

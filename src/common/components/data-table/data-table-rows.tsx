@@ -1,9 +1,9 @@
 import { useHydrated } from "@tanstack/react-router";
 import { flexRender, type RowData, Subscribe } from "@tanstack/react-table";
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import type { ReactElement, ReactNode } from "react";
-import { TableCell, TableRow } from "@/common/components/ui/table";
+import { TableBody, TableCell, TableRow } from "@/common/components/ui/table";
 import type { DataTableInstance, DataTableRow } from "./table-features";
+import { useWindowVirtual } from "./use-window-virtual";
 
 type RenderSubComponent<TData extends RowData> = (
 	row: DataTableRow<TData>,
@@ -11,40 +11,41 @@ type RenderSubComponent<TData extends RowData> = (
 
 interface DataTableRowsProps<TData extends RowData> {
 	table: DataTableInstance<TData>;
-	isLoading: boolean;
 	emptyState?: ReactNode;
 	renderSubComponent?: RenderSubComponent<TData>;
 }
 
 const VIRTUALIZATION_THRESHOLD = 100;
-const ESTIMATED_ROW_HEIGHT = 41;
+const ESTIMATED_ROW_HEIGHT = 72;
+const ESTIMATED_EXPANDED_HEIGHT = 400;
 const INITIAL_ROWS_TO_RENDER = 30;
 
+/** The table body: one <tbody> for small pages, virtualized groups for large ones */
 const DataTableRows = <TData extends RowData>({
 	table,
-	isLoading,
 	emptyState,
 	renderSubComponent,
 }: Readonly<DataTableRowsProps<TData>>) => {
-	const data = table.options.data;
-	const columnsLength = table.getAllLeafColumns().length;
+	const columnsLength = table.getVisibleLeafColumns().length;
 	const hydrated = useHydrated();
 
-	if (isLoading) {
-		return <SkeletonRows columnsLength={columnsLength} rowsCount={10} />;
-	}
-
-	if (data.length === 0) {
-		return <EmptyRow columnsLength={columnsLength} emptyState={emptyState} />;
+	if (table.options.data.length === 0) {
+		return (
+			<TableBody>
+				<TableRow>
+					<TableCell className="h-24 text-center" colSpan={columnsLength}>
+						{emptyState ?? "No results."}
+					</TableCell>
+				</TableRow>
+			</TableBody>
+		);
 	}
 
 	const rows = table.getRowModel().rows;
-	const shouldVirtualize = rows.length > VIRTUALIZATION_THRESHOLD;
 
-	// Non-virtualized rendering for small datasets
-	if (!shouldVirtualize) {
+	if (rows.length <= VIRTUALIZATION_THRESHOLD) {
 		return (
-			<>
+			<TableBody>
 				{rows.map((row) => (
 					<TableRowWithExpansion
 						key={row.id}
@@ -52,13 +53,13 @@ const DataTableRows = <TData extends RowData>({
 						row={row}
 					/>
 				))}
-			</>
+			</TableBody>
 		);
 	}
 
-	// Virtualized rendering for large datasets
 	return (
 		<VirtualizedRows
+			columnsLength={columnsLength}
 			hydrated={hydrated}
 			renderSubComponent={renderSubComponent}
 			rows={rows}
@@ -70,27 +71,29 @@ const DataTableRows = <TData extends RowData>({
 
 const VirtualizedRows = <TData extends RowData>({
 	rows,
+	columnsLength,
 	hydrated,
 	renderSubComponent,
 }: {
 	rows: DataTableRow<TData>[];
+	columnsLength: number;
 	hydrated: boolean;
 	renderSubComponent?: RenderSubComponent<TData>;
 }) => {
-	const rowVirtualizer = useWindowVirtualizer({
-		count: rows.length,
-		enabled: hydrated,
-		estimateSize: () => ESTIMATED_ROW_HEIGHT,
-		overscan: 15,
-	});
+	const { anchorRef, items, measureElement, topPadding, bottomPadding } =
+		useWindowVirtual<HTMLTableSectionElement>({
+			count: rows.length,
+			enabled: hydrated,
+			estimateSize: (index) =>
+				rows[index].getIsExpanded()
+					? ESTIMATED_EXPANDED_HEIGHT
+					: ESTIMATED_ROW_HEIGHT,
+			overscan: 15,
+		});
 
-	const virtualRows = rowVirtualizer.getVirtualItems();
-	const totalSize = rowVirtualizer.getTotalSize();
-
-	// Before hydration or if virtualizer not ready, render initial rows
-	if (!hydrated || virtualRows.length === 0) {
+	if (!hydrated || items.length === 0) {
 		return (
-			<>
+			<TableBody ref={anchorRef}>
 				{rows.slice(0, INITIAL_ROWS_TO_RENDER).map((row) => (
 					<TableRowWithExpansion
 						key={row.id}
@@ -98,37 +101,50 @@ const VirtualizedRows = <TData extends RowData>({
 						row={row}
 					/>
 				))}
-			</>
+			</TableBody>
 		);
 	}
 
-	const topSpacerHeight = virtualRows[0]?.start ?? 0;
-	const bottomSpacerHeight =
-		virtualRows.length > 0
-			? totalSize - (virtualRows.at(-1)?.end ?? totalSize)
-			: 0;
-
 	return (
 		<>
-			{topSpacerHeight > 0 && <tr style={{ height: topSpacerHeight }} />}
-
-			{virtualRows.map((virtualRow) => {
-				const row = rows[virtualRow.index];
+			<tbody ref={anchorRef} aria-hidden />
+			{topPadding > 0 && (
+				<Spacer height={topPadding} columnsLength={columnsLength} />
+			)}
+			{items.map((item) => {
+				const row = rows[item.index];
+				// One <tbody> per row so the measured height covers the expansion too
 				return (
-					<TableRowWithExpansion
-						key={row.id}
-						renderSubComponent={renderSubComponent}
-						row={row}
-					/>
+					<tbody key={row.id} data-index={item.index} ref={measureElement}>
+						<TableRowWithExpansion
+							renderSubComponent={renderSubComponent}
+							row={row}
+						/>
+					</tbody>
 				);
 			})}
-
-			{bottomSpacerHeight > 0 && <tr style={{ height: bottomSpacerHeight }} />}
+			{bottomPadding > 0 && (
+				<Spacer height={bottomPadding} columnsLength={columnsLength} />
+			)}
 		</>
 	);
 };
 
-// Single Row Component
+const Spacer = ({
+	height,
+	columnsLength,
+}: {
+	height: number;
+	columnsLength: number;
+}) => (
+	<tbody aria-hidden>
+		<tr>
+			<td colSpan={columnsLength} style={{ height, padding: 0 }} />
+		</tr>
+	</tbody>
+);
+
+// Single Row
 
 // Row objects are stable, so state-dependent reads go through a subscription
 const TableRowWithExpansion = <TData extends RowData>({
@@ -173,42 +189,6 @@ const TableRowWithExpansion = <TData extends RowData>({
 			);
 		}}
 	</Subscribe>
-);
-
-// Helper Components
-
-const SkeletonRows = ({
-	columnsLength,
-	rowsCount,
-}: {
-	columnsLength: number;
-	rowsCount: number;
-}) => (
-	<>
-		{Array.from({ length: rowsCount }, (_, index) => (
-			<TableRow className="group" key={`skeleton-row-${String(index)}`}>
-				{Array.from({ length: columnsLength }, (_, cellIndex) => (
-					<TableCell key={`skeleton-cell-${String(cellIndex)}`}>
-						<div className="h-5 w-25 animate-pulse rounded-full bg-muted" />
-					</TableCell>
-				))}
-			</TableRow>
-		))}
-	</>
-);
-
-const EmptyRow = ({
-	columnsLength,
-	emptyState,
-}: {
-	columnsLength: number;
-	emptyState?: ReactNode;
-}) => (
-	<TableRow>
-		<TableCell className="h-24 text-center" colSpan={columnsLength}>
-			{emptyState ?? "No results."}
-		</TableCell>
-	</TableRow>
 );
 
 export default DataTableRows;

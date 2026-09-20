@@ -1,20 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useSession } from "@/common/auth/auth-client";
-import DataDisplayToolbar from "@/common/components/data-table/data-display-toolbar";
 import { DataTable } from "@/common/components/data-table/data-table";
-import type { DataTableInstance } from "@/common/components/data-table/table-features";
-import type { UserRow } from "@/features/users/api/users.functions";
 import { deleteUserFn, getUsersFn } from "@/features/users/api/users.functions";
 import { createColumns } from "@/features/users/components/columns";
 import { CreateUserForm } from "@/features/users/components/create-user-form";
-
-function renderUsersTableHeader(table: DataTableInstance<UserRow>) {
-	return (
-		<DataDisplayToolbar table={table} searchPlaceholder="Filter by username…" />
-	);
-}
 
 export const usersQueryOptions = {
 	queryKey: ["users"],
@@ -23,6 +14,8 @@ export const usersQueryOptions = {
 
 export function UsersPage() {
 	const queryClient = useQueryClient();
+	const search = useSearch({ from: "/_app/users" });
+	const navigate = useNavigate({ from: "/users" });
 	const { data: users = [] } = useQuery(usersQueryOptions);
 	const { data: session } = useSession();
 
@@ -46,17 +39,6 @@ export function UsersPage() {
 		? deleteMutation.variables
 		: undefined;
 
-	const columns = useMemo(
-		() =>
-			createColumns(
-				deleteMutation.mutate,
-				firstUserId,
-				currentUserId,
-				deletingId,
-			),
-		[deleteMutation.mutate, firstUserId, currentUserId, deletingId],
-	);
-
 	return (
 		<div className="container mx-auto py-6 px-4">
 			<div className="mb-6">
@@ -67,10 +49,18 @@ export function UsersPage() {
 			</div>
 			<div className="grid gap-6 lg:grid-cols-[1fr_350px]">
 				<DataTable
-					columns={columns}
+					columns={createColumns(
+						deleteMutation.mutate,
+						firstUserId,
+						currentUserId,
+						deletingId,
+					)}
 					data={users}
+					search={search}
+					navigate={navigate}
+					getRowId={(user) => user.id}
+					searchPlaceholder="Search username…"
 					emptyState="No users found."
-					header={renderUsersTableHeader}
 				/>
 				<div className="self-start">
 					<CreateUserForm />

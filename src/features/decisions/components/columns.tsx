@@ -1,20 +1,14 @@
-import { ExternalLink, Loader2, Trash2 } from "lucide-react";
+import { ExternalLink, Trash2 } from "lucide-react";
 import type { DataTableColumnDef } from "@/common/components/data-table/table-features";
 import { IPLinkBadge } from "@/common/components/ip-badge";
 import { RelativeTime } from "@/common/components/relative-dates";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
+import { countryFlag } from "@/common/lib/country-flag";
 import type { DecisionWithHost } from "@/features/decisions/api/decisions.functions";
 
-function originVariant(origin: string) {
-	switch (origin.toLowerCase()) {
-		case "cscli":
-			return "outline" as const;
-		case "capi":
-			return "secondary" as const;
-		default:
-			return "default" as const;
-	}
+export function shortScenario(scenario: string) {
+	return scenario.replace(/^(crowdsecurity|firewallservices)\//, "");
 }
 
 function typeVariant(type: string) {
@@ -35,195 +29,127 @@ export function createColumns(
 	return [
 		{
 			accessorKey: "hostIp",
-			header: "IP",
-			meta: { sortable: true, globalFilter: true, visibleByDefault: true },
-			filterFn: "isOneOf",
-			cell: ({ row }) => {
-				const ip = row.getValue<string>("hostIp");
-				return <IPLinkBadge ip={ip} />;
+			header: "Host",
+			meta: {
+				sortable: true,
+				filter: "text",
+				globalFilter: true,
+				card: "title",
 			},
+			cell: ({ row }) => (
+				<span className="flex items-center gap-2">
+					<span title={row.original.host.country ?? undefined}>
+						{countryFlag(row.original.host.country)}
+					</span>
+					<IPLinkBadge ip={row.original.hostIp} />
+				</span>
+			),
+		},
+		{
+			accessorKey: "type",
+			header: "Decision",
+			size: 150,
+			meta: { filter: "select", card: "badge" },
+			cell: ({ row }) => (
+				<span className="flex flex-wrap items-center gap-1">
+					<Badge variant={typeVariant(row.original.type)}>
+						{row.original.type}
+					</Badge>
+					{!row.original.active && <Badge variant="outline">expired</Badge>}
+				</span>
+			),
+		},
+		{
+			id: "status",
+			accessorFn: (row) => (row.active ? "Active" : "Expired"),
+			header: "Status",
+			meta: { filterOnly: true, filter: "select", sortable: true },
 		},
 		{
 			accessorKey: "scenario",
 			header: "Scenario",
-			meta: {
-				globalFilter: true,
-				visibleByDefault: { desktop: true, mobile: false },
-				expandedLabel: "Scenario",
-			},
+			meta: { sortable: true, filter: "text", globalFilter: true },
 			cell: ({ row }) => {
-				const scenario = row.getValue<string>("scenario");
-				const short = scenario.replace("crowdsecurity/", "");
+				const entries = new Set(row.original.alerts.flatMap((a) => a.entries));
 				return (
-					<span className="max-w-[200px] truncate block" title={scenario}>
-						{short}
+					<span className="flex min-w-0 flex-col">
+						<span
+							className="truncate font-medium"
+							title={row.original.scenario}
+						>
+							{shortScenario(row.original.scenario)}
+						</span>
+						<span className="truncate text-xs text-muted-foreground">
+							via {row.original.origin}
+							{entries.size > 0 &&
+								` · ${entries.size} entr${entries.size === 1 ? "y" : "ies"}`}
+						</span>
 					</span>
 				);
-			},
-		},
-		{
-			accessorKey: "type",
-			header: "Type",
-			size: 80,
-			meta: { filterVariant: "select", visibleByDefault: true },
-			filterFn: "isOneOf",
-			cell: ({ row }) => {
-				const type = row.getValue<string>("type");
-				return <Badge variant={typeVariant(type)}>{type}</Badge>;
 			},
 		},
 		{
 			accessorKey: "origin",
 			header: "Origin",
-			meta: {
-				visibleByDefault: { desktop: true, mobile: false },
-				expandedLabel: "Origin",
-				filterVariant: "select",
-			},
-			filterFn: "isOneOf",
-			cell: ({ row }) => {
-				const origin = row.getValue<string>("origin");
-				return <Badge variant={originVariant(origin)}>{origin}</Badge>;
-			},
+			meta: { filterOnly: true, filter: "select" },
 		},
 		{
 			id: "country",
+			accessorFn: (row) => row.host.country ?? "",
 			header: "Country",
-			size: 80,
-			accessorFn: (row) => row.host.country,
-			meta: {
-				sortable: true,
-				visibleByDefault: { desktop: true, mobile: false },
-				expandedLabel: "Country",
-				filterVariant: "select",
-			},
-			filterFn: "isOneOf",
-			cell: ({ row }) => row.getValue("country") ?? "-",
+			meta: { filterOnly: true, filter: "select", sortable: true },
 		},
 		{
-			id: "status",
-			header: "Status",
-			size: 80,
-			accessorFn: (row) => (row.active ? "Active" : "Expired"),
-			meta: { sortable: true, filterVariant: "select", visibleByDefault: true },
-			filterFn: "isOneOf",
-			cell: ({ row }) => {
-				const status = row.getValue<string>("status");
-				return (
-					<Badge variant={status === "Active" ? "destructive" : "secondary"}>
-						{status}
-					</Badge>
-				);
-			},
-		},
-		{
-			id: "entries",
-			header: "Details",
-			accessorFn: (row) => {
-				const all = new Set<string>();
-				for (const a of row.alerts) {
-					for (const e of a.entries) all.add(e);
-				}
-				return [...all];
-			},
-			meta: {
-				visibleByDefault: { desktop: true, mobile: false },
-				expandedLabel: "Details",
-			},
-			cell: ({ row }) => {
-				const entries = row.getValue<string[]>("entries");
-				if (!entries.length)
-					return <span className="text-muted-foreground">—</span>;
-				const [first, ...rest] = entries;
-				return (
-					<span className="flex items-center gap-1.5 min-w-0">
-						<span
-							className="font-mono text-xs max-w-[160px] truncate"
-							title={first}
-						>
-							{first}
-						</span>
-						{rest.length > 0 && (
-							<span className="shrink-0 text-[10px] font-medium text-muted-foreground bg-muted rounded px-1">
-								+{rest.length}
-							</span>
-						)}
-					</span>
-				);
-			},
-		},
-		{
-			accessorKey: "duration",
-			header: "Duration",
-			meta: {
-				visibleByDefault: { desktop: true, mobile: false },
-				expandedLabel: "Duration",
-			},
+			accessorKey: "expiresAt",
+			header: "Expires",
+			size: 170,
+			meta: { sortable: true, filter: "date" },
 			cell: ({ row }) =>
 				row.original.active ? (
-					row.getValue<string>("duration")
+					<span className="flex flex-col">
+						<RelativeTime date={row.original.expiresAt} />
+						<span className="text-xs text-muted-foreground">
+							{row.original.duration}
+						</span>
+					</span>
 				) : (
 					<span className="text-muted-foreground">—</span>
 				),
 		},
 		{
-			accessorKey: "expiresAt",
-			header: "Expires",
-			meta: {
-				sortable: true,
-				visibleByDefault: { desktop: true, mobile: false },
-				expandedLabel: "Expires",
-			},
-			cell: ({ row }) => (
-				<RelativeTime date={row.getValue<string>("expiresAt")} />
-			),
+			accessorKey: "createdAt",
+			header: "Created",
+			meta: { filterOnly: true, filter: "date", sortable: true },
 		},
 		{
-			id: "delete",
-			meta: {
-				visibleByDefault: { desktop: true, mobile: false },
-				expandedLabel: "",
-			},
+			id: "actions",
+			size: 90,
 			cell: ({ row }) => {
 				const decision = row.original;
-				if (!decision.active) return null;
-				const isDeleting = deletingId === decision.id;
 				return (
-					<Button
-						variant="destructive"
-						size="sm"
-						disabled={isDeleting}
-						onClick={() => onDelete(decision.id)}
-					>
-						{isDeleting ? (
-							<Loader2 className="size-4 animate-spin" />
-						) : (
-							<Trash2 className="size-4" />
+					<span className="flex items-center justify-end gap-1">
+						{decision.active && (
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								aria-label="Delete decision"
+								loading={deletingId === decision.id}
+								onClick={() => onDelete(decision.id)}
+							>
+								<Trash2 className="size-4" />
+							</Button>
 						)}
-						{isDeleting ? "Deleting…" : "Delete"}
-					</Button>
-				);
-			},
-		},
-		{
-			id: "viewInCrowdsec",
-			meta: {
-				visibleByDefault: { desktop: true, mobile: false },
-				expandedLabel: "",
-			},
-			cell: ({ row }) => {
-				const ip = row.original.hostIp;
-				return (
-					<Button
-						variant="default"
-						size="sm"
-						onClick={() => {
-							window.open(`https://app.crowdsec.net/cti/${ip}`, "_blank");
-						}}
-					>
-						<ExternalLink className="mr-1" />
-						View in CrowdSec
-					</Button>
+						<Button variant="ghost" size="icon-sm" asChild>
+							<a
+								href={`https://app.crowdsec.net/cti/${decision.hostIp}`}
+								target="_blank"
+								rel="noreferrer"
+								aria-label="View in CrowdSec CTI"
+							>
+								<ExternalLink className="size-4" />
+							</a>
+						</Button>
+					</span>
 				);
 			},
 		},

@@ -1,11 +1,11 @@
 import {
+	type Cell,
 	type Column,
 	type ColumnDef,
 	columnFacetingFeature,
 	columnFilteringFeature,
 	columnSizingFeature,
 	columnVisibilityFeature,
-	constructFilterFn,
 	createExpandedRowModel,
 	createFacetedRowModel,
 	createFacetedUniqueValues,
@@ -27,27 +27,26 @@ import {
 	sortFn_text,
 	tableFeatures,
 } from "@tanstack/react-table";
+import {
+	dateFilterFn,
+	numberFilterFn,
+	selectFilterFn,
+	textFilterFn,
+} from "./filters/filter-fns";
+import type { FilterType } from "./filters/filter-operators";
 
 export type DataTableColumnMeta = {
 	sortable?: boolean;
-	visibleByDefault?: { desktop?: boolean; mobile?: boolean } | boolean;
-	/** Include this column's value in the global text filter */
+	/** Filter UI and filter function for the column */
+	filter?: FilterType;
+	/** Include this column's value in the global text search */
 	globalFilter?: boolean;
-	/** Human-readable label shown in the expanded mobile row */
-	expandedLabel?: string;
-	/** Shorter column header text used on mobile to avoid overflow */
-	mobileHeader?: string;
-	/** Column filter variant: 'select' for multi-select faceted filter */
-	filterVariant?: "select";
+	visibleByDefault?: boolean;
+	/** Used for filtering and sorting only, never rendered */
+	filterOnly?: boolean;
+	/** Where the cell goes on a mobile card. Columns without a header are actions. */
+	card?: "title" | "badge" | "field" | "action";
 };
-
-/** Keeps rows whose cell value is one of the selected facet values. */
-const isOneOf = constructFilterFn({
-	filter: (dataValue: unknown, filterValue: string[]) =>
-		filterValue.includes(String(dataValue)),
-	autoRemove: (filterValue: unknown) =>
-		!Array.isArray(filterValue) || filterValue.length === 0,
-});
 
 // The single feature set every DataTable is built on
 export const dataTableFeatures = tableFeatures({
@@ -65,7 +64,13 @@ export const dataTableFeatures = tableFeatures({
 	expandedRowModel: createExpandedRowModel(),
 	facetedRowModel: createFacetedRowModel(),
 	facetedUniqueValues: createFacetedUniqueValues(),
-	filterFns: { isOneOf },
+	// Keys match FilterType so a column's meta.filter doubles as its filterFn
+	filterFns: {
+		text: textFilterFn,
+		select: selectFilterFn,
+		number: numberFilterFn,
+		date: dateFilterFn,
+	},
 	// Everything the "auto" sort function can pick
 	sortFns: {
 		alphanumeric: sortFn_alphanumeric,
@@ -96,4 +101,9 @@ export type DataTableRow<TData extends RowData> = Row<DataTableFeatures, TData>;
 export type DataTableInstance<TData extends RowData> = ReactTable<
 	DataTableFeatures,
 	TData
+>;
+export type DataTableCell<TData extends RowData> = Cell<
+	DataTableFeatures,
+	TData,
+	unknown
 >;

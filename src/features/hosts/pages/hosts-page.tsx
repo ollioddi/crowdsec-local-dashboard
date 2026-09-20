@@ -1,10 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSearch } from "@tanstack/react-router";
-import { useCallback } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
-import z from "zod";
-import DataDisplayToolbar from "@/common/components/data-table/data-display-toolbar";
 import { DataTable } from "@/common/components/data-table/data-table";
+import { LiveIndicator } from "@/common/components/live-indicator";
 import { useSSEConnection } from "@/common/hooks/use-sse-connection";
 import {
 	getHostsFn,
@@ -12,10 +10,6 @@ import {
 } from "@/features/hosts/api/hosts.functions";
 import { columns } from "@/features/hosts/components/columns";
 import { HostExpandedRow } from "@/features/hosts/components/host-expanded-row";
-
-export const hostsSearchSchema = z.object({
-	hostIp: z.string().optional(),
-});
 
 export const hostsQueryOptions = {
 	queryKey: ["hosts"],
@@ -25,14 +19,13 @@ export const hostsQueryOptions = {
 
 export function HostsPage() {
 	const queryClient = useQueryClient();
-	const { hostIp } = useSearch({
-		from: "/_app/hosts",
-	});
-
+	const search = useSearch({ from: "/_app/hosts" });
+	const navigate = useNavigate({ from: "/hosts" });
 	const { data: hosts = [] } = useQuery(hostsQueryOptions);
 
-	const handleHostsMessage = useCallback(
-		(incoming: HostWithCount[]) => {
+	const connected = useSSEConnection<HostWithCount[]>(
+		"/sse/hosts",
+		(incoming) => {
 			queryClient.setQueryData<HostWithCount[]>(["hosts"], (old) => {
 				if (old) {
 					const knownIps = new Set(old.map((h) => h.ip));
@@ -45,12 +38,6 @@ export function HostsPage() {
 				return incoming;
 			});
 		},
-		[queryClient],
-	);
-
-	const connected = useSSEConnection<HostWithCount[]>(
-		"/sse/hosts",
-		handleHostsMessage,
 	);
 
 	return (
@@ -64,24 +51,13 @@ export function HostsPage() {
 			<DataTable
 				columns={columns}
 				data={hosts}
-				initialSorting={[{ id: "activeDecisions", desc: true }]}
-				initialGlobalFilter={hostIp}
+				search={search}
+				navigate={navigate}
+				getRowId={(host) => host.ip}
+				searchPlaceholder="Search IP…"
 				emptyState="No hosts discovered yet."
 				renderSubComponent={(row) => <HostExpandedRow row={row} />}
-				header={(table) => (
-					<DataDisplayToolbar
-						table={table}
-						searchPlaceholder="Filter by IP…"
-						extra={
-							<div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-								<span
-									className={`inline-block size-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`}
-								/>
-								{connected ? "Live" : "Disconnected"}
-							</div>
-						}
-					/>
-				)}
+				toolbarExtra={<LiveIndicator connected={connected} />}
 			/>
 		</div>
 	);

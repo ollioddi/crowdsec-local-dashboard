@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { dataTableSearchSchema } from "@/common/components/data-table/search-schema";
 import {
 	DecisionsPage,
 	decisionsQueryOptions,
-	decisionsSearchSchema,
 } from "@/features/decisions/pages/decisions-page";
 
 export const Route = createFileRoute("/_app/decisions")({
-	validateSearch: decisionsSearchSchema,
+	validateSearch: dataTableSearchSchema({
+		sort: { field: "status", order: "asc" },
+	}),
 	loader: async ({ context }) => {
 		await context.queryClient.query({
 			...decisionsQueryOptions,

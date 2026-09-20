@@ -1,51 +1,45 @@
 import { Link } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
 import type { DataTableRow } from "@/common/components/data-table/table-features";
-import { RelativeTime } from "@/common/components/relative-dates";
-import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
+import { countryFlag } from "@/common/lib/country-flag";
 import type { HostWithCount } from "@/features/hosts/api/hosts.functions";
+import { hostDecisions } from "./columns";
+
+function Field({
+	label,
+	children,
+}: Readonly<{ label: string; children: React.ReactNode }>) {
+	return (
+		<div className="min-w-0">
+			<p className="mb-0.5 text-xs font-medium text-muted-foreground">
+				{label}
+			</p>
+			<span className="break-all">{children}</span>
+		</div>
+	);
+}
 
 export function HostExpandedRow({
 	row,
 }: Readonly<{ row: DataTableRow<HostWithCount> }>) {
 	const host = row.original;
-	const activeCount = host._count.decisions;
+	const { label, link } = hostDecisions(host);
 
 	return (
-		<div className="px-1 py-2 space-y-4">
-			<div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-				<div>
-					<p className="text-xs font-medium text-muted-foreground mb-0.5">
-						Active Decisions
-					</p>
-					<Badge variant={activeCount > 0 ? "destructive" : "secondary"}>
-						{activeCount}
-					</Badge>
-				</div>
-				<div>
-					<p className="text-xs font-medium text-muted-foreground mb-0.5">
-						Total Bans
-					</p>
-					<span className="font-medium">{host.totalBans ?? 0}</span>
-				</div>
-				<div>
-					<p className="text-xs font-medium text-muted-foreground mb-0.5">
-						First Seen
-					</p>
-					<RelativeTime date={host.firstSeen} />
-				</div>
-				<div>
-					<p className="text-xs font-medium text-muted-foreground mb-0.5">
-						Last Seen
-					</p>
-					<RelativeTime date={host.lastSeen} />
-				</div>
+		<div className="space-y-4 px-1 py-2">
+			<div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
+				<Field label="Country">
+					{host.country ? `${countryFlag(host.country)} ${host.country}` : "—"}
+				</Field>
+				<Field label="AS number">{host.asNumber ?? "—"}</Field>
+				<Field label="AS name">{host.asName ?? "—"}</Field>
+				<Field label="Scope">{host.scope}</Field>
 			</div>
-			<Button size="sm" asChild className="w-full">
-				<Link to="/decisions" search={{ hostIp: host.ip, active: true }}>
+			<Button size="sm" asChild className="w-full sm:w-auto">
+				<Link {...link}>
 					<ExternalLink className="mr-1.5 size-4" />
-					View Decisions
+					{label}
 				</Link>
 			</Button>
 		</div>

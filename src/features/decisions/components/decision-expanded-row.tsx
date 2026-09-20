@@ -1,26 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, Loader2, Trash2 } from "lucide-react";
+import moment from "moment";
+import type { ReactNode } from "react";
 import type { DataTableRow } from "@/common/components/data-table/table-features";
-import { RelativeTime } from "@/common/components/relative-dates";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
 import { Skeleton } from "@/common/components/ui/skeleton";
+import { countryFlag } from "@/common/lib/country-flag";
 import {
 	type DecisionAlertDetail,
 	type DecisionWithHost,
 	getDecisionAlertsFn,
 } from "@/features/decisions/api/decisions.functions";
-
-function originVariant(origin: string) {
-	switch (origin.toLowerCase()) {
-		case "cscli":
-			return "outline" as const;
-		case "capi":
-			return "secondary" as const;
-		default:
-			return "default" as const;
-	}
-}
+import { shortScenario } from "./columns";
 
 function verbColor(verb: string | undefined): string {
 	switch (verb?.toUpperCase()) {
@@ -47,20 +39,28 @@ function statusColor(status: number | undefined): string {
 	return "text-red-600 dark:text-red-400";
 }
 
-interface AlertEvidenceProps {
-	alert: DecisionAlertDetail;
+function Field({
+	label,
+	children,
+}: Readonly<{ label: string; children: ReactNode }>) {
+	return (
+		<div className="min-w-0">
+			<p className="mb-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+				{label}
+			</p>
+			<span className="break-all text-sm">{children}</span>
+		</div>
+	);
 }
 
-function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
+function AlertEvidence({ alert }: Readonly<{ alert: DecisionAlertDetail }>) {
 	const firstEvent = alert.events[0];
 
 	return (
 		<div className="space-y-2">
 			<div className="flex items-center gap-2">
 				<span className="text-xs font-semibold">
-					{alert.scenario
-						.replace("crowdsecurity/", "")
-						.replace("firewallservices/", "")}
+					{shortScenario(alert.scenario)}
 				</span>
 				<span className="text-xs text-muted-foreground">
 					· {alert.events.length} event{alert.events.length === 1 ? "" : "s"}
@@ -68,14 +68,14 @@ function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
 			</div>
 
 			{alert.entryType === "paths" && alert.entries.length > 0 && (
-				<div className="max-h-48 overflow-y-auto space-y-0.5 rounded border p-1">
+				<div className="max-h-48 space-y-0.5 overflow-y-auto rounded border p-1">
 					{alert.events
 						.filter((e) => e.eventType === "http")
 						.map((event, idx) => (
 							<div
 								// biome-ignore lint/suspicious/noArrayIndexKey: events carry no stable id and the list is never reordered
 								key={`${idx}-${event.httpVerb}${event.httpPath}${event.httpStatus}`}
-								className="flex items-center gap-2 text-xs py-0.5"
+								className="flex items-center gap-2 py-0.5 text-xs"
 							>
 								{event.httpVerb && (
 									<span
@@ -85,7 +85,7 @@ function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
 									</span>
 								)}
 								<span
-									className="font-mono flex-1 truncate"
+									className="flex-1 truncate font-mono"
 									title={event.httpPath}
 								>
 									{event.httpPath ?? "—"}
@@ -103,8 +103,8 @@ function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
 			)}
 
 			{alert.entryType === "ports" && (
-				<div className="rounded border p-2 text-xs space-y-1.5">
-					<p className="text-muted-foreground font-medium">
+				<div className="space-y-1.5 rounded border p-2 text-xs">
+					<p className="font-medium text-muted-foreground">
 						{alert.events.length} dropped connection
 						{alert.events.length === 1 ? "" : "s"}
 						{firstEvent?.eventType === "firewall_pf" &&
@@ -116,7 +116,7 @@ function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
 							{alert.entries.map((port) => (
 								<span
 									key={port}
-									className="font-mono rounded bg-muted px-1.5 py-0.5 text-[11px]"
+									className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]"
 								>
 									{port}
 								</span>
@@ -127,11 +127,11 @@ function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
 			)}
 
 			{alert.entryType === "usernames" && alert.entries.length > 0 && (
-				<div className="max-h-32 overflow-y-auto space-y-0.5 rounded border p-1">
+				<div className="max-h-32 space-y-0.5 overflow-y-auto rounded border p-1">
 					{alert.entries.map((user) => (
 						<div
 							key={user}
-							className="flex items-center gap-2 text-xs py-0.5 px-1"
+							className="flex items-center gap-2 px-1 py-0.5 text-xs"
 						>
 							<span className="font-mono">{user}</span>
 						</div>
@@ -154,6 +154,7 @@ export function DecisionExpandedRow({
 	deletingId,
 }: Readonly<DecisionExpandedRowProps>) {
 	const decision = row.original;
+	const host = decision.host;
 	const isDeleting = deletingId === decision.id;
 
 	const { data: alerts = [], isLoading } = useQuery({
@@ -164,7 +165,7 @@ export function DecisionExpandedRow({
 	});
 
 	return (
-		<div className="relative px-1 py-2 space-y-4">
+		<div className="relative space-y-4 px-1 py-2">
 			{isDeleting && (
 				<div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-[2px]">
 					<div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -173,58 +174,35 @@ export function DecisionExpandedRow({
 					</div>
 				</div>
 			)}
-			<div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-				<div className="col-span-2">
-					<p className="text-xs font-medium text-muted-foreground mb-0.5">
-						Scenario
-					</p>
-					<span className="font-medium break-all">
-						{decision.scenario.replace("crowdsecurity/", "")}
-					</span>
-				</div>
-				<div>
-					<p className="text-xs font-medium text-muted-foreground mb-0.5">
-						Origin
-					</p>
-					<Badge variant={originVariant(decision.origin)}>
-						{decision.origin}
-					</Badge>
-				</div>
-				<div>
-					<p className="text-xs font-medium text-muted-foreground mb-0.5">
-						Country
-					</p>
-					<span>{decision.host.country ?? "—"}</span>
-				</div>
-				{decision.host.asNumber && (
-					<div className="col-span-2">
-						<p className="text-xs font-medium text-muted-foreground mb-0.5">
-							AS
-						</p>
-						<span>
-							{decision.host.asNumber}
-							{decision.host.asName && ` — ${decision.host.asName}`}
-						</span>
-					</div>
-				)}
-				<div>
-					<p className="text-xs font-medium text-muted-foreground mb-0.5">
-						Duration
-					</p>
-					<span>{decision.duration}</span>
-				</div>
-				<div>
-					<p className="text-xs font-medium text-muted-foreground mb-0.5">
-						Expires
-					</p>
-					<RelativeTime date={decision.expiresAt} />
-				</div>
+
+			<div className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-lg border bg-muted/30 p-3 sm:grid-cols-4">
+				<Field label="Location">
+					{host.country ? `${countryFlag(host.country)} ${host.country}` : "—"}
+				</Field>
+				<Field label="AS name">{host.asName ?? "—"}</Field>
+				<Field label="AS number">{host.asNumber ?? "—"}</Field>
+				<Field label="Created">
+					{moment(decision.createdAt).format("DD/MM/YYYY HH:mm")}
+				</Field>
+			</div>
+
+			<div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
+				<Field label="Scenario">{decision.scenario}</Field>
+				<Field label="Origin">
+					<Badge variant="outline">{decision.origin}</Badge>
+				</Field>
+				<Field label="Duration">{decision.duration}</Field>
+				<Field label="Expires">
+					{decision.expiresAt
+						? moment(decision.expiresAt).format("DD/MM/YYYY HH:mm")
+						: "—"}
+				</Field>
 			</div>
 
 			{decision.alerts.length > 0 && (
 				<div className="space-y-3">
-					<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-						Alert Evidence
+					<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+						Alert evidence
 					</p>
 					{isLoading ? (
 						<div className="space-y-2">
@@ -245,7 +223,7 @@ export function DecisionExpandedRow({
 					<Button
 						variant="destructive"
 						size="sm"
-						className="flex-1"
+						className="flex-1 sm:flex-none"
 						icon={Trash2}
 						iconPlacement="left"
 						loading={isDeleting}
@@ -253,22 +231,23 @@ export function DecisionExpandedRow({
 							onDelete(decision.id, () => row.toggleExpanded(false))
 						}
 					>
-						{isDeleting ? "Deleting…" : "Delete"}
+						{isDeleting ? "Deleting…" : "Delete decision"}
 					</Button>
 				)}
 				<Button
-					variant="default"
+					variant="outline"
 					size="sm"
-					className="flex-1"
-					onClick={() =>
-						window.open(
-							`https://app.crowdsec.net/cti/${decision.hostIp}`,
-							"_blank",
-						)
-					}
+					className="flex-1 sm:flex-none"
+					asChild
 				>
-					<ExternalLink className="mr-1.5 size-4" />
-					CrowdSec CTI
+					<a
+						href={`https://app.crowdsec.net/cti/${decision.hostIp}`}
+						target="_blank"
+						rel="noreferrer"
+					>
+						<ExternalLink className="mr-1.5 size-4" />
+						CrowdSec CTI
+					</a>
 				</Button>
 			</div>
 		</div>
