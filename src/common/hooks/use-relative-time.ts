@@ -1,46 +1,54 @@
 import moment from "moment";
-import { useEffect, useState } from "react";
+import { useCallback, useRef, useSyncExternalStore } from "react";
+
+/** One ticker for every relative time on the page, stopped when the last unmounts */
+const listeners = new Set<() => void>();
+let ticker: ReturnType<typeof setInterval> | undefined;
+let tickVersion = 0;
+
+function subscribe(listener: () => void) {
+	listeners.add(listener);
+	ticker ??= setInterval(() => {
+		tickVersion++;
+		for (const notify of listeners) {
+			notify();
+		}
+	}, 1_000);
+
+	return () => {
+		listeners.delete(listener);
+		if (listeners.size === 0 && ticker !== undefined) {
+			clearInterval(ticker);
+			ticker = undefined;
+		}
+	};
+}
+
+const getServerSnapshot = () => "";
+
+type Snapshot = { version: number; time: number | null; value: string };
 
 /**
- * Returns a live-updating relative time string (e.g. "2 minutes ago", "in 3 hours").
- * Refresh interval adapts based on how far away the date is:
- *   < 1 min  → every 1s
- *   < 1 hour → every 30s
- *   < 1 day  → every 5 min
- *   else     → every 1 hour
+ * A live "2 minutes ago" string. The snapshot must be cached per tick:
+ * useSyncExternalStore re-reads it after commit, and recomputing from the clock
+ * each call loops forever.
  */
 export function useRelativeTime(
 	date: string | Date | null | undefined,
 ): string {
-	const [relative, setRelative] = useState(() =>
-		date ? moment(date).fromNow() : "",
-	);
+	const time = date ? new Date(date).getTime() : null;
+	const cache = useRef<Snapshot>({ version: -1, time: null, value: "" });
 
-	useEffect(() => {
-		if (!date) return;
+	const getSnapshot = useCallback(() => {
+		if (cache.current.version !== tickVersion || cache.current.time !== time) {
+			cache.current = {
+				version: tickVersion,
+				time,
+				value: time === null ? "" : moment(time).fromNow(),
+			};
+		}
+		return cache.current.value;
+	}, [time]);
 
-		const update = () => setRelative(moment(date).fromNow());
-		update();
-
-		const getInterval = () => {
-			const diffMs = Math.abs(moment().diff(moment(date)));
-			if (diffMs < 60_000) return 1_000;
-			if (diffMs < 3_600_000) return 30_000;
-			if (diffMs < 86_400_000) return 300_000;
-			return 3_600_000;
-		};
-
-		let timer: ReturnType<typeof setTimeout>;
-		const schedule = () => {
-			timer = setTimeout(() => {
-				update();
-				schedule();
-			}, getInterval());
-		};
-		schedule();
-
-		return () => clearTimeout(timer);
-	}, [date]);
-
-	return relative;
+	return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
