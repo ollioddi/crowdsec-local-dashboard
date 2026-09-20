@@ -253,8 +253,13 @@ export class LapiClient {
 
 		if (!response.ok) {
 			const body = await response.text().catch(() => "");
+			// LAPI reports an already-gone decision as a 500 carrying this message,
+			// not as a 200 with nbDeleted 0
+			if (response.status === 404 || /doesn't exist|not found/i.test(body)) {
+				return { deleted: false };
+			}
 			throw new Error(
-				`Failed to delete decision ${id}: ${response.status} ${response.statusText} — ${body}`,
+				`Failed to delete decision ${id}: ${response.status} ${response.statusText}: ${body}`,
 			);
 		}
 
