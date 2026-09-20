@@ -4,7 +4,9 @@
 
 A self-hosted local web dashboard for viewing and managing decisions made by your [CrowdSec](https://crowdsec.net) instance. Built for homelab use - no enterprise account or cloud connectivity required.
 
-<img src="readme/crowdsec-dashboard-desktop-decisions.png" width="600" alt="Hosts view"/><br/>
+<!-- screenshots:hero -->
+<img src="readme/crowdsec-dashboard-desktop-decisions.png" width="600" alt="Decisions - every filter, sort and page lives in the URL"/><br/>
+<!-- /screenshots:hero -->
 
 ---
 
@@ -26,30 +28,41 @@ This dashboard replaces all of that with a filterable table and a delete button.
 
 ## Screenshots (Desktop)
 
+<!-- screenshots:desktop -->
 <table>
   <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-desktop-hosts.png" width="280" alt="Hosts view"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-desktop-users.png" width="280" alt="Decisions view"/><br/><sub>Users - Show users and login sources</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-desktop-login.png" width="420" alt="Login with optional OIDC SSO (the button label is configurable)"/><br/><sub>Login with optional OIDC SSO (the button label is configurable)</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-desktop-decisions-filters.png" width="420" alt="Decisions - filter chips with per-column operators and facet counts"/><br/><sub>Decisions - filter chips with per-column operators and facet counts</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="readme/crowdsec-dashboard-desktop-decisions-expanded.png" width="420" alt="Decisions - expanded row showing the HTTP requests behind a ban"/><br/><sub>Decisions - expanded row showing the HTTP requests behind a ban</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-desktop-hosts.png" width="420" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="readme/crowdsec-dashboard-desktop-users.png" width="420" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
   </tr>
 </table>
+<!-- /screenshots:desktop -->
 
 ## Screenshots (Mobile)
 
+<!-- screenshots:mobile -->
 <table>
   <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-login.png" width="280" alt="Hosts view"/><br/><sub>Login with optional OIDC SSO (Button text can be customized)</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-users.png" width="280" alt="Decisions view"/><br/><sub>Users - Show users and login sources</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-login.png" width="230" alt="Login with optional OIDC SSO (the button label is configurable)"/><br/><sub>Login with optional OIDC SSO (the button label is configurable)</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-decisions.png" width="230" alt="Decisions - cards instead of a sideways scroll"/><br/><sub>Decisions - cards instead of a sideways scroll</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-decisions-http.png" width="230" alt="Decisions - expanded card showing HTTP alert details"/><br/><sub>Decisions - expanded card showing HTTP alert details</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-sidebar.png" width="280" alt="Navigation sidebar"/><br/><sub>Sidebar - slide-out navigation with theme toggle</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-hosts.png" width="280" alt="User management"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-decisions-ports.png" width="230" alt="Decisions - expanded card showing a port scan"/><br/><sub>Decisions - expanded card showing a port scan</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-hosts.png" width="230" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-users.png" width="230" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
   </tr>
-    <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-decisions.png" width="280" alt="Navigation sidebar"/><br/><sub>Decisions - expanded row showing HTTP alert details</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-decisions2.png" width="280" alt="User management"/><br/><sub>Decisions - expanded row showing Port Scan alert details</sub></td>
+  <tr>
+    <td align="center"><img src="readme/crowdsec-dashboard-mobile-sidebar.png" width="230" alt="Sidebar - slide-out navigation with theme toggle"/><br/><sub>Sidebar - slide-out navigation with theme toggle</sub></td>
   </tr>
 </table>
-
+<!-- /screenshots:mobile -->
 
 ## Features
 
@@ -263,6 +276,18 @@ cp .env.example .env   # fill in your values
 pnpm run db:push       # creates the SQLite schema and generates the Prisma client
 pnpm run dev           # start dev server on http://localhost:3000
 ```
+
+### Screenshots
+
+`pnpm screenshots` regenerates every image in this README. It seeds a throwaway
+database in `.demo/`, builds the app, drives Chromium through each view at
+desktop and phone sizes, and rewrites the screenshot blocks above. Run it after
+any change to the UI. Flags: `--only=<name>` for a subset, `--keep-data` to
+reuse the last database, `--no-build`, `--no-readme`.
+
+The demo addresses come from reserved ranges, so nothing in the images needs
+blurring. Add or change a shot by editing the `scenes` list in
+`scripts/screenshots.ts`, where each entry carries its own README caption.
 
 ---
 

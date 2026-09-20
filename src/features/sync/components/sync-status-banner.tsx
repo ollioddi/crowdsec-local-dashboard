@@ -49,6 +49,7 @@ function Banner({
 	return (
 		<div
 			role="status"
+			data-slot="sync-banner"
 			className={`flex items-start gap-3 border-b px-4 py-2 text-sm ${toneClass}`}
 		>
 			<TriangleAlert className="mt-0.5 size-4 shrink-0" />

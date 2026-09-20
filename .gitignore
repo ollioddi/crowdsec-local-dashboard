@@ -11,6 +11,7 @@ count.txt
 .output
 .vinxi
 todos.json
+.demo
 *.db
 *.db-journal
 
