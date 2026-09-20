@@ -7,10 +7,11 @@
  *   extractAlertData(alert)  — sync-time, called in sync/db.ts
  *                              extracts { entries, entryType } for DB storage
  */
-import type { AlertEvent, CrowdSecAlert } from "@/common/crowdsec-lapi/types";
+import type { AlertEvent } from "@/common/crowdsec-lapi/types";
 import {
 	type AlertEntryType,
 	detectEventType,
+	type ExtractableAlert,
 	extractMeta,
 	type ParsedEventMeta,
 	parseCommon,
@@ -19,7 +20,12 @@ import * as firewallPf from "./firewall-pf";
 import * as http from "./http";
 import * as ssh from "./ssh";
 
-export type { AlertEntryType, EventType, ParsedEventMeta } from "./common";
+export type {
+	AlertEntryType,
+	EventType,
+	ExtractableAlert,
+	ParsedEventMeta,
+} from "./common";
 
 export type AlertExtract = {
 	entries: string[];
@@ -42,7 +48,7 @@ export function parseAlertEvent(event: AlertEvent): ParsedEventMeta {
 }
 
 /** Extracts entries[] and entryType for DB storage. Called at sync time. */
-export function extractAlertData(alert: CrowdSecAlert): AlertExtract {
+export function extractAlertData(alert: ExtractableAlert): AlertExtract {
 	const firstEvent = alert.events?.[0];
 	if (!firstEvent) return { entries: [], entryType: "none" };
 

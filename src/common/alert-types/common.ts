@@ -1,4 +1,7 @@
-import type { AlertEvent } from "@/common/crowdsec-lapi/types";
+import type { AlertEvent, CrowdSecAlert } from "@/common/crowdsec-lapi/types";
+
+/** Exactly the fields extraction reads, so a caller cannot pass a lying alert. */
+export type ExtractableAlert = Pick<CrowdSecAlert, "events" | "meta">;
 
 /** Discriminates the raw log format that produced the alert events. */
 export type EventType = "http" | "firewall_pf" | "ssh" | "unknown";

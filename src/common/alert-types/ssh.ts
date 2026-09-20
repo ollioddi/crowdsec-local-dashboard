@@ -7,9 +7,10 @@
  * sync-time:  extractEntries(alert) → unique targeted usernames
  * fetch-time: parseEvent(event, meta) → ParsedEventMeta with sshUser/sshService
  */
-import type { AlertEvent, CrowdSecAlert } from "@/common/crowdsec-lapi/types";
+import type { AlertEvent } from "@/common/crowdsec-lapi/types";
 import {
 	type AlertEntryType,
+	type ExtractableAlert,
 	type ParsedEventMeta,
 	parseCommon,
 	present,
@@ -18,7 +19,7 @@ import {
 export const ENTRY_TYPE: AlertEntryType = "usernames";
 
 /** Unique targeted usernames across all events. Stored in Alert.entries at sync time. */
-export function extractEntries(alert: CrowdSecAlert): string[] {
+export function extractEntries(alert: ExtractableAlert): string[] {
 	const seen = new Set<string>();
 	for (const event of alert.events ?? []) {
 		const meta = Object.fromEntries(event.meta.map((m) => [m.key, m.value]));

@@ -357,3 +357,54 @@ export async function pruneOldDecisions(
 
 	return [...new Set(toPrune.map((d) => d.hostIp))];
 }
+
+/**
+ * Re-derives entries/entryType from stored events, for alerts written before
+ * extraction existed. Those never refresh once their decision goes inactive.
+ * Firewall alerts recover their type but not ports: dst_port was never stored.
+ */
+export async function repairAlertExtracts(): Promise<number> {
+	const candidates = await prisma.alert.findMany({
+		where: { entryType: "none", NOT: { events: "[]" } },
+		select: { id: true, events: true },
+	});
+	if (candidates.length === 0) return 0;
+
+	let repaired = 0;
+	for (const batch of chunks(candidates)) {
+		const updates = [];
+		for (const row of batch) {
+			let events: CrowdSecAlert["events"];
+			try {
+				events = JSON.parse(row.events);
+			} catch {
+				continue;
+			}
+			if (!events?.length) continue;
+
+			// meta is empty: alert-level meta was never persisted, so firewall
+			// alerts recover their type but not their ports
+			const { entries, entryType } = extractAlertData({ events, meta: [] });
+			if (entryType === "none") continue;
+
+			updates.push(
+				prisma.alert.update({
+					where: { id: row.id },
+					data: { entries: JSON.stringify(entries), entryType },
+				}),
+			);
+		}
+		if (updates.length > 0) {
+			await prisma.$transaction(updates);
+			repaired += updates.length;
+		}
+	}
+
+	if (repaired > 0) {
+		log.info("Recovered entries for {repaired} of {candidates} blank alerts", {
+			repaired,
+			candidates: candidates.length,
+		});
+	}
+	return repaired;
+}

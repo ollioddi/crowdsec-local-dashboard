@@ -7,9 +7,10 @@
  * sync-time:  extractEntries(alert) → unique http_paths stored in Alert.entries
  * fetch-time: parseEvent(event, meta) → ParsedEventMeta with verb/path/status
  */
-import type { AlertEvent, CrowdSecAlert } from "@/common/crowdsec-lapi/types";
+import type { AlertEvent } from "@/common/crowdsec-lapi/types";
 import {
 	type AlertEntryType,
+	type ExtractableAlert,
 	type ParsedEventMeta,
 	parseCommon,
 	present,
@@ -18,7 +19,7 @@ import {
 export const ENTRY_TYPE: AlertEntryType = "paths";
 
 /** Unique http_paths across all events. Stored in Alert.entries at sync time. */
-export function extractEntries(alert: CrowdSecAlert): string[] {
+export function extractEntries(alert: ExtractableAlert): string[] {
 	const seen = new Set<string>();
 	for (const event of alert.events ?? []) {
 		const path = event.meta.find((m) => m.key === "http_path")?.value;

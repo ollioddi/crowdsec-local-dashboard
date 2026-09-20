@@ -10,9 +10,10 @@
  *              not in individual event meta — the pf parser aggregates them)
  * fetch-time: parseEvent(event, meta) → ParsedEventMeta with iface/rule/service
  */
-import type { AlertEvent, CrowdSecAlert } from "@/common/crowdsec-lapi/types";
+import type { AlertEvent } from "@/common/crowdsec-lapi/types";
 import {
 	type AlertEntryType,
+	type ExtractableAlert,
 	type ParsedEventMeta,
 	parseCommon,
 	present,
@@ -21,7 +22,7 @@ import {
 export const ENTRY_TYPE: AlertEntryType = "ports";
 
 /** Destination ports from alert-level meta. Stored in Alert.entries at sync time. */
-export function extractEntries(alert: CrowdSecAlert): string[] {
+export function extractEntries(alert: ExtractableAlert): string[] {
 	const raw = alert.meta?.find((m) => m.key === "dst_port")?.value;
 	if (!raw) return [];
 	try {

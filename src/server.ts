@@ -4,6 +4,7 @@ import { env } from "@/common/lib/env";
 import { errorFields, initLogging, logger } from "@/common/lib/logging/logger";
 import { closeAllSSEConnections } from "@/common/lib/sse.server";
 import { APP_VERSION } from "@/common/lib/version";
+import { repairAlertExtracts } from "@/features/sync/lib/db";
 import { recordSyncResult } from "@/features/sync/lib/status";
 import { syncDecisions } from "@/features/sync/lib/sync";
 
@@ -82,6 +83,8 @@ async function boot() {
 	});
 	await prisma.$queryRaw`SELECT 1`;
 	log.info("Database reachable", { url: env.DATABASE_URL });
+	// Alerts stored before entry extraction existed never refresh on their own
+	await repairAlertExtracts();
 	startDecisionPolling();
 	if (env.OIDC_ISSUER_URL) {
 		log.info("SSO enabled", { issuer: env.OIDC_ISSUER_URL });
