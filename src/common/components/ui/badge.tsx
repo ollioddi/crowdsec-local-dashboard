@@ -5,17 +5,20 @@ import type * as React from "react";
 import { cn } from "@/common/lib/utils";
 
 const badgeVariants = cva(
-	"inline-flex items-center justify-center rounded-full border border-transparent px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+	"inline-flex items-center justify-center rounded-full border border-transparent h-6 px-2 leading-none text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
 	{
 		variants: {
 			variant: {
 				default: "bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
 				secondary:
-					"bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
+					"border-border bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
 				destructive:
 					"bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
 				outline:
 					"border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+				warning:
+					"border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+				info: "border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-400",
 				ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
 				link: "text-primary underline-offset-4 [a&]:hover:underline",
 			},

@@ -24,13 +24,14 @@ export function IPCopyBadge({ ip }: Readonly<{ ip: string }>) {
 
 	return (
 		<Badge
+			asChild
 			variant="outline"
 			className={`cursor-pointer font-mono text-sm${isCopied ? " text-green-500" : ""}`}
-			onClick={handleCopy}
-			title={ip}
 		>
-			{display}
-			<ClipboardCopy className="ml-1.5 size-3" />
+			<button type="button" onClick={handleCopy} title={ip}>
+				{display}
+				<ClipboardCopy className="ml-1.5 size-3" />
+			</button>
 		</Badge>
 	);
 }
