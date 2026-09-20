@@ -218,6 +218,15 @@ function Sidebar({
 						} as React.CSSProperties
 					}
 					side={side}
+					onOpenAutoFocus={(event) => {
+						// Radix's scan lands on the footer theme toggle and pops its tooltip
+						event.preventDefault();
+						const panel = event.currentTarget as HTMLElement | null;
+						const firstItem = panel?.querySelector<HTMLElement>(
+							'[data-slot="sidebar-content"] [data-slot="sidebar-menu-button"]',
+						);
+						(firstItem ?? panel)?.focus({ preventScroll: true });
+					}}
 				>
 					<SheetHeader className="sr-only">
 						<SheetTitle>Sidebar</SheetTitle>
@@ -546,7 +555,9 @@ function SidebarMenuButton({
 		/>
 	);
 
-	if (!tooltip) {
+	// A tooltip that cannot show still opens on focus and swallows the Escape
+	// that should close the mobile sidebar
+	if (!tooltip || isMobile || state !== "collapsed") {
 		return button;
 	}
 
@@ -559,12 +570,7 @@ function SidebarMenuButton({
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>{button}</TooltipTrigger>
-			<TooltipContent
-				side="right"
-				align="center"
-				hidden={state !== "collapsed" || isMobile}
-				{...tooltip}
-			/>
+			<TooltipContent side="right" align="center" {...tooltip} />
 		</Tooltip>
 	);
 }
