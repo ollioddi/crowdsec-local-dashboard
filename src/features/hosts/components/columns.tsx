@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import type { ColumnDef } from "@tanstack/react-table";
 import { ExternalLink } from "lucide-react";
+import type { DataTableColumnDef } from "@/common/components/data-table/table-features";
 import { IPCopyBadge } from "@/common/components/ip-badge";
 import { RelativeTime } from "@/common/components/relative-dates";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
 import type { HostWithCount } from "@/features/hosts/api/hosts.functions";
 
-export const columns: ColumnDef<HostWithCount>[] = [
+export const columns: DataTableColumnDef<HostWithCount>[] = [
 	{
 		accessorKey: "ip",
 		header: "IP Address",
@@ -53,7 +53,7 @@ export const columns: ColumnDef<HostWithCount>[] = [
 			mobileHeader: "Co.",
 			visibleByDefault: true,
 		},
-		filterFn: "arrIncludesSome",
+		filterFn: "isOneOf",
 		cell: ({ row }) => row.getValue("country") ?? "-",
 	},
 	{

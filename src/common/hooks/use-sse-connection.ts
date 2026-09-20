@@ -1,5 +1,4 @@
-"use no memo";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 /**
  * Manages an SSE connection lifecycle. Returns whether the connection is live.
@@ -15,35 +14,34 @@ export function useSSEConnection<T>(
 	onMessage: (data: T) => void,
 ): boolean {
 	const [connected, setConnected] = useState(false);
-	const onMessageRef = useRef(onMessage);
-	onMessageRef.current = onMessage;
-	const eventSourceRef = useRef<EventSource | null>(null);
-
-	const connect = useCallback(() => {
-		eventSourceRef.current?.close();
-		console.debug("Establishing SSE connection", { url });
-		const eventSource = new EventSource(url);
-		eventSourceRef.current = eventSource;
-
-		eventSource.onopen = () => setConnected(true);
-		eventSource.onerror = () => setConnected(false);
-		eventSource.onmessage = (event) => {
-			try {
-				onMessageRef.current(JSON.parse(event.data) as T);
-			} catch {
-				// ignore malformed messages
-			}
-		};
-	}, [url]);
+	// Always calls the latest onMessage without re-opening the stream
+	const handleMessage = useEffectEvent((data: T) => onMessage(data));
 
 	useEffect(() => {
+		let eventSource: EventSource | null = null;
+
+		const connect = () => {
+			eventSource?.close();
+			console.debug("Establishing SSE connection", { url });
+			eventSource = new EventSource(url);
+			eventSource.onopen = () => setConnected(true);
+			eventSource.onerror = () => setConnected(false);
+			eventSource.onmessage = (event) => {
+				try {
+					handleMessage(JSON.parse(event.data) as T);
+				} catch {
+					// ignore malformed messages
+				}
+			};
+		};
+
 		connect();
 
 		const handleVisibilityChange = () => {
 			// Only reconnect if the browser actually dropped the stream
 			if (
 				document.visibilityState === "visible" &&
-				eventSourceRef.current?.readyState === EventSource.CLOSED
+				eventSource?.readyState === EventSource.CLOSED
 			) {
 				connect();
 			}
@@ -53,11 +51,11 @@ export function useSSEConnection<T>(
 
 		return () => {
 			document.removeEventListener("visibilitychange", handleVisibilityChange);
-			eventSourceRef.current?.close();
-			eventSourceRef.current = null;
+			eventSource?.close();
+			eventSource = null;
 			setConnected(false);
 		};
-	}, [connect]);
+	}, [url]);
 
 	return connected;
 }

@@ -1,8 +1,8 @@
-"use no memo";
 import {
 	flexRender,
-	type Header,
-	type Table as ReactTableType,
+	type RowData,
+	type SortDirection,
+	Subscribe,
 } from "@tanstack/react-table";
 import {
 	ArrowDownNarrowWide,
@@ -12,17 +12,26 @@ import {
 import { Button } from "@/common/components/ui/button";
 import { useIsMobile } from "@/common/hooks/use-mobile";
 import { cn } from "@/common/lib/utils";
+import type { DataTableHeader } from "./table-features";
 
-// This component is used to render the header cell of a data table
-const DataTableHeaderCell = <TData,>({
+function SortIcon({ direction }: { direction: false | SortDirection }) {
+	if (direction === "asc") {
+		return <ArrowUpNarrowWide className="ml-2 h-4 w-4" />;
+	}
+	if (direction === "desc") {
+		return <ArrowDownNarrowWide className="ml-2 h-4 w-4" />;
+	}
+	return <ArrowUpDown className="ml-2 h-4 w-4" />;
+}
+
+// Header objects are stable, so the sort state goes through a subscription
+const DataTableHeaderCell = <TData extends RowData>({
 	header,
 }: Readonly<{
-	header: Header<TData, unknown>;
-	table: ReactTableType<TData>;
+	header: DataTableHeader<TData>;
 }>) => {
 	const column = header.column;
 	const meta = column.columnDef.meta;
-	const isSorted = column.getIsSorted();
 	const isMobile = useIsMobile();
 
 	if (header.isPlaceholder) {
@@ -35,38 +44,38 @@ const DataTableHeaderCell = <TData,>({
 			? meta.mobileHeader
 			: flexRender(column.columnDef.header, header.getContext());
 
-	// Determine which icon to show based on sort state
-	const getSortIcon = () => {
-		if (isSorted === "asc") {
-			return <ArrowUpNarrowWide className="ml-2 h-4 w-4" />;
-		}
-		if (isSorted === "desc") {
-			return <ArrowDownNarrowWide className="ml-2 h-4 w-4" />;
-		}
-		return <ArrowUpDown className="ml-2 h-4 w-4" />;
-	};
+	if (!meta?.sortable) {
+		return (
+			<div className="flex items-center gap-1 py-2">
+				<span className="font-semibold">{label}</span>
+			</div>
+		);
+	}
 
 	return (
-		<div className="flex items-center gap-1 py-2">
-			{(meta?.sortable ?? false) ? (
-				<Button
-					className={cn(
-						"flex items-center hover:border-2 hover:shadow-sm",
-						isSorted &&
-							"bg-background shadow-sm dark:border-input dark:bg-input/30",
-					)}
-					onClick={() => {
-						column.toggleSorting(isSorted === "asc");
-					}}
-					variant="ghost"
-				>
-					<span className="font-semibold">{label}</span>
-					{getSortIcon()}
-				</Button>
-			) : (
-				<span className="font-semibold">{label}</span>
+		<Subscribe
+			source={column.table.atoms.sorting}
+			selector={() => column.getIsSorted()}
+		>
+			{(isSorted) => (
+				<div className="flex items-center gap-1 py-2">
+					<Button
+						className={cn(
+							"flex items-center hover:border-2 hover:shadow-sm",
+							isSorted &&
+								"bg-background shadow-sm dark:border-input dark:bg-input/30",
+						)}
+						onClick={() => {
+							column.toggleSorting(isSorted === "asc");
+						}}
+						variant="ghost"
+					>
+						<span className="font-semibold">{label}</span>
+						<SortIcon direction={isSorted} />
+					</Button>
+				</div>
 			)}
-		</div>
+		</Subscribe>
 	);
 };
 

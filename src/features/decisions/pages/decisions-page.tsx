@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
-import type { ColumnFiltersState, Row } from "@tanstack/react-table";
+import type { ColumnFiltersState } from "@tanstack/react-table";
 import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import DataDisplayToolbar from "@/common/components/data-table/data-display-toolbar";
 import { DataTable } from "@/common/components/data-table/data-table";
+import type { DataTableRow } from "@/common/components/data-table/table-features";
 import { useSSEConnection } from "@/common/hooks/use-sse-connection";
 import {
 	type DecisionWithHost,
@@ -123,7 +124,7 @@ export function DecisionsPage() {
 	);
 
 	const renderSubComponent = useCallback(
-		(row: Row<DecisionWithHost>) => (
+		(row: DataTableRow<DecisionWithHost>) => (
 			<DecisionExpandedRow
 				row={row}
 				onDelete={handleDelete}

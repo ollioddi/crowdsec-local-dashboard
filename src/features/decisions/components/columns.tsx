@@ -1,5 +1,5 @@
-import type { ColumnDef } from "@tanstack/react-table";
 import { ExternalLink, Loader2, Trash2 } from "lucide-react";
+import type { DataTableColumnDef } from "@/common/components/data-table/table-features";
 import { IPLinkBadge } from "@/common/components/ip-badge";
 import { RelativeTime } from "@/common/components/relative-dates";
 import { Badge } from "@/common/components/ui/badge";
@@ -31,13 +31,13 @@ function typeVariant(type: string) {
 export function createColumns(
 	onDelete: (id: number, collapse?: () => void) => void,
 	deletingId: number | undefined,
-): ColumnDef<DecisionWithHost>[] {
+): DataTableColumnDef<DecisionWithHost>[] {
 	return [
 		{
 			accessorKey: "hostIp",
 			header: "IP",
 			meta: { sortable: true, globalFilter: true, visibleByDefault: true },
-			filterFn: "arrIncludesSome",
+			filterFn: "isOneOf",
 			cell: ({ row }) => {
 				const ip = row.getValue<string>("hostIp");
 				return <IPLinkBadge ip={ip} />;
@@ -66,7 +66,7 @@ export function createColumns(
 			header: "Type",
 			size: 80,
 			meta: { filterVariant: "select", visibleByDefault: true },
-			filterFn: "arrIncludesSome",
+			filterFn: "isOneOf",
 			cell: ({ row }) => {
 				const type = row.getValue<string>("type");
 				return <Badge variant={typeVariant(type)}>{type}</Badge>;
@@ -80,7 +80,7 @@ export function createColumns(
 				expandedLabel: "Origin",
 				filterVariant: "select",
 			},
-			filterFn: "arrIncludesSome",
+			filterFn: "isOneOf",
 			cell: ({ row }) => {
 				const origin = row.getValue<string>("origin");
 				return <Badge variant={originVariant(origin)}>{origin}</Badge>;
@@ -97,7 +97,7 @@ export function createColumns(
 				expandedLabel: "Country",
 				filterVariant: "select",
 			},
-			filterFn: "arrIncludesSome",
+			filterFn: "isOneOf",
 			cell: ({ row }) => row.getValue("country") ?? "-",
 		},
 		{
@@ -106,7 +106,7 @@ export function createColumns(
 			size: 80,
 			accessorFn: (row) => (row.active ? "Active" : "Expired"),
 			meta: { sortable: true, filterVariant: "select", visibleByDefault: true },
-			filterFn: "arrIncludesSome",
+			filterFn: "isOneOf",
 			cell: ({ row }) => {
 				const status = row.getValue<string>("status");
 				return (

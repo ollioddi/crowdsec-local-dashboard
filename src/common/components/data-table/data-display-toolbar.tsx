@@ -1,5 +1,4 @@
-"use no memo";
-import type { Column, Table } from "@tanstack/react-table";
+import type { RowData } from "@tanstack/react-table";
 import { RotateCcw, Search, Settings2, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { Badge } from "@/common/components/ui/badge";
@@ -14,12 +13,13 @@ import {
 } from "@/common/components/ui/dropdown-menu";
 import { Input } from "@/common/components/ui/input";
 import { useIsMobile } from "@/common/hooks/use-mobile";
-import { FacetedFilter } from "./faceted-filter";
+import { FacetedFilter, type FacetedOption } from "./faceted-filter";
+import type { DataTableColumn, DataTableInstance } from "./table-features";
 import { getDefaultColumnVisibility } from "./table-utils";
 
-export interface DataDisplayToolbarProps<TData> {
+export interface DataDisplayToolbarProps<TData extends RowData> {
 	/** TanStack Table instance */
-	table: Table<TData>;
+	table: DataTableInstance<TData>;
 	className?: string;
 	/** Placeholder text for the global search input */
 	searchPlaceholder?: string;
@@ -27,15 +27,30 @@ export interface DataDisplayToolbarProps<TData> {
 	extra?: ReactNode;
 }
 
+function columnLabel<TData extends RowData>(column: DataTableColumn<TData>) {
+	return typeof column.columnDef.header === "string"
+		? column.columnDef.header
+		: column.id;
+}
+
+function facetedOptions<TData extends RowData>(
+	column: DataTableColumn<TData>,
+): FacetedOption[] {
+	return Array.from(column.getFacetedUniqueValues().entries())
+		.filter(([value]) => value != null && String(value) !== "")
+		.map(([value, count]) => ({ label: String(value), count }))
+		.sort((a, b) => a.label.localeCompare(b.label));
+}
+
 /* ------------------------------ Global search ----------------------------- */
-const GlobalSearch = <TData,>({
+const GlobalSearch = <TData extends RowData>({
 	table,
 	placeholder = "Search…",
 }: {
-	table: Table<TData>;
+	table: DataTableInstance<TData>;
 	placeholder?: string;
 }) => {
-	const value = (table.getState().globalFilter as string) ?? "";
+	const value = (table.state.globalFilter as string | undefined) ?? "";
 
 	return (
 		<div className="relative w-full sm:max-w-sm">
@@ -61,10 +76,10 @@ const GlobalSearch = <TData,>({
 };
 
 /* --------------------------- Column visibility ---------------------------- */
-const ColumnVisibility = <TData,>({
+const ColumnVisibility = <TData extends RowData>({
 	columns,
 }: {
-	columns: Column<TData>[];
+	columns: DataTableColumn<TData>[];
 }) => {
 	const isMobile = useIsMobile();
 	const defaults = getDefaultColumnVisibility(
@@ -76,10 +91,6 @@ const ColumnVisibility = <TData,>({
 	);
 	const visibleColumns = columns.filter((col) => col.getIsVisible());
 	const hiddenCount = columns.length - visibleColumns.length;
-
-	const toggleColumn = (column: Column<TData>) => {
-		column.toggleVisibility();
-	};
 
 	const resetVisibility = () => {
 		for (const col of columns) {
@@ -119,24 +130,15 @@ const ColumnVisibility = <TData,>({
 					</Button>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				{columns.map((column) => {
-					const label =
-						typeof column.columnDef.header === "string"
-							? column.columnDef.header
-							: column.id;
-
-					return (
-						<DropdownMenuCheckboxItem
-							checked={column.getIsVisible()}
-							key={column.id}
-							onCheckedChange={() => {
-								toggleColumn(column);
-							}}
-						>
-							{label}
-						</DropdownMenuCheckboxItem>
-					);
-				})}
+				{columns.map((column) => (
+					<DropdownMenuCheckboxItem
+						checked={column.getIsVisible()}
+						key={column.id}
+						onCheckedChange={() => column.toggleVisibility()}
+					>
+						{columnLabel(column)}
+					</DropdownMenuCheckboxItem>
+				))}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
@@ -145,7 +147,7 @@ const ColumnVisibility = <TData,>({
 /* -------------------------------------------------------------------------- */
 /*                                   Toolbar                                  */
 /* -------------------------------------------------------------------------- */
-const DataDisplayToolbar = <TData,>({
+const DataDisplayToolbar = <TData extends RowData>({
 	table,
 	className = "",
 	searchPlaceholder,
@@ -163,7 +165,7 @@ const DataDisplayToolbar = <TData,>({
 		.getAllColumns()
 		.filter((col) => col.columnDef.meta?.filterVariant === "select");
 
-	const columnFilters = table.getState().columnFilters;
+	const columnFilters = table.state.columnFilters;
 	const isFiltered = columnFilters.length > 0;
 
 	return (
@@ -175,17 +177,16 @@ const DataDisplayToolbar = <TData,>({
 
 			{/* Faceted filters */}
 			{facetedColumns.map((column) => {
-				const label =
-					typeof column.columnDef.header === "string"
-						? column.columnDef.header
-						: column.id;
 				const currentFilter = columnFilters.find((f) => f.id === column.id);
 				return (
 					<FacetedFilter
 						key={column.id}
-						column={column}
-						title={label}
-						filterValue={(currentFilter?.value as string[]) ?? []}
+						title={columnLabel(column)}
+						options={facetedOptions(column)}
+						selected={(currentFilter?.value as string[] | undefined) ?? []}
+						onChange={(values) =>
+							column.setFilterValue(values.length > 0 ? values : undefined)
+						}
 					/>
 				);
 			})}
@@ -202,7 +203,7 @@ const DataDisplayToolbar = <TData,>({
 				</Button>
 			)}
 
-			{/* Right section — forced to its own row on mobile */}
+			{/* Right section, forced to its own row on mobile */}
 			<div className="flex basis-full items-center justify-between gap-3 sm:basis-auto sm:ml-auto sm:shrink-0 sm:justify-end">
 				{showColumnToggler && <ColumnVisibility columns={toggleableColumns} />}
 				{extra}

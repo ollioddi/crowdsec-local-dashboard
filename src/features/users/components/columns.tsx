@@ -1,9 +1,9 @@
-import type { ColumnDef } from "@tanstack/react-table";
 import { Trash2 } from "lucide-react";
 import {
 	LOCAL_EMAIL_DOMAIN,
 	SETUP_EMAIL_DOMAIN,
 } from "@/common/auth/email-domains";
+import type { DataTableColumnDef } from "@/common/components/data-table/table-features";
 import { RelativeTime } from "@/common/components/relative-dates";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
@@ -15,7 +15,7 @@ export function createColumns(
 	firstUserId: string,
 	currentUserId: string,
 	deletingId: string | undefined,
-): ColumnDef<UserRow>[] {
+): DataTableColumnDef<UserRow>[] {
 	return [
 		{
 			accessorKey: "displayUsername",

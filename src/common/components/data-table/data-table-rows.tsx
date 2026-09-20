@@ -1,26 +1,26 @@
-"use no memo";
 import { useHydrated } from "@tanstack/react-router";
-import {
-	flexRender,
-	type Table as ReactTableType,
-	type Row,
-} from "@tanstack/react-table";
+import { flexRender, type RowData, Subscribe } from "@tanstack/react-table";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import type { ReactElement, ReactNode } from "react";
 import { TableCell, TableRow } from "@/common/components/ui/table";
+import type { DataTableInstance, DataTableRow } from "./table-features";
 
-interface DataTableRowsProps<TData> {
-	table: ReactTableType<TData>;
+type RenderSubComponent<TData extends RowData> = (
+	row: DataTableRow<TData>,
+) => ReactElement;
+
+interface DataTableRowsProps<TData extends RowData> {
+	table: DataTableInstance<TData>;
 	isLoading: boolean;
 	emptyState?: ReactNode;
-	renderSubComponent?: (row: Row<TData>) => ReactElement;
+	renderSubComponent?: RenderSubComponent<TData>;
 }
 
 const VIRTUALIZATION_THRESHOLD = 100;
 const ESTIMATED_ROW_HEIGHT = 41;
 const INITIAL_ROWS_TO_RENDER = 30;
 
-const DataTableRows = <TData,>({
+const DataTableRows = <TData extends RowData>({
 	table,
 	isLoading,
 	emptyState,
@@ -68,14 +68,14 @@ const DataTableRows = <TData,>({
 
 // Virtualized Rows
 
-const VirtualizedRows = <TData,>({
+const VirtualizedRows = <TData extends RowData>({
 	rows,
 	hydrated,
 	renderSubComponent,
 }: {
-	rows: Row<TData>[];
+	rows: DataTableRow<TData>[];
 	hydrated: boolean;
-	renderSubComponent?: (row: Row<TData>) => ReactElement;
+	renderSubComponent?: RenderSubComponent<TData>;
 }) => {
 	const rowVirtualizer = useWindowVirtualizer({
 		count: rows.length,
@@ -130,41 +130,50 @@ const VirtualizedRows = <TData,>({
 
 // Single Row Component
 
-const TableRowWithExpansion = <TData,>({
+// Row objects are stable, so state-dependent reads go through a subscription
+const TableRowWithExpansion = <TData extends RowData>({
 	row,
 	renderSubComponent,
 }: {
-	row: Row<TData>;
-	renderSubComponent?: (row: Row<TData>) => ReactElement;
-}) => {
-	const visibleCells = row.getVisibleCells();
-	const isExpanded = row.getIsExpanded();
+	row: DataTableRow<TData>;
+	renderSubComponent?: RenderSubComponent<TData>;
+}) => (
+	<Subscribe
+		source={row.table.store}
+		selector={(state) => ({
+			isExpanded: state.expanded === true || !!state.expanded[row.id],
+			columnVisibility: state.columnVisibility,
+		})}
+	>
+		{({ isExpanded }) => {
+			const visibleCells = row.getVisibleCells();
+			return (
+				<>
+					<TableRow>
+						{visibleCells.map((cell) => (
+							<TableCell key={cell.id}>
+								{flexRender(cell.column.columnDef.cell, cell.getContext())}
+							</TableCell>
+						))}
+					</TableRow>
 
-	return (
-		<>
-			<TableRow data-state={row.getIsSelected() && "selected"}>
-				{visibleCells.map((cell) => (
-					<TableCell key={cell.id}>
-						{flexRender(cell.column.columnDef.cell, cell.getContext())}
-					</TableCell>
-				))}
-			</TableRow>
-
-			{isExpanded && renderSubComponent && (
-				<TableRow>
-					<TableCell
-						colSpan={visibleCells.length}
-						className="p-0 whitespace-normal"
-					>
-						<div className="sticky left-0 w-[100cqi] p-2">
-							{renderSubComponent(row)}
-						</div>
-					</TableCell>
-				</TableRow>
-			)}
-		</>
-	);
-};
+					{isExpanded && renderSubComponent && (
+						<TableRow>
+							<TableCell
+								colSpan={visibleCells.length}
+								className="p-0 whitespace-normal"
+							>
+								<div className="sticky left-0 w-[100cqi] p-2">
+									{renderSubComponent(row)}
+								</div>
+							</TableCell>
+						</TableRow>
+					)}
+				</>
+			);
+		}}
+	</Subscribe>
+);
 
 // Helper Components
 

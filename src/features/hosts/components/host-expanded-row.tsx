@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import type { Row } from "@tanstack/react-table";
 import { ExternalLink } from "lucide-react";
+import type { DataTableRow } from "@/common/components/data-table/table-features";
 import { RelativeTime } from "@/common/components/relative-dates";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
@@ -8,7 +8,7 @@ import type { HostWithCount } from "@/features/hosts/api/hosts.functions";
 
 export function HostExpandedRow({
 	row,
-}: Readonly<{ row: Row<HostWithCount> }>) {
+}: Readonly<{ row: DataTableRow<HostWithCount> }>) {
 	const host = row.original;
 	const activeCount = host._count.decisions;
 

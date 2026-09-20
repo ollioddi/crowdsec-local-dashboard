@@ -1,24 +1,13 @@
-"use no memo";
 import {
-	type ColumnDef,
 	type ColumnFiltersState,
-	type FilterFn,
-	getCoreRowModel,
-	getExpandedRowModel,
-	getFacetedRowModel,
-	getFacetedUniqueValues,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type Table as ReactTableType,
-	type Row,
+	type ColumnVisibilityState,
+	type RowData,
 	type SortingState,
-	useReactTable,
-	type VisibilityState,
+	useTable,
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	Table,
 	TableBody,
@@ -31,22 +20,28 @@ import { cn } from "@/common/lib/utils";
 import DataTableHeaderCell from "./data-table-header-cell";
 import DataTableRows from "./data-table-rows";
 import PaginationBar from "./pagination-bar";
+import {
+	type DataTableColumnDef,
+	type DataTableInstance,
+	type DataTableRow,
+	dataTableFeatures,
+} from "./table-features";
 import { getDefaultColumnVisibility, globalFilterFn } from "./table-utils";
 
 const EMPTY_FILTERS: ColumnFiltersState = [];
 const EMPTY_SORTING: SortingState = [];
 const EMPTY_GLOBAL_FILTER = "";
 
-interface DataTableProps<TData> {
-	columns: ColumnDef<TData, unknown>[];
+interface DataTableProps<TData extends RowData> {
+	columns: DataTableColumnDef<TData>[];
 	data: TData[];
 	isLoading?: boolean;
 	className?: string;
 	emptyState?: ReactNode;
 	/** Render extra content above the table (e.g. toolbar, search) */
-	header?: (table: ReactTableType<TData>) => ReactNode;
+	header?: (table: DataTableInstance<TData>) => ReactNode;
 	/** Custom sub-component for expandable rows (desktop) */
-	renderSubComponent?: (row: Row<TData>) => ReactElement;
+	renderSubComponent?: (row: DataTableRow<TData>) => ReactElement;
 	/** Initial column filter state (e.g. from URL search params) */
 	initialColumnFilters?: ColumnFiltersState;
 	/** Initial sorting state */
@@ -55,7 +50,7 @@ interface DataTableProps<TData> {
 	initialGlobalFilter?: string;
 }
 
-export function DataTable<TData>({
+export function DataTable<TData extends RowData>({
 	columns,
 	data,
 	isLoading = false,
@@ -73,9 +68,10 @@ export function DataTable<TData>({
 	const [columnFilters, setColumnFilters] =
 		useState<ColumnFiltersState>(initialColumnFilters);
 	const [globalFilter, setGlobalFilter] = useState(initialGlobalFilter);
-	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-		() => getDefaultColumnVisibility(columns, isMobile),
-	);
+	const [columnVisibility, setColumnVisibility] =
+		useState<ColumnVisibilityState>(() =>
+			getDefaultColumnVisibility(columns, isMobile),
+		);
 	const [pagination, setPagination] = useState({
 		pageIndex: 0,
 		pageSize: 10,
@@ -92,50 +88,41 @@ export function DataTable<TData>({
 	}, [isMobile, columns]);
 
 	// Prepend a dedicated chevron expand button column when rows are expandable
-	const effectiveColumns = useMemo((): ColumnDef<TData, unknown>[] => {
-		if (!renderSubComponent) return columns;
+	const expandColumn: DataTableColumnDef<TData> = {
+		id: "_expand",
+		size: 40,
+		cell: ({ row }) => {
+			if (!row.getCanExpand()) return null;
+			return (
+				<button
+					type="button"
+					aria-label={row.getIsExpanded() ? "Collapse row" : "Expand row"}
+					className="flex h-full w-full items-center justify-center p-1"
+					onClick={(e) => {
+						e.stopPropagation();
+						row.toggleExpanded();
+					}}
+				>
+					<ChevronDown
+						className={cn(
+							"h-4 w-4 text-muted-foreground transition-transform duration-200",
+							row.getIsExpanded() && "rotate-180",
+						)}
+					/>
+				</button>
+			);
+		},
+	};
+	const effectiveColumns = renderSubComponent
+		? [expandColumn, ...columns]
+		: columns;
 
-		const expandCol: ColumnDef<TData, unknown> = {
-			id: "_expand",
-			size: 40,
-			cell: ({ row }) => {
-				if (!row.getCanExpand()) return null;
-				return (
-					<button
-						type="button"
-						aria-label={row.getIsExpanded() ? "Collapse row" : "Expand row"}
-						className="flex h-full w-full items-center justify-center p-1"
-						onClick={(e) => {
-							e.stopPropagation();
-							row.toggleExpanded();
-						}}
-					>
-						<ChevronDown
-							className={cn(
-								"h-4 w-4 text-muted-foreground transition-transform duration-200",
-								row.getIsExpanded() && "rotate-180",
-							)}
-						/>
-					</button>
-				);
-			},
-		};
-
-		return [expandCol, ...columns];
-	}, [renderSubComponent, columns]);
-
-	const table = useReactTable({
+	const table = useTable({
+		features: dataTableFeatures,
 		data,
 		columns: effectiveColumns,
 		paginateExpandedRows: false,
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getExpandedRowModel: getExpandedRowModel(),
-		getFacetedRowModel: getFacetedRowModel(),
-		getFacetedUniqueValues: getFacetedUniqueValues(),
-		globalFilterFn: globalFilterFn as FilterFn<TData>,
+		globalFilterFn,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onColumnVisibilityChange: setColumnVisibility,
@@ -177,7 +164,7 @@ export function DataTable<TData>({
 										key={header.id}
 										style={{ width: header.getSize() }}
 									>
-										<DataTableHeaderCell header={header} table={table} />
+										<DataTableHeaderCell header={header} />
 									</TableHead>
 								))}
 							</TableRow>

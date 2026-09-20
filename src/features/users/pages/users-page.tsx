@@ -1,16 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Table } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { useSession } from "@/common/auth/auth-client";
 import DataDisplayToolbar from "@/common/components/data-table/data-display-toolbar";
 import { DataTable } from "@/common/components/data-table/data-table";
+import type { DataTableInstance } from "@/common/components/data-table/table-features";
 import type { UserRow } from "@/features/users/api/users.functions";
 import { deleteUserFn, getUsersFn } from "@/features/users/api/users.functions";
 import { createColumns } from "@/features/users/components/columns";
 import { CreateUserForm } from "@/features/users/components/create-user-form";
 
-function renderUsersTableHeader(table: Table<UserRow>) {
+function renderUsersTableHeader(table: DataTableInstance<UserRow>) {
 	return (
 		<DataDisplayToolbar table={table} searchPlaceholder="Filter by username…" />
 	);

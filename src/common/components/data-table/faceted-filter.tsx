@@ -1,7 +1,4 @@
-"use no memo";
-import type { Column } from "@tanstack/react-table";
 import { Check, PlusCircle } from "lucide-react";
-import { useMemo } from "react";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
 import {
@@ -21,35 +18,25 @@ import {
 import { Separator } from "@/common/components/ui/separator";
 import { cn } from "@/common/lib/utils";
 
-interface FacetedFilterProps<TData, TValue> {
-	column: Column<TData, TValue>;
-	title: string;
-	/** Pass the current filter value explicitly to trigger re-renders (column ref is stable) */
-	filterValue?: string[];
+export interface FacetedOption {
+	label: string;
+	count: number;
 }
 
-export function FacetedFilter<TData, TValue>({
-	column,
+interface FacetedFilterProps {
+	title: string;
+	options: FacetedOption[];
+	selected: string[];
+	onChange: (values: string[]) => void;
+}
+
+export function FacetedFilter({
 	title,
-	filterValue: filterValueProp,
-}: Readonly<FacetedFilterProps<TData, TValue>>) {
-	const facetedValues = column.getFacetedUniqueValues();
-	const filterValue =
-		filterValueProp ?? (column.getFilterValue() as string[]) ?? [];
-
-	const options = useMemo(
-		() =>
-			Array.from(facetedValues.keys())
-				.filter((v) => v != null && String(v) !== "")
-				.map((value) => ({
-					label: String(value),
-					count: facetedValues.get(value) ?? 0,
-				}))
-				.sort((a, b) => a.label.localeCompare(b.label)),
-		[facetedValues],
-	);
-
-	const selectedSet = new Set(filterValue);
+	options,
+	selected,
+	onChange,
+}: Readonly<FacetedFilterProps>) {
+	const selectedSet = new Set(selected);
 
 	const handleSelect = (value: string) => {
 		const next = new Set(selectedSet);
@@ -58,11 +45,8 @@ export function FacetedFilter<TData, TValue>({
 		} else {
 			next.add(value);
 		}
-		const values = Array.from(next);
-		column.setFilterValue(values.length > 0 ? values : undefined);
+		onChange(Array.from(next));
 	};
-
-	const handleClear = () => column.setFilterValue(undefined);
 
 	return (
 		<Popover>
@@ -140,7 +124,7 @@ export function FacetedFilter<TData, TValue>({
 								<CommandSeparator />
 								<CommandGroup>
 									<CommandItem
-										onSelect={handleClear}
+										onSelect={() => onChange([])}
 										className="justify-center text-center"
 									>
 										Clear filters

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import type { Row } from "@tanstack/react-table";
 import { ExternalLink, Loader2, Trash2 } from "lucide-react";
+import type { DataTableRow } from "@/common/components/data-table/table-features";
 import { RelativeTime } from "@/common/components/relative-dates";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
@@ -143,7 +143,7 @@ function AlertEvidence({ alert }: Readonly<AlertEvidenceProps>) {
 }
 
 interface DecisionExpandedRowProps {
-	row: Row<DecisionWithHost>;
+	row: DataTableRow<DecisionWithHost>;
 	onDelete: (id: number, collapse?: () => void) => void;
 	deletingId: number | undefined;
 }
