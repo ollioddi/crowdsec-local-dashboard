@@ -4,6 +4,47 @@ All notable changes to this project are listed here. Each entry is the body of
 the corresponding GitHub release: a hand-written summary followed by the list
 generated from commits.
 
+## [v0.5.1-beta](https://github.com/ollioddi/crowdsec-local-dashboard/releases/tag/v0.5.1-beta) - 2026-09-20
+
+### Highlights
+
+A bug fix release. Two things stopped fresh installs from working.
+
+- **Login works over plain HTTP again.** If you reached the dashboard at `http://<host>:3000`, created your admin account and kept landing back on the login page, this was why. The session was created but your browser discarded the cookie. Nothing to configure, just update.
+- **`.env.example` no longer crashes the container.** Copying it to `.env` without editing it failed on boot with `Invalid environment variables: LAPI_URL: Invalid URL`.
+
+> [!IMPORTANT]
+> Serving the dashboard over HTTPS? Set `BETTER_AUTH_URL` to its public URL, for example `https://dashboard.example.com`. That marks the session cookie `Secure`, which is how it should be behind a reverse proxy. Leave it unset only if you reach the dashboard over plain HTTP. The logs now warn you when it is missing.
+
+Page titles also follow the page now, so tabs read `Hosts (12)` instead of the same title everywhere.
+
+Update:
+
+```yaml
+image: ghcr.io/ollioddi/crowdsec-local-dashboard:0.5.1-beta
+```
+
+```
+docker compose pull && docker compose up -d
+```
+
+### Changes
+
+#### Features
+
+- **ui:** Title each page after what it shows ([735cefc](https://github.com/ollioddi/crowdsec-local-dashboard/commit/735cefc4285f543e65b621753a7fa1175dcbdc19))
+
+#### Bug fixes
+
+- **auth:** Keep the session cookie usable over plain HTTP ([6c4836e](https://github.com/ollioddi/crowdsec-local-dashboard/commit/6c4836ebc3471e69aeaf1c959673b59648ca13b0))
+- **config:** Stop .env.example crashing the container on boot ([c4ebd92](https://github.com/ollioddi/crowdsec-local-dashboard/commit/c4ebd92ff573d0793f60fb3ec2e0eee3ad43f0d8))
+
+#### Documentation
+
+- **readme:** Render the beta note as a callout ([9d89b4f](https://github.com/ollioddi/crowdsec-local-dashboard/commit/9d89b4f28ddf3b97de81cd030d5eead77c42b75d))
+
+**Full diff:** [v0.5.0-beta...v0.5.1-beta](https://github.com/ollioddi/crowdsec-local-dashboard/compare/v0.5.0-beta...v0.5.1-beta)
+
 ## [v0.5.0-beta](https://github.com/ollioddi/crowdsec-local-dashboard/releases/tag/v0.5.0-beta) - 2026-09-20
 
 # v0.5.0-beta
