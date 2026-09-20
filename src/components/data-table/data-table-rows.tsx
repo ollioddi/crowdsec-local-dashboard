@@ -152,8 +152,13 @@ const TableRowWithExpansion = <TData,>({
 
 			{isExpanded && renderSubComponent && (
 				<TableRow>
-					<TableCell colSpan={visibleCells.length}>
-						{renderSubComponent(row)}
+					<TableCell
+						colSpan={visibleCells.length}
+						className="p-0 whitespace-normal"
+					>
+						<div className="sticky left-0 w-[100cqi] p-2">
+							{renderSubComponent(row)}
+						</div>
 					</TableCell>
 				</TableRow>
 			)}

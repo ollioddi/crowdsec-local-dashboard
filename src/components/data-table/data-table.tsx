@@ -164,7 +164,10 @@ export function DataTable<TData>({
 	return (
 		<div className={cn("flex flex-col gap-4", className)}>
 			{header?.(table)}
-			<div className={cn("rounded-lg border overflow-x-auto")}>
+			<div
+				className={cn("rounded-lg border overflow-x-auto")}
+				style={{ containerType: "inline-size" }}
+			>
 				<Table className="min-w-0">
 					<TableHeader className="bg-muted">
 						{table.getHeaderGroups().map((headerGroup) => (
