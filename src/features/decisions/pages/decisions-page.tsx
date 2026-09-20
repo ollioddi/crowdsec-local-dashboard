@@ -5,6 +5,7 @@ import { DataTable } from "@/common/components/data-table/data-table";
 import type { DataTableRow } from "@/common/components/data-table/table-features";
 import { LiveIndicator } from "@/common/components/live-indicator";
 import { useSSEConnection } from "@/common/hooks/use-sse-connection";
+import { useTitle } from "@/common/hooks/use-title";
 import {
 	type DecisionWithHost,
 	deleteDecisionFn,
@@ -24,6 +25,7 @@ export function DecisionsPage() {
 	const search = useSearch({ from: "/_app/decisions" });
 	const navigate = useNavigate({ from: "/decisions" });
 	const { data: decisions = [] } = useQuery(decisionsQueryOptions);
+	useTitle(`Decisions (${decisions.length})`);
 
 	const connected = useSSEConnection<DecisionWithHost[]>(
 		"/sse/decisions",

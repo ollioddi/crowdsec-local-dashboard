@@ -1,3 +1,4 @@
+export const APP_NAME = "CrowdSec Local Dashboard";
 export const GITHUB_REPO = "ollioddi/crowdsec-local-dashboard";
 export const RELEASES_URL = `https://github.com/${GITHUB_REPO}/releases`;
 

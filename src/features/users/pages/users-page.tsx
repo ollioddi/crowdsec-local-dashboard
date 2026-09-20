@@ -3,6 +3,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useSession } from "@/common/auth/auth-client";
 import { DataTable } from "@/common/components/data-table/data-table";
+import { useTitle } from "@/common/hooks/use-title";
 import { deleteUserFn, getUsersFn } from "@/features/users/api/users.functions";
 import { createColumns } from "@/features/users/components/columns";
 import { CreateUserForm } from "@/features/users/components/create-user-form";
@@ -17,6 +18,7 @@ export function UsersPage() {
 	const search = useSearch({ from: "/_app/users" });
 	const navigate = useNavigate({ from: "/users" });
 	const { data: users = [] } = useQuery(usersQueryOptions);
+	useTitle(`Users (${users.length})`);
 	const { data: session } = useSession();
 
 	const firstUserId = users[0]?.id ?? "";

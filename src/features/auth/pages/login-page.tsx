@@ -21,6 +21,7 @@ import {
 	FieldLabel,
 } from "@/common/components/ui/field";
 import { Input } from "@/common/components/ui/input";
+import { useTitle } from "@/common/hooks/use-title";
 
 const signInWithOidc = () =>
 	authClient.signIn.social({ provider: "oidc", callbackURL: "/" });
@@ -28,6 +29,7 @@ const signInWithOidc = () =>
 export const LoginPage = () => {
 	const router = useRouter();
 	const { isFirstSetup, oidcConfig } = useLoaderData({ from: "/login" });
+	useTitle(isFirstSetup ? "Create admin account" : "Login");
 
 	useEffect(() => {
 		if (!isFirstSetup && oidcConfig.enabled && oidcConfig.autoRedirect) {

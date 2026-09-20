@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { DataTable } from "@/common/components/data-table/data-table";
 import { LiveIndicator } from "@/common/components/live-indicator";
 import { useSSEConnection } from "@/common/hooks/use-sse-connection";
+import { useTitle } from "@/common/hooks/use-title";
 import {
 	getHostsFn,
 	type HostWithCount,
@@ -22,6 +23,7 @@ export function HostsPage() {
 	const search = useSearch({ from: "/_app/hosts" });
 	const navigate = useNavigate({ from: "/hosts" });
 	const { data: hosts = [] } = useQuery(hostsQueryOptions);
+	useTitle(`Hosts (${hosts.length})`);
 
 	const connected = useSSEConnection<HostWithCount[]>(
 		"/sse/hosts",
