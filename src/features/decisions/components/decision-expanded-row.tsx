@@ -9,9 +9,9 @@ import { Skeleton } from "@/common/components/ui/skeleton";
 import { countryFlag } from "@/common/lib/country-flag";
 import {
 	type DecisionAlertDetail,
-	type DecisionWithHost,
 	getDecisionAlertsFn,
 } from "@/features/decisions/api/decisions.functions";
+import type { DecisionWithHost } from "@/features/decisions/api/decisions.types";
 import { shortScenario } from "./columns";
 
 function verbColor(verb: string | undefined): string {
@@ -160,7 +160,7 @@ export function DecisionExpandedRow({
 	const { data: alerts = [], isLoading } = useQuery({
 		queryKey: ["decision-alerts", decision.id],
 		queryFn: () => getDecisionAlertsFn({ data: { decisionId: decision.id } }),
-		enabled: decision.alerts.length > 0,
+		enabled: (decision.alertCount ?? 0) > 0,
 		staleTime: Infinity,
 	});
 
@@ -199,7 +199,7 @@ export function DecisionExpandedRow({
 				</Field>
 			</div>
 
-			{decision.alerts.length > 0 && (
+			{(decision.alertCount ?? 0) > 0 && (
 				<div className="space-y-3">
 					<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
 						Alert evidence

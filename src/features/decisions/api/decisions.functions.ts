@@ -2,38 +2,23 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/common/auth/auth.middleware";
 import { logger } from "@/common/lib/logging/logger";
+import type { DecisionsPayload } from "@/features/decisions/api/decisions.types";
 
 /**
  * Get all decisions from the database.
  * The background sync loop keeps the DB in sync with LAPI.
+ *
+ * Hosts come back as a separate lookup rather than embedded per row; see
+ * `joinDecisionHosts` for the client-side join.
  */
 export const getDecisionsFn = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
-	.handler(async () => {
-		const { prisma } = await import("@/common/lib/db");
-		const rows = await prisma.decision.findMany({
-			include: {
-				host: true,
-				alerts: {
-					select: { id: true, entries: true, entryType: true, scenario: true },
-				},
-			},
-			orderBy: { createdAt: "desc" },
-		});
-		return rows.map((decision) => ({
-			...decision,
-			alerts: decision.alerts.map((alert) => ({
-				id: alert.id,
-				scenario: alert.scenario,
-				entries: JSON.parse(alert.entries) as string[],
-				entryType: alert.entryType,
-			})),
-		}));
+	.handler(async (): Promise<DecisionsPayload> => {
+		const { queryDecisionsPayload } = await import(
+			"@/features/decisions/api/decisions-query.server"
+		);
+		return queryDecisionsPayload();
 	});
-
-export type DecisionWithHost = Awaited<
-	ReturnType<typeof getDecisionsFn>
->[number];
 
 /**
  * Fetch full alert data (including parsed events) for a single decision.

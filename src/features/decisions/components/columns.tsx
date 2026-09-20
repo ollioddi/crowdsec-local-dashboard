@@ -5,7 +5,7 @@ import { RelativeTime } from "@/common/components/relative-dates";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
 import { countryFlag } from "@/common/lib/country-flag";
-import type { DecisionWithHost } from "@/features/decisions/api/decisions.functions";
+import type { DecisionWithHost } from "@/features/decisions/api/decisions.types";
 
 export function shortScenario(scenario: string) {
 	return scenario.replace(/^(crowdsecurity|firewallservices)\//, "");
@@ -70,7 +70,7 @@ export function createColumns(
 			header: "Scenario",
 			meta: { sortable: true, filter: "text", globalFilter: true },
 			cell: ({ row }) => {
-				const entries = new Set(row.original.alerts.flatMap((a) => a.entries));
+				const entryCount = row.original.entryCount ?? 0;
 				return (
 					<span className="flex min-w-0 flex-col">
 						<span
@@ -81,8 +81,8 @@ export function createColumns(
 						</span>
 						<span className="truncate text-xs text-muted-foreground">
 							via {row.original.origin}
-							{entries.size > 0 &&
-								` · ${entries.size} entr${entries.size === 1 ? "y" : "ies"}`}
+							{entryCount > 0 &&
+								` · ${entryCount} entr${entryCount === 1 ? "y" : "ies"}`}
 						</span>
 					</span>
 				);

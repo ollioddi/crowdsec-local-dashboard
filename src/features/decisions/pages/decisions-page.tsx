@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { DataTable } from "@/common/components/data-table/data-table";
 import type { DataTableRow } from "@/common/components/data-table/table-features";
@@ -7,10 +8,14 @@ import { LiveIndicator } from "@/common/components/live-indicator";
 import { useSSEConnection } from "@/common/hooks/use-sse-connection";
 import { useTitle } from "@/common/hooks/use-title";
 import {
-	type DecisionWithHost,
 	deleteDecisionFn,
 	getDecisionsFn,
 } from "@/features/decisions/api/decisions.functions";
+import {
+	type DecisionsPayload,
+	type DecisionWithHost,
+	joinDecisionHosts,
+} from "@/features/decisions/api/decisions.types";
 import { createColumns } from "@/features/decisions/components/columns";
 import { DecisionExpandedRow } from "@/features/decisions/components/decision-expanded-row";
 
@@ -24,17 +29,19 @@ export function DecisionsPage() {
 	const queryClient = useQueryClient();
 	const search = useSearch({ from: "/_app/decisions" });
 	const navigate = useNavigate({ from: "/decisions" });
-	const { data: decisions = [] } = useQuery(decisionsQueryOptions);
+	const { data } = useQuery(decisionsQueryOptions);
+	// Hosts arrive as a lookup; every row for an IP shares one host object
+	const decisions = useMemo(() => joinDecisionHosts(data), [data]);
 	useTitle(`Decisions (${decisions.length})`);
 
-	const connected = useSSEConnection<DecisionWithHost[]>(
+	const connected = useSSEConnection<DecisionsPayload>(
 		"/sse/decisions",
 		(incoming) => {
-			queryClient.setQueryData<DecisionWithHost[]>(["decisions"], (old) => {
-				const incomingIds = new Set(incoming.map((d) => d.id));
+			queryClient.setQueryData<DecisionsPayload>(["decisions"], (old) => {
+				const incomingIds = new Set(incoming.decisions.map((d) => d.id));
 				if (old) {
-					const knownIds = new Set(old.map((d) => d.id));
-					for (const decision of incoming) {
+					const knownIds = new Set(old.decisions.map((d) => d.id));
+					for (const decision of incoming.decisions) {
 						if (!knownIds.has(decision.id)) {
 							toast.success("New decision", {
 								description: `${decision.type} on ${decision.hostIp}`,
@@ -44,10 +51,13 @@ export function DecisionsPage() {
 				}
 				// The server sends the active set; anything we knew as active that
 				// is no longer in it has expired and moves to the inactive part.
-				const inactive = (old ?? [])
+				const inactive = (old?.decisions ?? [])
 					.filter((d) => !incomingIds.has(d.id))
 					.map((d) => (d.active ? { ...d, active: false } : d));
-				return [...incoming, ...inactive];
+				return {
+					decisions: [...incoming.decisions, ...inactive],
+					hosts: { ...old?.hosts, ...incoming.hosts },
+				};
 			});
 		},
 	);
@@ -60,12 +70,17 @@ export function DecisionsPage() {
 		mutationFn: (id: number) => deleteDecisionFn({ data: { id } }),
 		onSuccess: (result, id) => {
 			// Update the row in place; the server broadcasts the new state too
-			queryClient.setQueryData<DecisionWithHost[]>(["decisions"], (old) =>
-				old?.map((d) =>
-					d.id === id
-						? { ...d, active: false, expiresAt: result.expiresAt }
-						: d,
-				),
+			queryClient.setQueryData<DecisionsPayload>(
+				["decisions"],
+				(old) =>
+					old && {
+						...old,
+						decisions: old.decisions.map((d) =>
+							d.id === id
+								? { ...d, active: false, expiresAt: result.expiresAt }
+								: d,
+						),
+					},
 			);
 			toast.success("Decision deleted", {
 				description: result.deleted
