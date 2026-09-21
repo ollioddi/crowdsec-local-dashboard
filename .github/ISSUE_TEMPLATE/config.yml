@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Configuration reference
+    url: https://github.com/ollioddi/crowdsec-local-dashboard#configuration
+    about: Every environment variable, with defaults and what it does.
+  - name: CrowdSec LAPI setup
+    url: https://github.com/ollioddi/crowdsec-local-dashboard#crowdsec-lapi-setup
+    about: Creating the machine and bouncer credentials the dashboard needs.

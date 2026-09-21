@@ -1,0 +1,12 @@
+name: Idea or question
+description: Suggest an improvement, or ask about something that is not covered by the README
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: What you are trying to do, and what would make it easier.
+    validations:
+      required: true

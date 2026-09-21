@@ -1,0 +1,47 @@
+name: Bug report
+description: Something in the dashboard is broken or behaving unexpectedly
+labels:
+  - bug
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you expected, and what you got instead. Screenshots are welcome.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Shown at the bottom of the sidebar, e.g. `v0.5.1-beta`.
+      placeholder: v0.5.1-beta
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: How are you running it?
+      options:
+        - Docker Compose
+        - Docker
+        - Node
+        - Kubernetes
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Optional, but it makes a fix much more likely.
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Anything the container printed around the problem. Set `LOG_LEVEL=debug` for more detail.
+      render: shell
