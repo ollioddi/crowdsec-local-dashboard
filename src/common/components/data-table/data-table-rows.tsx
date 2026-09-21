@@ -23,8 +23,9 @@ const ESTIMATED_ROW_HEIGHT = 53;
 const ESTIMATED_EXPANDED_HEIGHT = 400;
 const INITIAL_ROWS_TO_RENDER = 30;
 
-/** Keeps the last row's border in both paths, so 50 and 500 rows match. */
-const KEEP_LAST_BORDER = "[&_tr:last-child]:border-b";
+/** Keeps the last row's separator in both paths, so 50 and 500 rows match. */
+const KEEP_LAST_BORDER =
+	"[&_tr:last-child>*]:shadow-[inset_0_-1px_0_var(--border)]";
 
 /** The table body: one <tbody> for small pages, virtualized groups for large ones */
 const DataTableRows = <TData extends RowData>({
