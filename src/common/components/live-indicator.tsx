@@ -1,5 +1,5 @@
+import { cn } from "cn";
 import { useRelativeTime } from "@/common/hooks/use-relative-time";
-import { cn } from "@/common/lib/utils";
 
 interface LiveIndicatorProps {
 	connected: boolean;

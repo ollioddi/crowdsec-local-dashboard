@@ -4,13 +4,13 @@ import {
 	type SortDirection,
 	Subscribe,
 } from "@tanstack/react-table";
+import { cn } from "cn";
 import {
 	ArrowDownNarrowWide,
 	ArrowUpDown,
 	ArrowUpNarrowWide,
 } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
-import { cn } from "@/common/lib/utils";
 import type { DataTableHeader } from "./table-features";
 
 function SortIcon({ direction }: { direction: false | SortDirection }) {

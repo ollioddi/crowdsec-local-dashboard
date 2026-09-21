@@ -1,4 +1,5 @@
 import type { RowData } from "@tanstack/react-table";
+import { cn } from "cn";
 import { Check, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/common/components/ui/button";
@@ -19,7 +20,6 @@ import {
 	SelectValue,
 } from "@/common/components/ui/select";
 import { Separator } from "@/common/components/ui/separator";
-import { cn } from "@/common/lib/utils";
 import type { DataTableColumn } from "../table-features";
 import { columnLabel } from "../table-utils";
 import {

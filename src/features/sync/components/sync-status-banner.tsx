@@ -1,7 +1,7 @@
+import { cn } from "cn";
 import { ChevronDown, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { useRelativeTime } from "@/common/hooks/use-relative-time";
-import { cn } from "@/common/lib/utils";
 import type { SyncStatus } from "@/features/sync/api/sync-status.functions";
 
 export function SyncStatusBanner({

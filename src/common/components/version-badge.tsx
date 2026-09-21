@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import { cn } from "cn";
 import { ArrowUpCircle, Tag } from "lucide-react";
 import { SidebarMenuButton } from "@/common/components/ui/sidebar";
-import { cn } from "@/common/lib/utils";
 import {
 	APP_VERSION,
 	isNewerVersion,

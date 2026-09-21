@@ -1,5 +1,5 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
-import { cn } from "@/common/lib/utils";
 
 export type PageHeaderStat = {
 	label: string;

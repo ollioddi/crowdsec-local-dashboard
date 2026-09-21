@@ -1,9 +1,9 @@
 import { useHydrated } from "@tanstack/react-router";
 import { flexRender, type RowData, Subscribe } from "@tanstack/react-table";
+import { cn } from "cn";
 import { ChevronDown } from "lucide-react";
 import type { ReactElement, ReactNode, RefObject } from "react";
 import { Button } from "@/common/components/ui/button";
-import { cn } from "@/common/lib/utils";
 import type {
 	DataTableCell,
 	DataTableColumnMeta,

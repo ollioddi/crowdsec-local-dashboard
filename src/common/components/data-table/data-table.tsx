@@ -1,4 +1,5 @@
 import { type RowData, useTable } from "@tanstack/react-table";
+import { cn } from "cn";
 import { ChevronDown } from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
 import { useEffect, useRef } from "react";
@@ -11,7 +12,6 @@ import {
 } from "@/common/components/ui/table";
 import { useIsMobile } from "@/common/hooks/use-mobile";
 import { usePullToRefresh } from "@/common/hooks/use-pull-to-refresh";
-import { cn } from "@/common/lib/utils";
 import DataTableCards from "./data-table-cards";
 import DataTableHeaderCell from "./data-table-header-cell";
 import DataTableRows from "./data-table-rows";

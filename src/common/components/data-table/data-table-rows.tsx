@@ -1,8 +1,8 @@
 import { useHydrated } from "@tanstack/react-router";
 import { flexRender, type RowData, Subscribe } from "@tanstack/react-table";
+import { cn } from "cn";
 import type { ReactElement, ReactNode, RefObject } from "react";
 import { TableBody, TableCell, TableRow } from "@/common/components/ui/table";
-import { cn } from "@/common/lib/utils";
 import type { DataTableInstance, DataTableRow } from "./table-features";
 import { isActionColumn } from "./table-utils";
 import { useVirtualRows } from "./use-virtual-rows";

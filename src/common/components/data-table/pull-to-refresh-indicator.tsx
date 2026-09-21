@@ -1,5 +1,5 @@
+import { cn } from "cn";
 import { RefreshCw } from "lucide-react";
-import { cn } from "@/common/lib/utils";
 
 /** Pushed into view by the pull itself. */
 export function PullToRefreshIndicator({

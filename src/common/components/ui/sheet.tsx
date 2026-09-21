@@ -1,10 +1,9 @@
 "use client";
 
+import { cn } from "cn";
 import { XIcon } from "lucide-react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import type * as React from "react";
-
-import { cn } from "@/common/lib/utils";
 
 function Sheet({
 	...props

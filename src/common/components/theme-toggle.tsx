@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import { MonitorCog, Moon, Sun } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
 import { ButtonGroup } from "@/common/components/ui/button-group";
@@ -13,7 +14,6 @@ import {
 	TooltipTrigger,
 } from "@/common/components/ui/tooltip";
 import { useTheme } from "@/common/context/theme-provider";
-import { cn } from "@/common/lib/utils";
 
 interface ThemeToggleProps {
 	className?: string;
