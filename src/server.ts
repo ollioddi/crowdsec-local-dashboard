@@ -81,7 +81,9 @@ function startDecisionPolling() {
 async function boot() {
 	initLogging({ level: env.LOG_LEVEL, format: env.LOG_FORMAT });
 	const startedAt = performance.now();
-	log.info("CrowdSec Dashboard {version} starting", { version: APP_VERSION });
+	log.info("CrowdSec Local Dashboard {version} starting", {
+		version: APP_VERSION,
+	});
 	await prisma.$queryRaw`SELECT 1`;
 	log.info("Database reachable", { url: env.DATABASE_URL });
 	startDecisionPolling();

@@ -1,4 +1,4 @@
-# CrowdSec Dashboard
+# CrowdSec Local Dashboard
 > [!IMPORTANT]
 > This project is in beta. Expect breaking changes and incomplete features.
 
