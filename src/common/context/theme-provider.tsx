@@ -52,19 +52,23 @@ export function ThemeProvider({
 	// Apply theme class synchronously before paint
 	useLayoutEffect(() => {
 		const root = globalThis.document.documentElement;
+		const query = globalThis.matchMedia("(prefers-color-scheme: dark)");
 
-		root.classList.remove("light", "dark");
+		const apply = () => {
+			const resolved =
+				theme === "system" ? (query.matches ? "dark" : "light") : theme;
 
-		const resolved =
-			theme === "system"
-				? globalThis.matchMedia("(prefers-color-scheme: dark)").matches
-					? "dark"
-					: "light"
-				: theme;
+			root.classList.remove("light", "dark");
+			root.classList.add(resolved);
+			// Installed PWAs paint their status and title bars from this
+			syncThemeColor(resolved);
+		};
 
-		root.classList.add(resolved);
-		// Installed PWAs paint their status and title bars from this
-		syncThemeColor(resolved);
+		apply();
+		if (theme !== "system") return;
+
+		query.addEventListener("change", apply);
+		return () => query.removeEventListener("change", apply);
 	}, [theme]);
 
 	const value = useMemo(
