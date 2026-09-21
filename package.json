@@ -49,6 +49,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "sonner": "^2.0.8",
+    "vaul": "^1.1.2",
     "zod": "^4.6.5"
   },
   "devDependencies": {

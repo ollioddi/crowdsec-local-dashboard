@@ -7,7 +7,10 @@ import { PageHeader } from "@/common/components/page-header";
 import { useTitle } from "@/common/hooks/use-title";
 import { deleteUserFn, getUsersFn } from "@/features/users/api/users.functions";
 import { createColumns } from "@/features/users/components/columns";
-import { CreateUserForm } from "@/features/users/components/create-user-form";
+import {
+	CreateUserCard,
+	CreateUserDrawer,
+} from "@/features/users/components/create-user-form";
 
 export const usersQueryOptions = {
 	queryKey: ["users"],
@@ -47,6 +50,7 @@ export function UsersPage() {
 			<PageHeader
 				title="Users"
 				summary={[{ label: "accounts", value: users.length }]}
+				actions={<CreateUserDrawer className="lg:hidden" />}
 			/>
 			<div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[1fr_350px]">
 				<DataTable
@@ -63,8 +67,8 @@ export function UsersPage() {
 					searchPlaceholder="Search username…"
 					emptyState="No users found."
 				/>
-				<div className="self-start">
-					<CreateUserForm />
+				<div className="hidden self-start lg:block">
+					<CreateUserCard />
 				</div>
 			</div>
 		</div>
