@@ -291,7 +291,7 @@ export function DecisionExpandedRow({
 			)}
 
 			{/* Only what the row or card does not already show */}
-			<div className="grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)_minmax(0,auto)]">
+			<div className="grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-[repeat(4,auto)] sm:justify-between">
 				<Field label="Location">
 					{host.country
 						? `${countryFlag(host.country)} ${countryName(host.country)}`

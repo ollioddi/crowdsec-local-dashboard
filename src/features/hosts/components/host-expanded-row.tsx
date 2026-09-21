@@ -28,7 +28,7 @@ export function HostExpandedRow({
 
 	return (
 		<div className="space-y-4 px-1 py-2">
-			<div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)_minmax(0,auto)]">
+			<div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-[repeat(4,auto)] sm:justify-between">
 				<Field label="Country">
 					{host.country
 						? `${countryFlag(host.country)} ${countryName(host.country)}`

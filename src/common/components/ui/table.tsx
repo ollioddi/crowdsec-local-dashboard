@@ -17,7 +17,10 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
 	return (
 		<thead
 			data-slot="table-header"
-			className={cn("[&_tr]:border-b", className)}
+			className={cn(
+				"[&_tr>*]:shadow-[inset_0_-1px_0_var(--border)]",
+				className,
+			)}
 			{...props}
 		/>
 	);
@@ -27,7 +30,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
 	return (
 		<tbody
 			data-slot="table-body"
-			className={cn("[&_tr:last-child]:border-0", className)}
+			className={cn("[&_tr:last-child>*]:shadow-none", className)}
 			{...props}
 		/>
 	);
@@ -51,7 +54,9 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
 		<tr
 			data-slot="table-row"
 			className={cn(
-				"hover:bg-muted data-[state=selected]:bg-muted border-b transition-colors",
+				// Firefox drops a 1px row border at fractional device pixel ratios, so
+				// the separator is an inset shadow on the cells instead.
+				"hover:bg-muted data-[state=selected]:bg-muted transition-colors [&>*]:shadow-[inset_0_-1px_0_var(--border)]",
 				className,
 			)}
 			{...props}
