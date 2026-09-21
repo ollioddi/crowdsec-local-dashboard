@@ -157,13 +157,13 @@ Refer to the sample `.env.example` file for guidance on setting these environmen
 | `UPDATE_CHECK` | | `true` | Ask GitHub for the newest release a few times a day so the sidebar can point out an update. Set to `false` to never contact GitHub. |
 | `LOG_LEVEL` | | `info` | Lowest level written: `fatal`, `error`, `warn`, `info`, `debug` or `trace`. `debug` shows every sync, `info` only the ones that changed something. |
 | `LOG_FORMAT` | | `human` | `human` is one colored line per event (set `NO_COLOR=1` to drop the colors). `json` writes one JSON object per line for a log collector. |
-
-At `info` the log records what changed: sign-ins and failed sign-ins, users created or deleted, decisions removed from the dashboard and by whom, every sync that changed something, and LAPI outages with their recovery. Stack traces appear only at `debug`, where quiet polls are logged too.
 | `OIDC_CLIENT_ID` | | | Client ID from your OIDC provider. Required to enable SSO. |
 | `OIDC_CLIENT_SECRET` | | | Client secret from your OIDC provider. Required to enable SSO. |
 | `OIDC_ISSUER_URL` | | | Issuer URL of your OIDC provider, e.g. `https://authentik.example.com/application/o/my-app/`. Required to enable SSO. |
 | `OIDC_BUTTON_LABEL` | | `Sign in with SSO` | Label shown on the SSO login button. |
 | `OIDC_AUTO_REDIRECT` | | `false` | Set to `true` to skip the login form and redirect straight to your SSO provider. |
+
+At `info` the log records what changed: sign-ins and failed sign-ins, users created or deleted, decisions removed from the dashboard and by whom, every sync that changed something, and LAPI outages with their recovery. Stack traces appear only at `debug`, where quiet polls are logged too.
 
 ---
 
