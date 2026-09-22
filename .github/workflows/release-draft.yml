@@ -66,7 +66,12 @@ jobs:
           git commit -am "chore(release): pin compose to $VERSION"
           git push --force origin "$branch"
 
-          # See the changelog workflow: PRs need a maintainer token to get CI
+          # A PR opened with the workflow token never gets a CI run, so the
+          # required check leaves it unmergeable and auto-merge waits forever.
+          # RELEASE_TOKEN is a fine-grained PAT whose PRs run CI like any other.
+          if [ -z "${RELEASE_TOKEN:-}" ]; then
+            echo "::warning::RELEASE_TOKEN is not set. The prep PR will get no CI run and cannot auto-merge; merge it by hand."
+          fi
           export GH_TOKEN="${RELEASE_TOKEN:-$GH_TOKEN}"
           if ! gh pr view "$branch" --json number >/dev/null 2>&1; then
             gh pr create --base main --head "$branch" \

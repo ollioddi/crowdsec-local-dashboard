@@ -40,6 +40,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      # The prep PR pinning the compose file has to merge before the draft is
+      # published. Nothing enforces that order, and getting it wrong ships a tag
+      # whose compose file pulls the previous release. Catch it here, once.
+      - name: Compose file pins this release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          want="${TAG#v}"
+          got="$(sed -n -E 's#.*image: ghcr.io/ollioddi/crowdsec-local-dashboard:(.*)#\1#p' docker-compose.yml)"
+          if [ "$got" != "$want" ]; then
+            echo "::error::docker-compose.yml pins '$got' but this tag is '$want'. Merge the release prep PR, then re-run this build."
+            exit 1
+          fi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -106,6 +122,22 @@ jobs:
           path: /tmp/digests
           pattern: digest-*
           merge-multiple: true
+
+      # The prep PR pinning the compose file has to merge before the draft is
+      # published. Nothing enforces that order, and getting it wrong ships a tag
+      # whose compose file pulls the previous release. Catch it here, once.
+      - name: Compose file pins this release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          want="${TAG#v}"
+          got="$(sed -n -E 's#.*image: ghcr.io/ollioddi/crowdsec-local-dashboard:(.*)#\1#p' docker-compose.yml)"
+          if [ "$got" != "$want" ]; then
+            echo "::error::docker-compose.yml pins '$got' but this tag is '$want'. Merge the release prep PR, then re-run this build."
+            exit 1
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
