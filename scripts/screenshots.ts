@@ -158,7 +158,7 @@ async function gotoDecisions(page: Page, search: Record<string, unknown>) {
 
 /** The expanded card is taller than a phone screen, so frame the evidence. */
 async function showEvidence(page: Page) {
-	const evidence = page.getByText("Alert evidence").first();
+	const evidence = page.locator('[data-slot="alert-evidence"]').first();
 	await evidence.waitFor();
 	await evidence.scrollIntoViewIfNeeded();
 }
@@ -209,7 +209,7 @@ const scenes: Scene[] = [
 				pageSize: EXPANDED_PAGE_SIZE,
 				expanded: [String(featured.paths.id)],
 			});
-			await page.getByText("Alert evidence").first().waitFor();
+			await page.locator('[data-slot="alert-evidence"]').first().waitFor();
 		},
 	},
 	{

@@ -123,7 +123,10 @@ function AlertEvidence({ alert }: Readonly<{ alert: DecisionAlertDetail }>) {
 	const count = alert.eventsCount ?? alert.events.length;
 
 	return (
-		<div className="space-y-2 rounded-lg border bg-muted/20 p-2.5">
+		<div
+			data-slot="alert-evidence"
+			className="space-y-2 rounded-lg border bg-muted/20 p-2.5"
+		>
 			<div className="flex flex-wrap items-center gap-x-2 gap-y-1">
 				<span className="text-xs font-semibold">
 					{shortScenario(alert.scenario)}
