@@ -17,13 +17,20 @@ import {
 } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { type Browser, chromium, type Page } from "playwright";
+import {
+	type Browser,
+	type BrowserContext,
+	chromium,
+	type Page,
+} from "playwright";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const demoDir = path.join(root, ".demo");
 const outDir = path.join(root, "readme");
 const port = 3210;
 const origin = `http://localhost:${port}`;
+const RELEASES_URL =
+	"https://github.com/ollioddi/crowdsec-local-dashboard/releases";
 
 const args = process.argv.slice(2);
 const flag = (name: string) => args.includes(`--${name}`);
@@ -41,6 +48,10 @@ const serverEnv: NodeJS.ProcessEnv = {
 	// Left unset on purpose: with no LAPI the poller never overwrites the demo data.
 	LAPI_URL: "",
 	LAPI_BOUNCER_API_TOKEN: "",
+	// Enough for the login shot to show the SSO button; discovery only runs on click
+	OIDC_CLIENT_ID: "demo-client",
+	OIDC_CLIENT_SECRET: "demo-secret",
+	OIDC_ISSUER_URL: "https://sso.example.com/application/o/crowdsec-dashboard/",
 };
 
 type Device = "desktop" | "mobile";
@@ -62,6 +73,8 @@ type Scene = {
 
 // Short enough that the expanded row dominates the frame
 const EXPANDED_PAGE_SIZE = 5;
+
+const LIST_PAGE_SIZE = 15;
 
 const viewports = {
 	desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 },
@@ -138,6 +151,59 @@ async function startServer() {
 	throw new Error("The demo server never became healthy");
 }
 
+/** Nothing newer than the captured branch exists, so the badge is handed a release. */
+async function showUpdateAvailable(context: BrowserContext) {
+	const nullLatest =
+		/("k":\["current","latest"\],"v":\[\{"t":1,"s":"(v?[^"]+)"\},)\{"t":2,"s":0\}/;
+
+	await context.route("**/_serverFn/**", async (route) => {
+		try {
+			const response = await route.fetch();
+			const text = await response.text();
+			const patched = text.replace(
+				nullLatest,
+				(_all, head: string, current: string) => {
+					const version = nextVersion(current);
+					const url = `${RELEASES_URL}/tag/${version}`;
+					return `${head}{"t":10,"i":900,"p":{"k":["version","url"],"v":[{"t":1,"s":"${version}"},{"t":1,"s":"${url}"}]},"o":0}`;
+				},
+			);
+			await route.fulfill({ response, body: patched });
+		} catch {
+			// The context can close with a request still in flight
+		}
+	});
+}
+
+function nextVersion(current: string): string {
+	const match = /^v?(\d+)\.(\d+)\.(\d+)(-.+)?$/.exec(current);
+	if (!match) return "v0.6.0-beta";
+	return `v${match[1]}.${Number(match[2]) + 1}.0${match[4] ?? ""}`;
+}
+
+/** Holds the gesture past its release threshold so the indicator stays in frame. */
+async function holdPullToRefresh(page: Page) {
+	// A string body, because the bundler rewrites named inner functions and the
+	// browser then trips over its __name helper
+	await page.evaluate(`(() => {
+		const scroller = document.querySelector("[data-scroll-container]");
+		if (!scroller) throw new Error("No scroll container to pull on");
+		const fire = (type, clientY) => {
+			const touch = new Touch({ identifier: 1, target: scroller, clientX: 195, clientY });
+			scroller.dispatchEvent(new TouchEvent(type, {
+				bubbles: true,
+				cancelable: true,
+				touches: [touch],
+				targetTouches: [touch],
+				changedTouches: [touch],
+			}));
+		};
+		fire("touchstart", 200);
+		for (let y = 220; y <= 400; y += 20) fire("touchmove", y);
+	})()`);
+	await page.evaluate(() => new Promise(requestAnimationFrame));
+}
+
 async function settle(page: Page) {
 	await page.waitForLoadState("networkidle");
 	await page.evaluate(() => document.fonts.ready);
@@ -158,7 +224,7 @@ async function gotoDecisions(page: Page, search: Record<string, unknown>) {
 
 /** The expanded card is taller than a phone screen, so frame the evidence. */
 async function showEvidence(page: Page) {
-	const evidence = page.getByText("Alert evidence").first();
+	const evidence = page.locator('[data-slot="alert-evidence"]').first();
 	await evidence.waitFor();
 	await evidence.scrollIntoViewIfNeeded();
 }
@@ -181,7 +247,7 @@ const scenes: Scene[] = [
 		fullPage: true,
 		hero: true,
 		run: async (page) => {
-			await gotoDecisions(page, { pageSize: 10 });
+			await gotoDecisions(page, { pageSize: LIST_PAGE_SIZE });
 		},
 	},
 	{
@@ -191,7 +257,7 @@ const scenes: Scene[] = [
 			"Decisions - filter chips with per-column operators and facet counts",
 		run: async (page) => {
 			await gotoDecisions(page, {
-				pageSize: 10,
+				pageSize: LIST_PAGE_SIZE,
 				filters: { status: { operator: "isAnyOf", value: ["Active"] } },
 			});
 			await page.getByRole("button", { name: /^Filter$/ }).click();
@@ -209,7 +275,7 @@ const scenes: Scene[] = [
 				pageSize: EXPANDED_PAGE_SIZE,
 				expanded: [String(featured.paths.id)],
 			});
-			await page.getByText("Alert evidence").first().waitFor();
+			await page.locator('[data-slot="alert-evidence"]').first().waitFor();
 		},
 	},
 	{
@@ -218,7 +284,7 @@ const scenes: Scene[] = [
 		caption: "Hosts - sortable, filterable IP list with active ban counts",
 		fullPage: true,
 		run: async (page) => {
-			await page.goto(`${origin}/hosts`);
+			await page.goto(`${origin}/hosts?pageSize=${LIST_PAGE_SIZE}`);
 			await settle(page);
 		},
 	},
@@ -247,7 +313,7 @@ const scenes: Scene[] = [
 		device: "mobile",
 		caption: "Decisions - cards instead of a sideways scroll",
 		run: async (page) => {
-			await gotoDecisions(page, { pageSize: 10 });
+			await gotoDecisions(page, { pageSize: LIST_PAGE_SIZE });
 		},
 	},
 	{
@@ -277,11 +343,34 @@ const scenes: Scene[] = [
 		},
 	},
 	{
+		name: "mobile-users-create",
+		device: "mobile",
+		caption:
+			"Users - the create form opens in a drawer instead of squashing the table",
+		run: async (page) => {
+			await page.goto(`${origin}/users`);
+			await settle(page);
+			await page.getByRole("button", { name: "New user" }).click();
+			await page.getByRole("dialog").waitFor();
+			await settle(page);
+		},
+	},
+	{
+		name: "mobile-hosts-refresh",
+		device: "mobile",
+		caption: "Hosts - pull the list down to resync with CrowdSec",
+		run: async (page) => {
+			await page.goto(`${origin}/hosts?pageSize=${LIST_PAGE_SIZE}`);
+			await settle(page);
+			await holdPullToRefresh(page);
+		},
+	},
+	{
 		name: "mobile-hosts",
 		device: "mobile",
 		caption: "Hosts - sortable, filterable IP list with active ban counts",
 		run: async (page) => {
-			await page.goto(`${origin}/hosts`);
+			await page.goto(`${origin}/hosts?pageSize=${LIST_PAGE_SIZE}`);
 			await settle(page);
 		},
 	},
@@ -299,7 +388,7 @@ const scenes: Scene[] = [
 		device: "mobile",
 		caption: "Sidebar - slide-out navigation with theme toggle",
 		run: async (page) => {
-			await page.goto(`${origin}/hosts`);
+			await page.goto(`${origin}/hosts?pageSize=${LIST_PAGE_SIZE}`);
 			await settle(page);
 			await page.locator('[data-slot="sidebar-trigger"]').click();
 			await page.getByRole("dialog").waitFor();
@@ -334,6 +423,7 @@ async function capture(
 			document.head.append(style);
 		});
 	});
+	await showUpdateAvailable(context);
 	const page = await context.newPage();
 
 	const loginScene = list.find((scene) => scene.signedOut);
@@ -345,11 +435,18 @@ async function capture(
 	await page.goto(`${origin}/login`);
 	await page.fill("#username", login.username);
 	await page.fill("#password", login.password);
-	await page.getByRole("button", { name: "Sign in" }).click();
+	await page.getByRole("button", { name: "Sign in", exact: true }).click();
 	// The router appends its validated defaults, so match the path only.
 	await page.waitForURL((url) => url.pathname === "/hosts", {
 		timeout: 15_000,
 	});
+	// The badge only mounts in the desktop sidebar, and it fills in asynchronously
+	if (device === "desktop") {
+		await page
+			.getByText(/^Update available/)
+			.first()
+			.waitFor();
+	}
 
 	for (const scene of list) {
 		if (scene === loginScene) continue;
@@ -357,6 +454,7 @@ async function capture(
 		await shoot(page, scene);
 	}
 
+	await context.unrouteAll({ behavior: "ignoreErrors" });
 	await context.close();
 }
 
