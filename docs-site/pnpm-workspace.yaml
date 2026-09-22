@@ -1,0 +1,5 @@
+# Its own workspace root, so the dashboard's install, CI and Dockerfile never
+# see the docs site's dependencies.
+allowBuilds:
+  esbuild: true
+  sharp: true

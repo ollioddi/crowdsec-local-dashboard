@@ -1,0 +1,23 @@
+---
+import Default from "@astrojs/starlight/components/MarkdownContent.astro";
+
+// Pagefind scales the ranking of content inside an element carrying this.
+// A release note from ten versions back is rarely what someone searching the
+// docs wants, so the changelog ranks below the guides instead of being cut out
+// of search entirely.
+const isChangelog = Astro.url.pathname.includes("/changelog");
+---
+
+{
+	isChangelog ? (
+		<div data-pagefind-weight="0.2">
+			<Default>
+				<slot />
+			</Default>
+		</div>
+	) : (
+		<Default>
+			<slot />
+		</Default>
+	)
+}

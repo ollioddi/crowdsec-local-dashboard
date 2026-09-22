@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "screenshots": "tsx scripts/screenshots.ts",
+    "docs:dev": "pnpm -C docs-site install && pnpm -C docs-site dev",
+    "docs:build": "pnpm -C docs-site install && pnpm -C docs-site build",
     "format": "biome format",
     "format:fix": "biome format --write",
     "lint": "biome lint",

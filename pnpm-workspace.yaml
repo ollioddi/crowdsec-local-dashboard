@@ -1,3 +1,7 @@
+# docs-site/ is deliberately NOT a workspace member. It has its own lockfile
+# and workspace root, so `pnpm install` here, CI and the Docker build never
+# resolve Astro. Use `pnpm docs:dev` / `pnpm docs:build` to drive it.
+
 allowBuilds:
   better-sqlite3: true
   esbuild: true

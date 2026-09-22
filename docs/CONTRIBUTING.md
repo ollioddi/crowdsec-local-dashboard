@@ -26,6 +26,44 @@ pnpm test
 pnpm build
 ```
 
+## Docs
+
+Two separate projects live in this repo.
+
+| | |
+| --- | --- |
+| The dashboard | root `package.json`, the pnpm workspace |
+| The docs site | `docs-site/`, its own lockfile and workspace root |
+
+`docs-site` is deliberately **not** a workspace member, so `pnpm install`, CI and the Docker build never resolve Astro. Drive it from the root instead:
+
+```sh
+pnpm docs:dev     # installs and serves on http://localhost:4321
+pnpm docs:build   # what the workflow runs
+```
+
+`docs/*.md` is the source of truth. Plain markdown, no frontmatter, readable on GitHub at any tag. `docs-site` never writes back to it: `scripts/sync-docs.mjs` copies the files into the Starlight collection and adapts them.
+
+That means a few rules when writing a page:
+
+- Start with a single `# H1`. It becomes the page title, and the site strips it.
+- Link between pages with relative paths (`configuration.md#retention`). Links to files outside `docs/` are rewritten to point at GitHub.
+- Reference screenshots as `images/<name>.png`. Only referenced images are copied into the site.
+- Use GitHub alerts (`> [!NOTE]`). They are converted to Starlight asides.
+- Add new pages to the sidebar in `docs-site/astro.config.mjs` and to `docs/README.md`.
+
+A push to `main` that touches `docs/` or `docs-site/` deploys the site through `.github/workflows/docs.yml`, and so does publishing or editing a release.
+
+### The changelog page
+
+`/changelog` is built from the GitHub releases, not from `CHANGELOG.md`. The file only goes back to v0.4.0-beta, because the workflow that writes it landed then, and an edit made to an already published release never reaches it. Reading the releases avoids both problems and needs nothing kept in sync.
+
+Unauthenticated builds work but share the 60 requests per hour GitHub allows per IP. Set `GH_API_TOKEN` to a token with `Contents: read` if you hit that while working locally. CI passes the built-in `GITHUB_TOKEN`.
+
+### Versioning the docs
+
+`docs/` is the unreleased version and always lives at the site root. When a release ships, freeze its docs by adding an entry to `versions` in `docs-site/site.config.mjs`. Nothing is archivable before v0.6, because `docs/` does not exist in any earlier tag.
+
 ## Screenshots
 
 `pnpm screenshots` regenerates every image in `docs/images`. It seeds a throwaway database in `.demo/`, builds the app, drives Chromium through each view at desktop and phone sizes, and rewrites the screenshot blocks in the README. Run it after any change to the UI.
