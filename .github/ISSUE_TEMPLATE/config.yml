@@ -1,8 +1,11 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Troubleshooting
+    url: https://github.com/ollioddi/crowdsec-local-dashboard/blob/main/docs/troubleshooting.md
+    about: Login loops, empty expanded rows, sync banners. Check here first.
   - name: Configuration reference
-    url: https://github.com/ollioddi/crowdsec-local-dashboard#configuration
+    url: https://github.com/ollioddi/crowdsec-local-dashboard/blob/main/docs/configuration.md
     about: Every environment variable, with defaults and what it does.
   - name: CrowdSec LAPI setup
-    url: https://github.com/ollioddi/crowdsec-local-dashboard#crowdsec-lapi-setup
+    url: https://github.com/ollioddi/crowdsec-local-dashboard/blob/main/docs/lapi-setup.md
     about: Creating the machine and bouncer credentials the dashboard needs.

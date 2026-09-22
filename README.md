@@ -5,7 +5,7 @@
 A self-hosted local web dashboard for viewing and managing decisions made by your [CrowdSec](https://crowdsec.net) instance. Built for homelab use - no enterprise account or cloud connectivity required.
 
 <!-- screenshots:hero -->
-<img src="readme/crowdsec-dashboard-desktop-decisions.png" width="600" alt="Decisions - every filter, sort and page lives in the URL"/><br/>
+<img src="docs/images/crowdsec-dashboard-desktop-decisions.png" width="600" alt="Decisions - every filter, sort and page lives in the URL"/><br/>
 <!-- /screenshots:hero -->
 
 ---
@@ -31,15 +31,15 @@ This dashboard replaces all of that with a filterable table and a delete button.
 <!-- screenshots:desktop -->
 <table>
   <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-desktop-login.png" width="420" alt="Login with optional OIDC SSO (the button label is configurable)"/><br/><sub>Login with optional OIDC SSO (the button label is configurable)</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-desktop-decisions-filters.png" width="420" alt="Decisions - filter chips with per-column operators and facet counts"/><br/><sub>Decisions - filter chips with per-column operators and facet counts</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-login.png" width="420" alt="Login with optional OIDC SSO (the button label is configurable)"/><br/><sub>Login with optional OIDC SSO (the button label is configurable)</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-decisions-filters.png" width="420" alt="Decisions - filter chips with per-column operators and facet counts"/><br/><sub>Decisions - filter chips with per-column operators and facet counts</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-desktop-decisions-expanded.png" width="420" alt="Decisions - expanded row showing the HTTP requests behind a ban"/><br/><sub>Decisions - expanded row showing the HTTP requests behind a ban</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-desktop-hosts.png" width="420" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-decisions-expanded.png" width="420" alt="Decisions - expanded row showing the HTTP requests behind a ban"/><br/><sub>Decisions - expanded row showing the HTTP requests behind a ban</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-hosts.png" width="420" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-desktop-users.png" width="420" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-users.png" width="420" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
   </tr>
 </table>
 <!-- /screenshots:desktop -->
@@ -49,17 +49,17 @@ This dashboard replaces all of that with a filterable table and a delete button.
 <!-- screenshots:mobile -->
 <table>
   <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-login.png" width="230" alt="Login with optional OIDC SSO (the button label is configurable)"/><br/><sub>Login with optional OIDC SSO (the button label is configurable)</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-decisions.png" width="230" alt="Decisions - cards instead of a sideways scroll"/><br/><sub>Decisions - cards instead of a sideways scroll</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-decisions-http.png" width="230" alt="Decisions - expanded card showing HTTP alert details"/><br/><sub>Decisions - expanded card showing HTTP alert details</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-login.png" width="230" alt="Login with optional OIDC SSO (the button label is configurable)"/><br/><sub>Login with optional OIDC SSO (the button label is configurable)</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-decisions.png" width="230" alt="Decisions - cards instead of a sideways scroll"/><br/><sub>Decisions - cards instead of a sideways scroll</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-decisions-http.png" width="230" alt="Decisions - expanded card showing HTTP alert details"/><br/><sub>Decisions - expanded card showing HTTP alert details</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-decisions-ports.png" width="230" alt="Decisions - expanded card showing a port scan"/><br/><sub>Decisions - expanded card showing a port scan</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-hosts.png" width="230" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-users.png" width="230" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-decisions-ports.png" width="230" alt="Decisions - expanded card showing a port scan"/><br/><sub>Decisions - expanded card showing a port scan</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-hosts.png" width="230" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-users.png" width="230" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="readme/crowdsec-dashboard-mobile-sidebar.png" width="230" alt="Sidebar - slide-out navigation with theme toggle"/><br/><sub>Sidebar - slide-out navigation with theme toggle</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-sidebar.png" width="230" alt="Sidebar - slide-out navigation with theme toggle"/><br/><sub>Sidebar - slide-out navigation with theme toggle</sub></td>
   </tr>
 </table>
 <!-- /screenshots:mobile -->
@@ -69,8 +69,6 @@ This dashboard replaces all of that with a filterable table and a delete button.
 - **Host overview** - every IP CrowdSec has ever seen, with active ban count and country enrichment
 - **Decision management** - filter by IP, type, origin, or status; delete decisions with one click
 - **Alert Extraction** - view alerts associated with each decision. Shows which ports are scanned, and which paths are requested.
-  - Currently `"pf_drop" | "pf_pass" | "http_access-log"` are supported, but more can be added on request.
-  - These types are generated by Opnsense and Traefik parsers. If your events are missing alert data, submit an issue with a sample event and I'll add support. 
 - **Real-time updates** - live changes streamed via Server-Sent Events (no polling on the client)
 - **Historical tracking** - decisions are mirrored to a local SQLite database; expired bans stay visible
 - **User management** - local username/password accounts; the first registered user becomes admin
@@ -79,13 +77,20 @@ This dashboard replaces all of that with a filterable table and a delete button.
 - **Dark mode** - follows system preference
 - **PWA installable** - installs as a Progressive Web App on supported devices.
 
+## What it is built against
+
+I run CrowdSec behind **Traefik** for HTTP and **OPNsense** for the firewall, so those are the two stacks this is actually tested on.
+
+Decisions and hosts work with any CrowdSec setup. What is stack-specific is the alert evidence in the expanded row, which is parsed per log type. A stack with no parser still shows the ban, just without the breakdown.
+
+Missing yours? [Open an issue](https://github.com/ollioddi/crowdsec-local-dashboard/issues/new/choose) with a sample alert and I will add it. The parsers are small and self-contained, I just cannot test what I do not run. See [Integrations](docs/integrations.md).
+
 ---
 
 ## Prerequisites
 
 - A running [CrowdSec](https://crowdsec.net) instance with an accessible Local API (LAPI)
-- **Docker + Docker Compose** (recommended)
-  _or_ Node.js 22+ for a manual install
+- **Docker + Docker Compose** (recommended) _or_ Node.js 22+ for a manual install
 
 ---
 
@@ -110,7 +115,9 @@ cd crowdsec-local-dashboard
 curl -o .env https://raw.githubusercontent.com/ollioddi/crowdsec-local-dashboard/main/.env.example
 ```
 
-Edit `.env` with your values - see [Configuration](#configuration) below. This step is optional: without a `.env` the dashboard starts with a generated session secret and shows the login page, but does not sync anything until the `LAPI_*` values are set.
+Edit `.env` with your values. This step is optional: without a `.env` the dashboard starts with a generated session secret and shows the login page, but does not sync anything until the `LAPI_*` values are set.
+
+See [Configuration](docs/configuration.md) for every variable, and [LAPI setup](docs/lapi-setup.md) for where the CrowdSec credentials come from.
 
 ### 3. Run
 
@@ -120,158 +127,25 @@ docker compose up -d
 
 Open [http://localhost:3000](http://localhost:3000). On first launch you will be prompted to create your admin account.
 
-### Updating
-
-The compose file pins the release it was downloaded with. To move to a newer release, download it again and pull:
-
-```sh
-curl -o docker-compose.yml https://raw.githubusercontent.com/ollioddi/crowdsec-local-dashboard/main/docker-compose.yml
-docker compose pull
-docker compose up -d
-```
-
-Check the [release notes](https://github.com/ollioddi/crowdsec-local-dashboard/releases) first; some releases need configuration changes.
-
-The SQLite database is stored in a Docker volume (`db`) and survives updates.
-
-> [!NOTE]
-> While in beta, I recommend using tagged releases rather than the main branch to avoid unexpected breaking changes. The app will notify when a new release is available (if you didn't disable the Github check).
-
 ---
 
-## Configuration
+## Documentation
 
-Refer to the sample `.env.example` file for guidance on setting these environment variables. The table below is for reference only.
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `DATABASE_URL` | | `file:/data/app.db` | SQLite path. Defaults to the persistent volume - no need to change. |
-| `BETTER_AUTH_SECRET` | | _(generated)_ | Secret used to sign sessions. The container generates one on first start and keeps it in the volume at `/data/auth-secret`. Set it to choose your own, and always set it for `pnpm dev`. Generate with `openssl rand -base64 32`. |
-| `BETTER_AUTH_URL` | | _(inferred from the proxy headers)_ | The public URL of the dashboard, e.g. `https://dashboard.example.com`. Leave it unset for plain HTTP at `http://<host>:3000`. Set it when you serve over HTTPS, so the session cookie is marked `Secure` - the flag is picked at startup, so without this it stays unmarked even behind an HTTPS proxy, and the dashboard warns when it notices. Also set it if logins fail with "Invalid origin". |
-| `LAPI_URL` | Yes | | CrowdSec LAPI base URL including port, e.g. `http://192.168.1.100:8080`. |
-| `LAPI_MACHINE_ID` | Yes | | Machine ID for watcher authentication. |
-| `LAPI_MACHINE_PASSWORD` | Yes | | Machine password for watcher authentication. |
-| `LAPI_BOUNCER_API_TOKEN` | Yes | | API token for bouncer (read) access. |
-| `LAPI_POLL_INTERVAL` | | `60` | Seconds between LAPI decision syncs. |
-| `DECISION_RETENTION_COUNT` | | `5000` | Maximum decisions kept in the database. The oldest inactive ones are pruned first, together with hosts and alerts nothing references anymore. Set to `0` to keep everything. |
-| `UPDATE_CHECK` | | `true` | Ask GitHub for the newest release a few times a day so the sidebar can point out an update. Set to `false` to never contact GitHub. |
-| `LOG_LEVEL` | | `info` | Lowest level written: `fatal`, `error`, `warn`, `info`, `debug` or `trace`. `debug` shows every sync, `info` only the ones that changed something. |
-| `LOG_FORMAT` | | `human` | `human` is one colored line per event (set `NO_COLOR=1` to drop the colors). `json` writes one JSON object per line for a log collector. |
-| `OIDC_CLIENT_ID` | | | Client ID from your OIDC provider. Required to enable SSO. |
-| `OIDC_CLIENT_SECRET` | | | Client secret from your OIDC provider. Required to enable SSO. |
-| `OIDC_ISSUER_URL` | | | Issuer URL of your OIDC provider, e.g. `https://authentik.example.com/application/o/my-app/`. Required to enable SSO. |
-| `OIDC_BUTTON_LABEL` | | `Sign in with SSO` | Label shown on the SSO login button. |
-| `OIDC_AUTO_REDIRECT` | | `false` | Set to `true` to skip the login form and redirect straight to your SSO provider. |
-
-At `info` the log records what changed: sign-ins and failed sign-ins, users created or deleted, decisions removed from the dashboard and by whom, every sync that changed something, and LAPI outages with their recovery. Stack traces appear only at `debug`, where quiet polls are logged too.
-
----
-
-## CrowdSec LAPI Setup
-
-The dashboard authenticates with LAPI in two ways:
-
-### Watcher credentials (Machine ID + Password)
-
-Used to stream decisions. These are the credentials your CrowdSec agent already uses:
-
-```sh
-cat /etc/crowdsec/local_api_credentials.yaml
-```
-
-Copy `login` to `LAPI_MACHINE_ID` and `password` to `LAPI_MACHINE_PASSWORD`.
-
-### Bouncer API token
-
-Used for querying decisions. Create a dedicated bouncer on your CrowdSec host:
-
-```sh
-cscli bouncers add crowdsec-dashboard
-```
-
-Copy the generated token into `LAPI_BOUNCER_API_TOKEN`. It is only shown once.
-
-> **Note:** This dashboard communicates exclusively with your **local** LAPI. It never contacts the CrowdSec Central API (CAPI) directly.
-
----
-
-## SSO / OIDC Setup
-
-SSO is optional. When the three `OIDC_*` variables are set, a "Sign in with SSO" button appears on the login page alongside the existing username/password form. Username/password login is always kept available so you can still access the dashboard if your identity provider is unreachable.
-
-### 1. Register the application with your provider
-
-Create an OAuth2/OIDC application in your identity provider (Authentik, Keycloak, Okta, etc.) with:
-
-- **Client type:** Confidential
-- **Redirect URI:** `https://your-dashboard-url/api/auth/callback/oidc`
-- **Scopes:** `openid`, `email`, `profile`
-
-Note the **client ID**, **client secret**, and **issuer URL** provided by your identity provider.
-
-### 2. Set the environment variables
-
-```env
-OIDC_CLIENT_ID=your-client-id
-OIDC_CLIENT_SECRET=your-client-secret
-OIDC_ISSUER_URL=https://authentik.example.com/application/o/my-app/
-```
-
-### 3. Optional: customise the button or skip the form
-
-```env
-# Change the button label (default: "Sign in with SSO")
-OIDC_BUTTON_LABEL=Sign in with Authentik
-
-# Redirect straight to your SSO provider without showing the login form
-OIDC_AUTO_REDIRECT=true
-```
-
-> `OIDC_AUTO_REDIRECT` is ignored on first launch so the admin account can still be created with a username and password.
-
----
-
-## Deployment
-
-Docker Compose is the recommended approach for homelab use. The container applies any pending schema changes on every startup and then launches the server.
-
-The image runs as the unprivileged `node` user (uid 1000), keeps its own files read-only, and needs no Linux capabilities. The bundled compose file also mounts the root filesystem read-only and drops every capability. `GET /api/health` answers `200` as soon as the server is up; the image ships a `HEALTHCHECK` that polls it.
-
-The sidebar shows the running version and, unless `UPDATE_CHECK=false`, the newest release on GitHub.
-
-#### Upgrading from 0.4.x or earlier
-
-Those releases ran as root, so the database in the `db` volume is owned by root and the new image cannot write to it. Fix the ownership once before starting the new version:
-
-```sh
-docker compose run --rm --user root --cap-add CHOWN --entrypoint chown dashboard -R node:node /data
-docker compose up -d
-```
-
-The container refuses to start and prints this command if the volume is still owned by root.
-
-A volume from 0.2.x or earlier cannot be upgraded at all: those releases created the database without migration history, and 0.3.0 already required a reset. The container explains this too. Start over with `docker compose down -v && docker compose up -d`.
-
-### Other options
-
-TanStack Start can be deployed to many platforms. As long as the runtime can reach your LAPI at `LAPI_URL`, it will work:
-
-| Platform | Notes |
+| | |
 |---|---|
-| **Node.js** | Clone the repo, then `pnpm run build && node .output/server/index.mjs` |
-| **Railway** | Connect your GitHub repo - zero config required |
-| **Vercel / Netlify** | Serverless; requires LAPI to be reachable from the edge |
-| **Bun** | Replace the start command with `bun .output/server/index.mjs` |
-
-See the [TanStack Start hosting docs](https://tanstack.com/start/latest/docs/framework/react/hosting) for a full list.
-
-> If your LAPI is only reachable on a local network, the dashboard must run on the same network - for example, via Docker on the same host or over a VPN.
+| [Configuration](docs/configuration.md) | Every environment variable |
+| [LAPI setup](docs/lapi-setup.md) | Watcher credentials and the bouncer token |
+| [SSO / OIDC](docs/sso.md) | Optional single sign-on |
+| [Deployment](docs/deployment.md) | The container, updating, other platforms |
+| [Getting the most out of it](docs/using-the-dashboard.md) | URL state, what Live means, simulated decisions |
+| [Troubleshooting](docs/troubleshooting.md) | Login loops, empty expanded rows, sync banners |
+| [Integrations](docs/integrations.md) | Traefik, OPNsense, and adding your stack |
 
 ---
 
 ## Contributing
 
-Setup, the screenshot script and the release process live in [CONTRIBUTING.md](CONTRIBUTING.md).
+Setup, the docs site, the screenshot script and the release process live in [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ---
 

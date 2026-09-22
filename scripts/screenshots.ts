@@ -26,7 +26,9 @@ import {
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const demoDir = path.join(root, ".demo");
-const outDir = path.join(root, "readme");
+/** Where the images live, relative to the repo root and to README.md. */
+const imageDir = "docs/images";
+const outDir = path.join(root, imageDir);
 const port = 3210;
 const origin = `http://localhost:${port}`;
 const RELEASES_URL =
@@ -471,7 +473,7 @@ function readmeTable(list: Scene[], width: number, perRow: number) {
 			.slice(i, i + perRow)
 			.map(
 				(scene) =>
-					`    <td align="center"><img src="readme/crowdsec-dashboard-${scene.name}.png" width="${width}" alt="${scene.caption}"/><br/><sub>${scene.caption}</sub></td>`,
+					`    <td align="center"><img src="${imageDir}/crowdsec-dashboard-${scene.name}.png" width="${width}" alt="${scene.caption}"/><br/><sub>${scene.caption}</sub></td>`,
 			);
 		rows.push(`  <tr>\n${cells.join("\n")}\n  </tr>`);
 	}
@@ -484,7 +486,7 @@ function updateReadme() {
 	const hero = scenes.find((scene) => scene.hero);
 	const blocks: Record<string, string> = {
 		hero: hero
-			? `<img src="readme/crowdsec-dashboard-${hero.name}.png" width="600" alt="${hero.caption}"/><br/>`
+			? `<img src="${imageDir}/crowdsec-dashboard-${hero.name}.png" width="600" alt="${hero.caption}"/><br/>`
 			: "",
 		desktop: readmeTable(
 			scenes.filter((scene) => scene.device === "desktop" && !scene.hero),
