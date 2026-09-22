@@ -43,7 +43,6 @@ commit_parsers = [
   { message = "^feat", group = "<!-- 1 -->Features" },
   { message = "^fix", group = "<!-- 2 -->Bug fixes" },
   { message = "^perf", group = "<!-- 3 -->Performance" },
-  { message = "^docs\\(changelog\\)", skip = true },
   { message = "^docs", group = "<!-- 4 -->Documentation" },
   { message = "^chore\\(deps(-dev)?\\)", group = "<!-- 5 -->Dependencies" },
   { message = "^(chore|refactor|style|test|ci|build)", skip = true },

@@ -56,7 +56,7 @@ A push to `main` that touches `docs/` or `docs-site/` deploys the site through `
 
 ### The changelog page
 
-`/changelog` is built from the GitHub releases, not from `CHANGELOG.md`. The file only goes back to v0.4.0-beta, because the workflow that writes it landed then, and an edit made to an already published release never reaches it. Reading the releases avoids both problems and needs nothing kept in sync.
+`/changelog` is built from the GitHub releases. There is no changelog file: the release body is the only copy, so editing a published release updates the site and nothing can drift out of sync.
 
 Unauthenticated builds work but share the 60 requests per hour GitHub allows per IP. Set `GH_API_TOKEN` to a token with `Contents: read` if you hit that while working locally. CI passes the built-in `GITHUB_TOKEN`.
 

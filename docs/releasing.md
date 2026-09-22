@@ -1,6 +1,6 @@
 # Releasing
 
-Releases are cut from `main` with two GitHub Actions workflows. The release notes are a mix of a summary you write and a list generated from commits.
+Releases are cut from `main` with the **Draft release** workflow. The release notes are a mix of a summary you write and a list generated from commits, and that release body is the only changelog the project keeps.
 
 ## 1. Write commits the generator understands
 
@@ -50,11 +50,16 @@ The workflow opens a small prep PR that pins `docker-compose.yml` to the new tag
 
 Open the draft on GitHub and edit the text above the marker: what the release means for users, breaking changes and how to migrate, upgrade steps. Leave the marker and the generated list in place. Re-running the workflow, for example after landing one more fix, regenerates the list and keeps your text.
 
+> [!IMPORTANT]
+> Merge the prep PR before publishing. The draft targets `main`, so publishing first tags a tree whose compose file still pulls the previous release. The image build asserts the pin and fails loudly if you get the order wrong.
+
 Publish the draft. GitHub then creates the tag, which triggers:
 
 - **Build and push Docker image**: publishes `ghcr.io/…:X.Y.Z` (no `v` prefix) and, for stable releases, `X.Y`. `latest` follows `main`, not releases.
-- **Update changelog**: opens a pull request that prepends the release body to `CHANGELOG.md`, runs CI on it and merges it automatically once CI passes. Automatic merging needs "Allow auto-merge" enabled in the repository settings; without it, merge that PR by hand. The workflow can also be run manually with a tag to add a release that was missed.
+- **Docs**: rebuilds the site, so `/changelog` picks the release up. It reads the releases directly, so editing a published release updates the site too.
 
-Both the prep PR and the changelog PR are opened with the `RELEASE_TOKEN` repository secret, a fine-grained personal access token for this repository with Contents and Pull requests set to read and write. Pull requests opened with the built-in workflow token never get a CI run, so the required check would keep them blocked forever. Without the secret the PRs are still created, but you have to close and reopen them to start CI.
+There is no changelog file to maintain. The release body is the changelog, and the docs site renders every release from the GitHub API.
+
+The prep PR is opened with the `RELEASE_TOKEN` repository secret, a fine-grained personal access token for this repository with Contents and Pull requests set to read and write. Pull requests opened with the built-in workflow token never get a CI run, so the required check would keep them blocked forever. Without the secret the PR is still created and the workflow warns, but you have to merge it by hand.
 
 A version containing a `-` (for example `v1.0.0-rc.1`) is marked as a pre-release.
