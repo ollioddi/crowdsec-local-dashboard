@@ -4,6 +4,12 @@ import { cn } from "cn";
 import { ChevronDown } from "lucide-react";
 import type { ReactElement, ReactNode, RefObject } from "react";
 import { Button } from "@/common/components/ui/button";
+import {
+	Drawer,
+	DrawerContent,
+	DrawerDescription,
+	DrawerTitle,
+} from "@/common/components/ui/drawer";
 import type {
 	DataTableCell,
 	DataTableColumnMeta,
@@ -28,7 +34,6 @@ interface DataTableCardsProps<TData extends RowData> {
 
 const VIRTUALIZATION_THRESHOLD = 40;
 const ESTIMATED_CARD_HEIGHT = 132;
-const ESTIMATED_EXPANDED_HEIGHT = 560;
 const INITIAL_CARDS_TO_RENDER = 12;
 // The gap sits inside the measured element so the virtualizer counts it
 const CARD_SPACING = "pb-2";
@@ -91,10 +96,8 @@ const VirtualizedCards = <TData extends RowData>({
 			scrollRef,
 			count: rows.length,
 			enabled: hydrated,
-			estimateSize: (index) =>
-				rows[index].getIsExpanded()
-					? ESTIMATED_EXPANDED_HEIGHT
-					: ESTIMATED_CARD_HEIGHT,
+			// Expansion opens a sheet, so every card keeps its collapsed height
+			estimateSize: () => ESTIMATED_CARD_HEIGHT,
 			overscan: 6,
 		});
 
@@ -145,6 +148,143 @@ function cardRole<TData extends RowData>(
 		: "action";
 }
 
+function cellsByRole<TData extends RowData>(
+	row: DataTableRow<TData>,
+	role: CardRole,
+): DataTableCell<TData>[] {
+	return row.getAllCells().filter((cell) => cardRole(cell) === role);
+}
+
+function renderCell<TData extends RowData>(cell: DataTableCell<TData>) {
+	return (
+		<div key={cell.id}>
+			{flexRender(cell.column.columnDef.cell, cell.getContext())}
+		</div>
+	);
+}
+
+/** The title and badge cells: what identifies the row at a glance. */
+function CardSummary<TData extends RowData>({
+	row,
+}: Readonly<{ row: DataTableRow<TData> }>) {
+	return (
+		<div className="flex min-w-0 flex-wrap items-center gap-1.5">
+			{cellsByRole(row, "title").map(renderCell)}
+			{cellsByRole(row, "badge").map(renderCell)}
+		</div>
+	);
+}
+
+/** The labelled field cells, two to a row. */
+function CardFields<TData extends RowData>({
+	row,
+}: Readonly<{ row: DataTableRow<TData> }>) {
+	const fields = cellsByRole(row, "field");
+	if (fields.length === 0) return null;
+	return (
+		<dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+			{fields.map((cell) => (
+				<div key={cell.id} className="min-w-0">
+					<dt className="text-[11px] uppercase tracking-wide text-muted-foreground">
+						{columnLabel(cell.column)}
+					</dt>
+					<dd className="min-w-0">
+						{flexRender(cell.column.columnDef.cell, cell.getContext())}
+					</dd>
+				</div>
+			))}
+		</dl>
+	);
+}
+
+/**
+ * The expanded row as a sheet over the list, the card repeated as its
+ * header. A phone has no room for a panel inline: filters, the header and
+ * one open row already fill the screen.
+ */
+function RowSheet<TData extends RowData>({
+	row,
+	children,
+}: Readonly<{ row: DataTableRow<TData>; children: ReactNode }>) {
+	return (
+		<Drawer
+			open
+			onOpenChange={(open) => {
+				if (!open) row.toggleExpanded(false);
+			}}
+		>
+			<DrawerContent className="max-h-[92dvh]">
+				<DrawerTitle className="sr-only">Row details</DrawerTitle>
+				<DrawerDescription className="sr-only">
+					Everything known about this row
+				</DrawerDescription>
+				<div className="flex flex-col gap-2.5 border-b px-4 pb-3 pt-2">
+					<CardSummary row={row} />
+					<CardFields row={row} />
+				</div>
+				<div className="min-h-0 overflow-y-auto overscroll-contain px-4 py-3">
+					{children}
+				</div>
+			</DrawerContent>
+		</Drawer>
+	);
+}
+
+/**
+ * The card header: the summary as one wide button, then either the icon
+ * actions or the expand chevron. Expandable tables keep their actions in
+ * the sheet as labelled buttons, which frees the header of targets one
+ * thumb-width from the chevron.
+ */
+function CardHeader<TData extends RowData>({
+	row,
+	expandable,
+	isExpanded,
+}: Readonly<{
+	row: DataTableRow<TData>;
+	expandable: boolean;
+	isExpanded: boolean;
+}>) {
+	const actions = cellsByRole(row, "action");
+	return (
+		<div className="group/header relative flex items-center gap-1 rounded-t-lg pr-1 transition-colors has-[>button:hover]:bg-muted/50">
+			{/* after: stretches the hit area across the header, so the hover
+			    highlight and the click target are the same shape */}
+			<button
+				type="button"
+				disabled={!expandable}
+				aria-expanded={expandable ? isExpanded : undefined}
+				onClick={() => row.toggleExpanded()}
+				className="flex min-w-0 flex-1 self-stretch p-2.5 text-left outline-none after:absolute after:inset-0 after:rounded-t-lg focus-visible:after:ring-[3px] focus-visible:after:ring-ring/50 disabled:pointer-events-none"
+			>
+				<CardSummary row={row} />
+			</button>
+			{!expandable && actions.length > 0 && (
+				<div className="relative z-10 flex shrink-0 items-center">
+					{actions.map(renderCell)}
+				</div>
+			)}
+			{expandable && (
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					className="relative z-10 size-9 shrink-0 text-muted-foreground"
+					aria-label={isExpanded ? "Collapse" : "Expand"}
+					aria-expanded={isExpanded}
+					onClick={() => row.toggleExpanded()}
+				>
+					<ChevronDown
+						className={cn(
+							"size-4 transition-transform",
+							isExpanded && "rotate-180",
+						)}
+					/>
+				</Button>
+			)}
+		</div>
+	);
+}
+
 // Row objects are stable, so the expanded flag goes through a subscription
 const RowCard = <TData extends RowData>({
 	row,
@@ -157,84 +297,25 @@ const RowCard = <TData extends RowData>({
 		source={row.table.store}
 		selector={(state) => state.expanded === true || !!state.expanded[row.id]}
 	>
-		{(isExpanded) => {
-			const cells = row.getAllCells();
-			const byRole = (role: CardRole) =>
-				cells.filter((cell) => cardRole(cell) === role);
-			const render = (cell: DataTableCell<TData>) => (
-				<div key={cell.id}>
-					{flexRender(cell.column.columnDef.cell, cell.getContext())}
+		{(isExpanded) => (
+			<div
+				className={cn(
+					"flex flex-col rounded-lg border bg-card transition-colors",
+					isExpanded && "border-ring/40 bg-muted/30",
+				)}
+			>
+				<CardHeader
+					row={row}
+					expandable={!!renderSubComponent}
+					isExpanded={isExpanded}
+				/>
+				<div className="px-2.5 pb-2.5 empty:hidden">
+					<CardFields row={row} />
 				</div>
-			);
-			const fields = byRole("field");
-			const actions = byRole("action");
-
-			return (
-				<div
-					className={cn(
-						"flex flex-col rounded-lg border bg-card transition-colors",
-						isExpanded && "border-ring/40 bg-muted/30",
-					)}
-				>
-					<div className="group/header relative flex items-center gap-1 rounded-t-lg pr-1 transition-colors has-[>button:hover]:bg-muted/50">
-						{/* after: stretches the hit area across the header, so the hover
-						    highlight and the click target are the same shape */}
-						<button
-							type="button"
-							disabled={!renderSubComponent}
-							aria-expanded={renderSubComponent ? isExpanded : undefined}
-							onClick={() => row.toggleExpanded()}
-							className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 self-stretch p-2.5 text-left outline-none after:absolute after:inset-0 after:rounded-t-lg focus-visible:after:ring-[3px] focus-visible:after:ring-ring/50 disabled:pointer-events-none"
-						>
-							{byRole("title").map(render)}
-							{byRole("badge").map(render)}
-						</button>
-						{/* The expanded panel repeats these as labelled buttons */}
-						{!isExpanded && actions.length > 0 && (
-							<div className="relative z-10 flex shrink-0 items-center">
-								{actions.map(render)}
-							</div>
-						)}
-						{renderSubComponent && (
-							<Button
-								variant="ghost"
-								size="icon-sm"
-								className="relative z-10 size-9 shrink-0 text-muted-foreground"
-								aria-label={isExpanded ? "Collapse" : "Expand"}
-								aria-expanded={isExpanded}
-								onClick={() => row.toggleExpanded()}
-							>
-								<ChevronDown
-									className={cn(
-										"size-4 transition-transform",
-										isExpanded && "rotate-180",
-									)}
-								/>
-							</Button>
-						)}
-					</div>
-
-					{fields.length > 0 && (
-						<dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 px-2.5 pb-2.5 text-sm">
-							{fields.map((cell) => (
-								<div key={cell.id} className="min-w-0">
-									<dt className="text-[11px] uppercase tracking-wide text-muted-foreground">
-										{columnLabel(cell.column)}
-									</dt>
-									<dd className="min-w-0">
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</dd>
-								</div>
-							))}
-						</dl>
-					)}
-					{isExpanded && renderSubComponent && (
-						<div className="border-t px-2.5 pb-2.5 pt-2.5">
-							{renderSubComponent(row)}
-						</div>
-					)}
-				</div>
-			);
-		}}
+				{isExpanded && renderSubComponent && (
+					<RowSheet row={row}>{renderSubComponent(row)}</RowSheet>
+				)}
+			</div>
+		)}
 	</Subscribe>
 );

@@ -134,7 +134,11 @@ export function createColumns(
 				const entryCount = row.original.entryCount ?? 0;
 				return (
 					<span className="flex min-w-0 flex-col leading-tight">
-						<span className="truncate font-medium" title={scenario}>
+						{/* A card has no column width to respect, so the name wraps at its hyphens */}
+						<span
+							className="truncate font-medium max-md:whitespace-normal"
+							title={scenario}
+						>
 							{shortScenario(scenario)}
 						</span>
 						<span className="truncate text-xs text-muted-foreground">
