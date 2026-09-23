@@ -52,7 +52,7 @@ function FilterChip<TData extends RowData>({
 	const [open, setOpen] = useState(false);
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
-			<div className="flex h-8 max-w-full items-center rounded-md border border-primary/40 bg-primary/5 text-xs">
+			<div className="flex h-8 max-w-full shrink-0 items-center rounded-md border border-primary/40 bg-primary/5 text-xs">
 				<PopoverTrigger asChild>
 					<button
 						type="button"
