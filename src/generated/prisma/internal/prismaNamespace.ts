@@ -1059,6 +1059,7 @@ export const DecisionScalarFieldEnum = {
   hostIp: 'hostIp',
   type: 'type',
   origin: 'origin',
+  uuid: 'uuid',
   scenario: 'scenario',
   duration: 'duration',
   scope: 'scope',
@@ -1082,7 +1083,18 @@ export const AlertScalarFieldEnum = {
   stopAt: 'stopAt',
   eventsCount: 'eventsCount',
   hostIp: 'hostIp',
-  events: 'events'
+  integration: 'integration',
+  machineId: 'machineId',
+  uuid: 'uuid',
+  scenarioVersion: 'scenarioVersion',
+  capacity: 'capacity',
+  leakspeed: 'leakspeed',
+  simulated: 'simulated',
+  remediation: 'remediation',
+  sourceScope: 'sourceScope',
+  sourceRange: 'sourceRange',
+  events: 'events',
+  meta: 'meta'
 } as const
 
 export type AlertScalarFieldEnum = (typeof AlertScalarFieldEnum)[keyof typeof AlertScalarFieldEnum]
@@ -1149,13 +1161,6 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'DecisionType'
  */
 export type EnumDecisionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DecisionType'>
-    
-
-
-/**
- * Reference to a field of type 'DecisionOrigin'
- */
-export type EnumDecisionOriginFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DecisionOrigin'>
     
 
 

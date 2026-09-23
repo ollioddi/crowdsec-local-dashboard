@@ -38,7 +38,8 @@ export type DecisionMinAggregateOutputType = {
   id: number | null
   hostIp: string | null
   type: $Enums.DecisionType | null
-  origin: $Enums.DecisionOrigin | null
+  origin: string | null
+  uuid: string | null
   scenario: string | null
   duration: string | null
   scope: string | null
@@ -52,7 +53,8 @@ export type DecisionMaxAggregateOutputType = {
   id: number | null
   hostIp: string | null
   type: $Enums.DecisionType | null
-  origin: $Enums.DecisionOrigin | null
+  origin: string | null
+  uuid: string | null
   scenario: string | null
   duration: string | null
   scope: string | null
@@ -67,6 +69,7 @@ export type DecisionCountAggregateOutputType = {
   hostIp: number
   type: number
   origin: number
+  uuid: number
   scenario: number
   duration: number
   scope: number
@@ -91,6 +94,7 @@ export type DecisionMinAggregateInputType = {
   hostIp?: true
   type?: true
   origin?: true
+  uuid?: true
   scenario?: true
   duration?: true
   scope?: true
@@ -105,6 +109,7 @@ export type DecisionMaxAggregateInputType = {
   hostIp?: true
   type?: true
   origin?: true
+  uuid?: true
   scenario?: true
   duration?: true
   scope?: true
@@ -119,6 +124,7 @@ export type DecisionCountAggregateInputType = {
   hostIp?: true
   type?: true
   origin?: true
+  uuid?: true
   scenario?: true
   duration?: true
   scope?: true
@@ -219,7 +225,8 @@ export type DecisionGroupByOutputType = {
   id: number
   hostIp: string
   type: $Enums.DecisionType
-  origin: $Enums.DecisionOrigin
+  origin: string
+  uuid: string | null
   scenario: string
   duration: string
   scope: string
@@ -256,7 +263,8 @@ export type DecisionWhereInput = {
   id?: Prisma.IntFilter<"Decision"> | number
   hostIp?: Prisma.StringFilter<"Decision"> | string
   type?: Prisma.EnumDecisionTypeFilter<"Decision"> | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFilter<"Decision"> | $Enums.DecisionOrigin
+  origin?: Prisma.StringFilter<"Decision"> | string
+  uuid?: Prisma.StringNullableFilter<"Decision"> | string | null
   scenario?: Prisma.StringFilter<"Decision"> | string
   duration?: Prisma.StringFilter<"Decision"> | string
   scope?: Prisma.StringFilter<"Decision"> | string
@@ -273,6 +281,7 @@ export type DecisionOrderByWithRelationInput = {
   hostIp?: Prisma.SortOrder
   type?: Prisma.SortOrder
   origin?: Prisma.SortOrder
+  uuid?: Prisma.SortOrderInput | Prisma.SortOrder
   scenario?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   scope?: Prisma.SortOrder
@@ -291,7 +300,8 @@ export type DecisionWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.DecisionWhereInput | Prisma.DecisionWhereInput[]
   hostIp?: Prisma.StringFilter<"Decision"> | string
   type?: Prisma.EnumDecisionTypeFilter<"Decision"> | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFilter<"Decision"> | $Enums.DecisionOrigin
+  origin?: Prisma.StringFilter<"Decision"> | string
+  uuid?: Prisma.StringNullableFilter<"Decision"> | string | null
   scenario?: Prisma.StringFilter<"Decision"> | string
   duration?: Prisma.StringFilter<"Decision"> | string
   scope?: Prisma.StringFilter<"Decision"> | string
@@ -308,6 +318,7 @@ export type DecisionOrderByWithAggregationInput = {
   hostIp?: Prisma.SortOrder
   type?: Prisma.SortOrder
   origin?: Prisma.SortOrder
+  uuid?: Prisma.SortOrderInput | Prisma.SortOrder
   scenario?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   scope?: Prisma.SortOrder
@@ -329,7 +340,8 @@ export type DecisionScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"Decision"> | number
   hostIp?: Prisma.StringWithAggregatesFilter<"Decision"> | string
   type?: Prisma.EnumDecisionTypeWithAggregatesFilter<"Decision"> | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginWithAggregatesFilter<"Decision"> | $Enums.DecisionOrigin
+  origin?: Prisma.StringWithAggregatesFilter<"Decision"> | string
+  uuid?: Prisma.StringNullableWithAggregatesFilter<"Decision"> | string | null
   scenario?: Prisma.StringWithAggregatesFilter<"Decision"> | string
   duration?: Prisma.StringWithAggregatesFilter<"Decision"> | string
   scope?: Prisma.StringWithAggregatesFilter<"Decision"> | string
@@ -342,7 +354,8 @@ export type DecisionScalarWhereWithAggregatesInput = {
 export type DecisionCreateInput = {
   id: number
   type: $Enums.DecisionType
-  origin: $Enums.DecisionOrigin
+  origin: string
+  uuid?: string | null
   scenario: string
   duration: string
   scope?: string
@@ -358,7 +371,8 @@ export type DecisionUncheckedCreateInput = {
   id: number
   hostIp: string
   type: $Enums.DecisionType
-  origin: $Enums.DecisionOrigin
+  origin: string
+  uuid?: string | null
   scenario: string
   duration: string
   scope?: string
@@ -372,7 +386,8 @@ export type DecisionUncheckedCreateInput = {
 export type DecisionUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumDecisionTypeFieldUpdateOperationsInput | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.StringFieldUpdateOperationsInput | string
@@ -388,7 +403,8 @@ export type DecisionUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   hostIp?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumDecisionTypeFieldUpdateOperationsInput | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.StringFieldUpdateOperationsInput | string
@@ -403,7 +419,8 @@ export type DecisionCreateManyInput = {
   id: number
   hostIp: string
   type: $Enums.DecisionType
-  origin: $Enums.DecisionOrigin
+  origin: string
+  uuid?: string | null
   scenario: string
   duration: string
   scope?: string
@@ -416,7 +433,8 @@ export type DecisionCreateManyInput = {
 export type DecisionUpdateManyMutationInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumDecisionTypeFieldUpdateOperationsInput | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.StringFieldUpdateOperationsInput | string
@@ -430,7 +448,8 @@ export type DecisionUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   hostIp?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumDecisionTypeFieldUpdateOperationsInput | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.StringFieldUpdateOperationsInput | string
@@ -455,6 +474,7 @@ export type DecisionCountOrderByAggregateInput = {
   hostIp?: Prisma.SortOrder
   type?: Prisma.SortOrder
   origin?: Prisma.SortOrder
+  uuid?: Prisma.SortOrder
   scenario?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   scope?: Prisma.SortOrder
@@ -473,6 +493,7 @@ export type DecisionMaxOrderByAggregateInput = {
   hostIp?: Prisma.SortOrder
   type?: Prisma.SortOrder
   origin?: Prisma.SortOrder
+  uuid?: Prisma.SortOrder
   scenario?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   scope?: Prisma.SortOrder
@@ -487,6 +508,7 @@ export type DecisionMinOrderByAggregateInput = {
   hostIp?: Prisma.SortOrder
   type?: Prisma.SortOrder
   origin?: Prisma.SortOrder
+  uuid?: Prisma.SortOrder
   scenario?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   scope?: Prisma.SortOrder
@@ -546,10 +568,6 @@ export type EnumDecisionTypeFieldUpdateOperationsInput = {
   set?: $Enums.DecisionType
 }
 
-export type EnumDecisionOriginFieldUpdateOperationsInput = {
-  set?: $Enums.DecisionOrigin
-}
-
 export type DecisionCreateNestedManyWithoutAlertsInput = {
   create?: Prisma.XOR<Prisma.DecisionCreateWithoutAlertsInput, Prisma.DecisionUncheckedCreateWithoutAlertsInput> | Prisma.DecisionCreateWithoutAlertsInput[] | Prisma.DecisionUncheckedCreateWithoutAlertsInput[]
   connectOrCreate?: Prisma.DecisionCreateOrConnectWithoutAlertsInput | Prisma.DecisionCreateOrConnectWithoutAlertsInput[]
@@ -591,7 +609,8 @@ export type DecisionUncheckedUpdateManyWithoutAlertsNestedInput = {
 export type DecisionCreateWithoutHostInput = {
   id: number
   type: $Enums.DecisionType
-  origin: $Enums.DecisionOrigin
+  origin: string
+  uuid?: string | null
   scenario: string
   duration: string
   scope?: string
@@ -605,7 +624,8 @@ export type DecisionCreateWithoutHostInput = {
 export type DecisionUncheckedCreateWithoutHostInput = {
   id: number
   type: $Enums.DecisionType
-  origin: $Enums.DecisionOrigin
+  origin: string
+  uuid?: string | null
   scenario: string
   duration: string
   scope?: string
@@ -648,7 +668,8 @@ export type DecisionScalarWhereInput = {
   id?: Prisma.IntFilter<"Decision"> | number
   hostIp?: Prisma.StringFilter<"Decision"> | string
   type?: Prisma.EnumDecisionTypeFilter<"Decision"> | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFilter<"Decision"> | $Enums.DecisionOrigin
+  origin?: Prisma.StringFilter<"Decision"> | string
+  uuid?: Prisma.StringNullableFilter<"Decision"> | string | null
   scenario?: Prisma.StringFilter<"Decision"> | string
   duration?: Prisma.StringFilter<"Decision"> | string
   scope?: Prisma.StringFilter<"Decision"> | string
@@ -661,7 +682,8 @@ export type DecisionScalarWhereInput = {
 export type DecisionCreateWithoutAlertsInput = {
   id: number
   type: $Enums.DecisionType
-  origin: $Enums.DecisionOrigin
+  origin: string
+  uuid?: string | null
   scenario: string
   duration: string
   scope?: string
@@ -676,7 +698,8 @@ export type DecisionUncheckedCreateWithoutAlertsInput = {
   id: number
   hostIp: string
   type: $Enums.DecisionType
-  origin: $Enums.DecisionOrigin
+  origin: string
+  uuid?: string | null
   scenario: string
   duration: string
   scope?: string
@@ -710,7 +733,8 @@ export type DecisionUpdateManyWithWhereWithoutAlertsInput = {
 export type DecisionCreateManyHostInput = {
   id: number
   type: $Enums.DecisionType
-  origin: $Enums.DecisionOrigin
+  origin: string
+  uuid?: string | null
   scenario: string
   duration: string
   scope?: string
@@ -723,7 +747,8 @@ export type DecisionCreateManyHostInput = {
 export type DecisionUpdateWithoutHostInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumDecisionTypeFieldUpdateOperationsInput | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.StringFieldUpdateOperationsInput | string
@@ -737,7 +762,8 @@ export type DecisionUpdateWithoutHostInput = {
 export type DecisionUncheckedUpdateWithoutHostInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumDecisionTypeFieldUpdateOperationsInput | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.StringFieldUpdateOperationsInput | string
@@ -751,7 +777,8 @@ export type DecisionUncheckedUpdateWithoutHostInput = {
 export type DecisionUncheckedUpdateManyWithoutHostInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumDecisionTypeFieldUpdateOperationsInput | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.StringFieldUpdateOperationsInput | string
@@ -764,7 +791,8 @@ export type DecisionUncheckedUpdateManyWithoutHostInput = {
 export type DecisionUpdateWithoutAlertsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumDecisionTypeFieldUpdateOperationsInput | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.StringFieldUpdateOperationsInput | string
@@ -779,7 +807,8 @@ export type DecisionUncheckedUpdateWithoutAlertsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   hostIp?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumDecisionTypeFieldUpdateOperationsInput | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.StringFieldUpdateOperationsInput | string
@@ -793,7 +822,8 @@ export type DecisionUncheckedUpdateManyWithoutAlertsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   hostIp?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumDecisionTypeFieldUpdateOperationsInput | $Enums.DecisionType
-  origin?: Prisma.EnumDecisionOriginFieldUpdateOperationsInput | $Enums.DecisionOrigin
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scenario?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.StringFieldUpdateOperationsInput | string
@@ -839,6 +869,7 @@ export type DecisionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   hostIp?: boolean
   type?: boolean
   origin?: boolean
+  uuid?: boolean
   scenario?: boolean
   duration?: boolean
   scope?: boolean
@@ -856,6 +887,7 @@ export type DecisionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   hostIp?: boolean
   type?: boolean
   origin?: boolean
+  uuid?: boolean
   scenario?: boolean
   duration?: boolean
   scope?: boolean
@@ -871,6 +903,7 @@ export type DecisionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   hostIp?: boolean
   type?: boolean
   origin?: boolean
+  uuid?: boolean
   scenario?: boolean
   duration?: boolean
   scope?: boolean
@@ -886,6 +919,7 @@ export type DecisionSelectScalar = {
   hostIp?: boolean
   type?: boolean
   origin?: boolean
+  uuid?: boolean
   scenario?: boolean
   duration?: boolean
   scope?: boolean
@@ -895,7 +929,7 @@ export type DecisionSelectScalar = {
   active?: boolean
 }
 
-export type DecisionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "hostIp" | "type" | "origin" | "scenario" | "duration" | "scope" | "simulated" | "createdAt" | "expiresAt" | "active", ExtArgs["result"]["decision"]>
+export type DecisionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "hostIp" | "type" | "origin" | "uuid" | "scenario" | "duration" | "scope" | "simulated" | "createdAt" | "expiresAt" | "active", ExtArgs["result"]["decision"]>
 export type DecisionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   host?: boolean | Prisma.HostDefaultArgs<ExtArgs>
   alerts?: boolean | Prisma.Decision$alertsArgs<ExtArgs>
@@ -918,7 +952,8 @@ export type $DecisionPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     id: number
     hostIp: string
     type: $Enums.DecisionType
-    origin: $Enums.DecisionOrigin
+    origin: string
+    uuid: string | null
     scenario: string
     duration: string
     scope: string
@@ -1354,7 +1389,8 @@ export interface DecisionFieldRefs {
   readonly id: Prisma.FieldRef<"Decision", 'Int'>
   readonly hostIp: Prisma.FieldRef<"Decision", 'String'>
   readonly type: Prisma.FieldRef<"Decision", 'DecisionType'>
-  readonly origin: Prisma.FieldRef<"Decision", 'DecisionOrigin'>
+  readonly origin: Prisma.FieldRef<"Decision", 'String'>
+  readonly uuid: Prisma.FieldRef<"Decision", 'String'>
   readonly scenario: Prisma.FieldRef<"Decision", 'String'>
   readonly duration: Prisma.FieldRef<"Decision", 'String'>
   readonly scope: Prisma.FieldRef<"Decision", 'String'>

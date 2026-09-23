@@ -18,18 +18,11 @@ export const DecisionType = {
 export type DecisionType = (typeof DecisionType)[keyof typeof DecisionType]
 
 
-export const DecisionOrigin = {
-  crowdsec: 'crowdsec',
-  cscli: 'cscli'
-} as const
-
-export type DecisionOrigin = (typeof DecisionOrigin)[keyof typeof DecisionOrigin]
-
-
 export const AlertEntryType = {
   paths: 'paths',
   ports: 'ports',
   usernames: 'usernames',
+  rules: 'rules',
   none: 'none'
 } as const
 

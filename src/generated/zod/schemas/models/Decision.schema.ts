@@ -1,12 +1,12 @@
 import * as z from 'zod';
-import { DecisionOriginSchema } from '../enums/DecisionOrigin.schema';
 import { DecisionTypeSchema } from '../enums/DecisionType.schema';
 
 export const DecisionSchema = z.object({
   id: z.number().int(),
   hostIp: z.string(),
   type: DecisionTypeSchema,
-  origin: DecisionOriginSchema,
+  origin: z.string(),
+  uuid: z.string().nullish(),
   scenario: z.string(),
   duration: z.string(),
   scope: z.string().default("Ip"),
