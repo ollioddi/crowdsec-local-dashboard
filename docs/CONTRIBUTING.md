@@ -26,6 +26,10 @@ pnpm test
 pnpm build
 ```
 
+## Adding a parser
+
+[Contributing a parser](contributing-a-parser.md) is its own page. It covers the two extension points (an integration for a new log source, a facet for a value that can appear on several) and what a new CrowdSec scenario actually needs, which is usually nothing. Every integration ships with a fixture test built from real `cscli alerts inspect` output, with hostnames renamed.
+
 ## Docs
 
 Two separate projects live in this repo.
@@ -66,7 +70,9 @@ Unauthenticated builds work but share the 60 requests per hour GitHub allows per
 
 ## Screenshots
 
-`pnpm screenshots` regenerates every image in `docs/images`. It seeds a throwaway database in `.demo/`, builds the app, drives Chromium through each view at desktop and phone sizes, and rewrites the screenshot blocks in the README. Run it after any change to the UI.
+`pnpm screenshots` regenerates every image in `docs/images`. It seeds a throwaway database in `.demo/`, builds the app, drives Chromium through each view at desktop and phone sizes, and rewrites the screenshot blocks in the README.
+
+Run it only as part of cutting a release, not after every UI change. The images live on `main` and on the docs site, so refreshing them mid-cycle shows people features that are not in any build they can pull.
 
 The first run needs a browser: `pnpm exec playwright install chromium`.
 

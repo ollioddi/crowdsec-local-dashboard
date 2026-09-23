@@ -110,6 +110,7 @@ export default defineConfig({
 					label: "Working on it",
 					items: [
 						{ label: "Contributing", slug: "contributing" },
+						{ label: "Contributing a parser", slug: "contributing-a-parser" },
 						{ label: "Releasing", slug: "releasing" },
 					],
 				},
