@@ -137,7 +137,10 @@ export function parseAlert(alert: RawAlert): ParsedAlertEnvelope {
 		({ kind: integrationId } as AlertAggregates);
 	const facets = extractAlertFacets(alertMeta);
 	const entries =
-		integration?.extractEntries?.({ events: views, alertMeta }) ?? [];
+		integration?.extractEntries?.({
+			events: views.filter((_, i) => events[i].integration === integrationId),
+			alertMeta,
+		}) ?? [];
 
 	return {
 		integration: integrationId,

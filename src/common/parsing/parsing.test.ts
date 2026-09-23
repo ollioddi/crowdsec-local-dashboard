@@ -293,3 +293,47 @@ describe("meta helpers", () => {
 		expect(parsed.integration).toBe("unknown");
 	});
 });
+
+describe("SSH upstream metadata", () => {
+	// Constructed from crowdsecurity/sshd-logs; not a captured alert.
+	it("reads ssh_failed-auth and target_user", () => {
+		const parsed = parseAlert({
+			events: [
+				{
+					meta: meta({
+						log_type: "ssh_failed-auth",
+						service: "ssh",
+						target_user: "root",
+					}),
+				},
+			],
+			meta: meta({ target_user: '["root","admin"]' }),
+		});
+		expect(parsed.integration).toBe("ssh");
+		expect(parsed.events[0].fields).toMatchObject({
+			user: "root",
+			service: "ssh",
+		});
+		expect(parsed.entries).toEqual(["root", "admin"]);
+		expect(parsed.events[0].unparsed).toEqual({});
+	});
+
+	it("does not claim another service's auth event", () => {
+		const parsed = parseEvent({
+			meta: meta({ log_type: "auth", service: "mail", user: "alice" }),
+		});
+		expect(parsed.integration).toBe("unknown");
+		expect(parsed.unparsed.log_type).toBe("auth");
+	});
+
+	it("excludes another source's username from the SSH entry list", () => {
+		const parsed = parseAlert({
+			events: [
+				{ meta: meta({ log_type: "ssh_failed-auth", target_user: "root" }) },
+				{ meta: meta({ log_type: "ssh_failed-auth", target_user: "admin" }) },
+				{ meta: meta({ log_type: "http_access-log", user: "web-user" }) },
+			],
+		});
+		expect(parsed.entries).toEqual(["root", "admin"]);
+	});
+});

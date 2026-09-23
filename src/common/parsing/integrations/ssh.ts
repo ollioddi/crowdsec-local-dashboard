@@ -3,13 +3,11 @@ import type { Integration, SshAggregates, SshEventFields } from "../types";
 
 /** Usernames the scenario aggregated across its events. */
 function usernames(alertMeta: MetaView): string[] | undefined {
-	return alertMeta.list("user", "username");
+	return alertMeta.list("target_user", "user", "username");
 }
 
 /**
- * sshd auth log, `log_type: ssh_auth` / `auth`. Covers crowdsecurity/ssh-bf and
- * friends on every agent that ships /var/log/auth.log. `entries[]` holds the
- * usernames that were tried.
+ * sshd authentication events. `entries[]` holds the usernames tried.
  */
 export const ssh = {
 	id: "ssh",
@@ -18,7 +16,8 @@ export const ssh = {
 
 	matches(meta) {
 		const logType = meta.peek("log_type");
-		if (logType === "ssh_auth" || logType === "auth") return true;
+		if (logType?.startsWith("ssh_")) return true;
+		if (logType === "auth" && meta.peek("service") === "ssh") return true;
 		return meta.has("ssh_user");
 	},
 
@@ -26,7 +25,7 @@ export const ssh = {
 		meta.skip("log_type");
 		return {
 			kind: "ssh",
-			user: meta.str("ssh_user", "user"),
+			user: meta.str("target_user", "ssh_user", "user"),
 			service: meta.str("service"),
 		};
 	},
@@ -41,7 +40,9 @@ export const ssh = {
 		return [
 			...new Set([
 				...(usernames(alertMeta) ?? []),
-				...distinctValues(events, (event) => event.str("ssh_user", "user")),
+				...distinctValues(events, (event) =>
+					event.str("target_user", "ssh_user", "user"),
+				),
 			]),
 		];
 	},

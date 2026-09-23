@@ -15,9 +15,7 @@ export const env = createEnv({
 		LAPI_MACHINE_PASSWORD: z.string().min(1).optional(),
 		LAPI_BOUNCER_API_TOKEN: z.string().min(1).optional(),
 		LAPI_POLL_INTERVAL: z.coerce.number().positive().default(60),
-		// Decision origins to mirror. Set it empty to pull every origin LAPI
-		// has, including CAPI and blocklists: tens of thousands of rows whose
-		// alert lookups alone take hours, so nothing ever gets written.
+		// Empty explicitly selects all origins, including CAPI and blocklists.
 		LAPI_DECISION_ORIGINS: z
 			.string()
 			.default("crowdsec,cscli")
@@ -39,31 +37,18 @@ export const env = createEnv({
 		OIDC_AUTO_REDIRECT: z.stringbool().optional(),
 	},
 
-	/**
-	 * What object holds the environment variables at runtime. This is usually
-	 * `process.env` or `import.meta.env`.
-	 */
+	// Empty values normally mean “unset”. Origins are the exception: an
+	// explicitly empty list asks LAPI for every origin.
 	runtimeEnv: Object.fromEntries(
-		Object.entries(process.env).map(([k, v]) => [
-			k,
-			typeof v === "string" ? v.replaceAll(/^"|"$/g, "") : v,
-		]),
+		Object.entries(process.env).map(([key, raw]) => {
+			const value = raw?.replaceAll(/^"|"$/g, "");
+			if (value === "" && key !== "LAPI_DECISION_ORIGINS") {
+				return [key, undefined];
+			}
+			return [key, value];
+		}),
 	),
-
-	/**
-	 * By default, this library will feed the environment variables directly to
-	 * the Zod validator.
-	 *
-	 * This means that if you have an empty string for a value that is supposed
-	 * to be a number (e.g. `PORT=` in a ".env" file), Zod will incorrectly flag
-	 * it as a type mismatch violation. Additionally, if you have an empty string
-	 * for a value that is supposed to be a string with a default value (e.g.
-	 * `DOMAIN=` in an ".env" file), the default value will never be applied.
-	 *
-	 * In order to solve these issues, we recommend that all new projects
-	 * explicitly specify this option as true.
-	 */
-	emptyStringAsUndefined: true,
+	emptyStringAsUndefined: false,
 
 	// Name the offending variables, then stop: a server answering 500 to every
 	// request hides the cause behind a generic message.

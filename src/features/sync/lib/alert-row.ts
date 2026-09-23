@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { CrowdSecAlert } from "@/common/crowdsec-lapi/types";
 import { toDateOrNull } from "@/common/lib/dates";
 import { logger } from "@/common/lib/logging/logger";
@@ -6,6 +7,14 @@ import { parseAlert, type RawAlert } from "@/common/parsing/registry";
 import type { Alert } from "@/generated/prisma/client";
 
 const log = logger("lapi-sync");
+
+const storedEvents = z.array(
+	z.object({
+		timestamp: z.string().optional(),
+		meta: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
+	}),
+);
+const storedMeta = z.record(z.string(), z.string());
 
 /**
  * Everything derived from an alert envelope, minus the identity columns: the
@@ -53,8 +62,8 @@ export function decodeAlertRow(
 ): RawAlert | null {
 	try {
 		return {
-			events: JSON.parse(row.events) as RawAlert["events"],
-			meta: recordToMeta(JSON.parse(row.meta) as Record<string, string>),
+			events: storedEvents.parse(JSON.parse(row.events)),
+			meta: recordToMeta(storedMeta.parse(JSON.parse(row.meta))),
 		};
 	} catch (error) {
 		log.warn("Alert {id} has unreadable stored events or meta", {

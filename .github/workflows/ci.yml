@@ -40,6 +40,9 @@ jobs:
           pnpm exec prisma generate
           git diff --exit-code -- src/generated ':!src/generated/zod/.prisma-zod-generator-manifest.json'
 
+      - name: Tests
+        run: pnpm test
+
       - name: Typecheck
         run: pnpm typecheck
 

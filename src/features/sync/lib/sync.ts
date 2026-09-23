@@ -1,5 +1,8 @@
 import { getLapiClient } from "@/common/crowdsec-lapi/get-lapi-client";
-import type { CrowdSecDecision } from "@/common/crowdsec-lapi/types";
+import type {
+	CrowdSecDecision,
+	DecisionStreamResponse,
+} from "@/common/crowdsec-lapi/types";
 import { broadcastCurrentState } from "@/common/lib/broadcast-state.server";
 import { env } from "@/common/lib/env";
 import { logger } from "@/common/lib/logging/logger";
@@ -59,6 +62,67 @@ async function removeDeletedDecisions(
 	await updateHostBanCounts(decisions.map((d) => d.value));
 }
 
+type StreamOutcome = { changed: boolean; newHosts: number };
+
+/** Writes what the stream said: new decisions in, deleted ones out. */
+async function applyStream(
+	stream: DecisionStreamResponse,
+): Promise<StreamOutcome> {
+	const newDecisions = stream.new ?? [];
+	const deletedDecisions = stream.deleted ?? [];
+	let newHosts = 0;
+	if (newDecisions.length > 0) newHosts = await addNewDecisions(newDecisions);
+	if (deletedDecisions.length > 0)
+		await removeDeletedDecisions(deletedDecisions);
+	return {
+		changed: newDecisions.length > 0 || deletedDecisions.length > 0,
+		newHosts,
+	};
+}
+
+/**
+ * Deactivates what LAPI no longer holds. A full pull is the complete active
+ * set, so anything active in the DB but absent from it is stale; a delta
+ * only knows about expiry.
+ */
+async function deactivateGone(
+	fullSync: boolean,
+	activeIds: number[],
+): Promise<boolean> {
+	let changed = false;
+	if (fullSync) {
+		const staleCount = await deactivateStaleDecisions(activeIds);
+		if (staleCount > 0) {
+			log.info("Deactivated {count} decisions no longer in LAPI", {
+				count: staleCount,
+			});
+			changed = true;
+		}
+	}
+	const expiredCount = await deactivateExpiredDecisions();
+	if (expiredCount > 0) {
+		log.info("Deactivated {count} decisions past their expiry", {
+			count: expiredCount,
+		});
+		changed = true;
+	}
+	return changed;
+}
+
+/** Applies the configured retention, if any. True when rows went. */
+async function pruneIfConfigured(): Promise<boolean> {
+	if (env.DECISION_RETENTION_COUNT <= 0 && env.DECISION_RETENTION_DAYS <= 0) {
+		return false;
+	}
+	const prunedIps = await pruneOldDecisions(
+		env.DECISION_RETENTION_COUNT,
+		env.DECISION_RETENTION_DAYS,
+	);
+	if (prunedIps.length === 0) return false;
+	await updateHostBanCounts(prunedIps);
+	return true;
+}
+
 /**
  * Syncs decisions from the LAPI stream endpoint.
  *
@@ -89,64 +153,28 @@ export async function syncDecisions(options?: {
 			// Unset pulls every origin, including CAPI and blocklist decisions
 			origins: env.LAPI_DECISION_ORIGINS,
 		});
-
 		const newDecisions = stream.new ?? [];
 		const deletedDecisions = stream.deleted ?? [];
-		let changed = false;
-		let newHosts = 0;
 
-		if (newDecisions.length > 0) {
-			newHosts = await addNewDecisions(newDecisions);
-			changed = true;
-		}
-
-		if (deletedDecisions.length > 0) {
-			await removeDeletedDecisions(deletedDecisions);
-			changed = true;
-		}
-
-		if (useStartup) {
-			const staleCount = await deactivateStaleDecisions(
-				newDecisions.map((d) => d.id),
-			);
-			if (staleCount > 0) {
-				log.info("Deactivated {count} decisions no longer in LAPI", {
-					count: staleCount,
-				});
-				changed = true;
-			}
-		}
-
-		const expiredCount = await deactivateExpiredDecisions();
-		if (expiredCount > 0) {
-			log.info("Deactivated {count} decisions past their expiry", {
-				count: expiredCount,
-			});
-			changed = true;
-		}
+		const applied = await applyStream(stream);
+		const deactivated = await deactivateGone(
+			useStartup,
+			newDecisions.map((d) => d.id),
+		);
 
 		isFirstFetch = false;
 		needsFullSync = false;
 
-		if (env.DECISION_RETENTION_COUNT > 0 || env.DECISION_RETENTION_DAYS > 0) {
-			const prunedIps = await pruneOldDecisions(
-				env.DECISION_RETENTION_COUNT,
-				env.DECISION_RETENTION_DAYS,
-			);
-			if (prunedIps.length > 0) {
-				await updateHostBanCounts(prunedIps);
-				changed = true;
-			}
-		}
+		const pruned = await pruneIfConfigured();
 
 		const durationMs = Math.round(performance.now() - startedAt);
-		if (changed) {
+		if (applied.changed || deactivated || pruned) {
 			log.info(
 				"Synced {newDecisions} new and {deletedDecisions} deleted decisions",
 				{
 					newDecisions: newDecisions.length,
 					deletedDecisions: deletedDecisions.length,
-					newHosts,
+					newHosts: applied.newHosts,
 					full: useStartup,
 					durationMs,
 				},

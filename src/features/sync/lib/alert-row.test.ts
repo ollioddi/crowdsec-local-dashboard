@@ -65,3 +65,19 @@ describe("decodeAlertRow", () => {
 		).toBeNull();
 	});
 });
+
+describe("invalid stored shapes", () => {
+	it.each([
+		"null",
+		"{}",
+		'[{"meta":null}]',
+		'[{"meta":[{"key":"x","value":42}]}]',
+	])("rejects event JSON %s", (events) => {
+		expect(decodeAlertRow({ id: 1, events, meta: "{}" })).toBeNull();
+	});
+	it("rejects non-string alert metadata", () => {
+		expect(
+			decodeAlertRow({ id: 1, events: "[]", meta: '{"dst_port":443}' }),
+		).toBeNull();
+	});
+});
