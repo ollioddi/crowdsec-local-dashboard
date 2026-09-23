@@ -98,7 +98,16 @@ export default defineConfig({
 							label: "Getting the most out of it",
 							slug: "using-the-dashboard",
 						},
-						{ label: "Integrations", slug: "integrations" },
+						{
+							label: "Integrations",
+							items: [
+								{ label: "Overview", slug: "integrations" },
+								{ label: "Traefik", slug: "integrations/traefik" },
+								{ label: "AppSec WAF", slug: "integrations/appsec" },
+								{ label: "OPNsense", slug: "integrations/opnsense" },
+								{ label: "SSH", slug: "integrations/ssh" },
+							],
+						},
 						{ label: "Troubleshooting", slug: "troubleshooting" },
 					],
 				},

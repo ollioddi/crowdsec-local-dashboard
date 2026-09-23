@@ -2,6 +2,8 @@
 
 A self-hosted dashboard for the decisions your CrowdSec instance has made. It reads your Local API, mirrors it to SQLite so expired bans stay visible, and lets you delete a ban without opening a terminal.
 
+<img src="images/crowdsec-dashboard-desktop-decisions.png" width="800" alt="The decisions table on a desktop"/>
+
 ## Start here
 
 Three things have to be true before anything syncs.
@@ -24,7 +26,7 @@ The [README](../README.md) has the three-command Docker quick start if you just 
 ## Then
 
 - **[Getting the most out of it](using-the-dashboard.md)** covers what the interface is telling you: what Live means, why a ban says `overdue`, what a simulated decision is.
-- **[Integrations](integrations.md)** is what the expanded row can show for your stack, and the one Traefik setting that is easy to miss.
+- **[Integrations](integrations.md)** is what the expanded row can show for your stack, with a page per source: [Traefik](integrations/traefik.md), [AppSec](integrations/appsec.md), [OPNsense](integrations/opnsense.md) and [SSH](integrations/ssh.md).
 - **[Troubleshooting](troubleshooting.md)** for when you land back on the login page, or the expanded row is empty.
 
 ## Working on it
