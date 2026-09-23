@@ -1,11 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "cn";
-import { ExternalLink, Loader2, Trash2 } from "lucide-react";
+import {
+	ExternalLink,
+	type Info,
+	Loader2,
+	Trash2,
+	WifiOff,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import type { DataTableRow } from "@/common/components/data-table/table-features";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
 import { Skeleton } from "@/common/components/ui/skeleton";
+import { useOnline } from "@/common/hooks/use-online";
 import { countryFlag, countryName } from "@/common/lib/country-flag";
 import { formatDateTime, humanSpan } from "@/common/lib/dates";
 import type { AlertDetail } from "@/features/decisions/api/alert-detail";
@@ -106,17 +113,57 @@ function useDecisionAlerts(decision: DecisionWithHost) {
 	});
 }
 
+type AlertsQuery = ReturnType<typeof useDecisionAlerts>;
+
+function EvidenceNotice({
+	icon: Icon,
+	children,
+	onRetry,
+}: Readonly<{
+	icon: typeof Info;
+	children: ReactNode;
+	onRetry?: () => void;
+}>) {
+	const online = useOnline();
+	return (
+		<div className="flex items-start gap-2 rounded-md border border-dashed p-2.5 text-xs text-muted-foreground">
+			<Icon className="mt-0.5 size-3.5 shrink-0" />
+			<span className="flex-1">{children}</span>
+			{onRetry && online && (
+				<Button variant="outline" size="xs" onClick={onRetry}>
+					Try again
+				</Button>
+			)}
+		</div>
+	);
+}
+
+/** "None stored" only when the server said so; a failed load says that instead. */
 function EvidenceColumn({
-	alerts,
-	isLoading,
+	query,
 	hostIp,
-}: Readonly<{ alerts: AlertDetail[]; isLoading: boolean; hostIp: string }>) {
-	if (isLoading) {
+}: Readonly<{ query: AlertsQuery; hostIp: string }>) {
+	const alerts = query.data ?? [];
+	if (query.isPending && query.fetchStatus === "paused") {
+		return (
+			<EvidenceNotice icon={WifiOff}>
+				Waiting for a connection to load the alert evidence.
+			</EvidenceNotice>
+		);
+	}
+	if (query.isLoading) {
 		return (
 			<div className="space-y-2">
 				<Skeleton className="h-4 w-48" />
 				<Skeleton className="h-20 w-full" />
 			</div>
+		);
+	}
+	if (query.isError) {
+		return (
+			<EvidenceNotice icon={WifiOff} onRetry={() => query.refetch()}>
+				The alert evidence could not be loaded.
+			</EvidenceNotice>
 		);
 	}
 	if (alerts.length === 0) return <NoEvidence />;
@@ -238,7 +285,8 @@ export function DecisionExpandedRow({
 }: Readonly<DecisionExpandedRowProps>) {
 	const decision = row.original;
 	const isDeleting = deletingId === decision.id;
-	const { data: alerts = [], isLoading } = useDecisionAlerts(decision);
+	const alertsQuery = useDecisionAlerts(decision);
+	const alerts = alertsQuery.data ?? [];
 
 	return (
 		<div className="relative flex flex-col gap-4 md:flex-row md:gap-6">
@@ -253,11 +301,7 @@ export function DecisionExpandedRow({
 
 			{/* Evidence first: it is the reason the row was expanded */}
 			<div className="min-w-0 flex-1">
-				<EvidenceColumn
-					alerts={alerts}
-					isLoading={isLoading}
-					hostIp={decision.hostIp}
-				/>
+				<EvidenceColumn query={alertsQuery} hostIp={decision.hostIp} />
 			</div>
 
 			<aside className="flex shrink-0 flex-col gap-3 md:w-80 md:border-l md:pl-5">
