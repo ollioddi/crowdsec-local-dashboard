@@ -38,20 +38,29 @@ function docUrl(target, fromDir) {
 	return `${base}/${trail}${anchor ? `#${anchor}` : ""}`;
 }
 
+/** Where a relative link lands, so a page in a subfolder can link upward. */
+function isInsideDocs(target, fromDir) {
+	const resolved = path.resolve(fromDir, target.split("#")[0]);
+	return !path.relative(srcDocs, resolved).startsWith("..");
+}
+
 /** One pass over every link, so no rule can shadow another by ordering. */
 function rewriteLinks(text, fromDir) {
 	return text.replace(/\]\(([^)\s]+)\)/g, (match, target) => {
 		if (/^(https?:|#|mailto:)/.test(target)) return match;
 		// Anything outside docs/ is a repo file the site cannot serve.
-		if (target.startsWith("../"))
-			return `](${repo}/blob/main/${target.slice(3)})`;
+		if (!isInsideDocs(target, fromDir)) {
+			const repoPath = path.relative(root, path.resolve(fromDir, target));
+			return `](${repo}/blob/main/${repoPath})`;
+		}
 		if (/\.md(#|$)/.test(target)) return `](${docUrl(target, fromDir)})`;
 		return match;
 	});
 }
 
-// Both spellings a page can use: <img src="images/x.png"> and ![alt](images/x.png).
-const IMAGE_REF = /(src="|\]\()images\/([^")]+)/g;
+// Both spellings a page can use: <img src="images/x.png"> and ![alt](images/x.png),
+// from any depth: a page in docs/integrations/ writes ../images/x.png.
+const IMAGE_REF = /(src="|\]\()(?:\.\.\/)*images\/([^")]+)/g;
 
 /** Screenshots live outside docs/, so they are copied into the site's public/. */
 function rewriteImages(text) {
