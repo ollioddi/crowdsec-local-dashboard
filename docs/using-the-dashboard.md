@@ -30,7 +30,28 @@ The banner also calls out missing watcher credentials separately, because that f
 
 **Scope** distinguishes a Range ban from a single IP ban.
 
+**Origin** says who decided: `crowdsec` for your own agents, `cscli` for manual bans, and `CAPI`, `lists` or `console` when [`LAPI_DECISION_ORIGINS`](configuration.md#crowdsec-lapi) is opened up to include them.
+
 Relative times tick live. Country codes are spelled out next to the flag.
+
+## The alert evidence
+
+Expanding a decision splits into two columns on a desktop, and stacks into a sheet on a phone. The left column is the evidence, one box per linked alert. Top to bottom:
+
+- **The header**: the scenario, which log source the alert came from, a `simulated` badge when relevant, how many events over what window, and when. Under it, labelled: the scenario version, the bucket that fired (`10 leaking 10s` means ten hits inside a ten second leak window tripped it, the difference between a burst and a slow crawl), the scope, whether it was remediated, and the alert id.
+- **Client tags**: CVE and technology tags from the scenario, and the JA4H fingerprint, which survives a scanner rotating IPs and forging its user agent.
+- **The evidence itself**, shaped by the source: request lines for HTTP with the router, user agent and query size on each, the rule and verdict for AppSec with the ids that tie it to the access log, the ports and grouped connections for a firewall scan, the usernames for SSH. Every line of a list has the same shape, so nothing appears or vanishes depending on the other lines. See [Integrations](integrations.md) for what each one shows. An alert that mixes sources renders each of them.
+- **Other fields** and **Not parsed**, inline: everything else the alert carried. Other fields is what a parser read but the box does not draw; Not parsed is every key no parser reads, kept so nothing CrowdSec sends is silently dropped.
+
+The right column has the same six facts for every decision: location, network, the agent that reported it, the log it read, when it was first seen, and the ban length, with the remove and CrowdSec CTI buttons under them. A value the sync does not have reads as Unknown rather than disappearing.
+
+What each source puts in the box is on its own page under [Integrations](integrations.md).
+
+## On a phone
+
+The table becomes a list of cards, and expanding one opens a sheet over the list rather than growing the card, so filters and the open row stop competing for the screen. The sheet carries everything the desktop row does, in the same order. Filters take one row however many there are, scrolling sideways, with Clear pinned first.
+
+Improving a parser improves the rows already in the database: the raw events are stored and re-read every time a row is expanded, so nothing needs a re-sync.
 
 ## Deleting a decision
 
