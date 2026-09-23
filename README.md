@@ -66,9 +66,9 @@ This dashboard replaces all of that with a filterable table and a delete button.
 
 ## Features
 
-- **Host overview** - every IP CrowdSec has ever seen, with active ban count and country enrichment
-- **Decision management** - filter by IP, type, origin, or status; delete decisions with one click
-- **Alert evidence** - expand a decision to see what tripped it: the requests behind an HTTP ban, the WAF rule that fired, the ports a scan touched, the usernames tried over SSH, plus the client fingerprint and the bucket that fired. Anything the parsers do not understand yet is still shown raw.
+- **Host overview** - hosts with decisions recorded by the dashboard, with active ban count and country enrichment
+- **Decision management** - filter by IP, type, origin, or status; remove decisions after confirmation
+- **Alert evidence** - inspect HTTP requests, WAF rule matches, firewall connections and SSH attempts. Unrecognised metadata is shown alongside the parsed evidence.
 - **Real-time updates** - live changes streamed via Server-Sent Events (no polling on the client)
 - **Historical tracking** - decisions are mirrored to a local SQLite database; expired bans stay visible
 - **User management** - local username/password accounts; the first registered user becomes admin
@@ -137,7 +137,7 @@ Open [http://localhost:3000](http://localhost:3000). On first launch you will be
 | [LAPI setup](docs/lapi-setup.md) | Watcher credentials and the bouncer token |
 | [SSO / OIDC](docs/sso.md) | Optional single sign-on |
 | [Deployment](docs/deployment.md) | The container, updating, other platforms |
-| [Getting the most out of it](docs/using-the-dashboard.md) | URL state, what Live means, simulated decisions |
+| [Using the dashboard](docs/using-the-dashboard.md) | URL state, what Live means, simulated decisions |
 | [Troubleshooting](docs/troubleshooting.md) | Login loops, empty expanded rows, sync banners |
 | [Integrations](docs/integrations.md) | Traefik, OPNsense, and adding your stack |
 
@@ -175,8 +175,8 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 This project is not affiliated with or endorsed by CrowdSec.
 
-The [CrowdSec Console](https://www.crowdsec.net/console/) is the official solution for managing decisions and it is genuinely excellent - it offers threat intelligence, detailed attacker insights, geolocation analysis, ASN data, behavioral trends, and a polished interface that goes far beyond what this project does. If you are running anything beyond a personal homelab, you should use it.
+The [CrowdSec Console](https://www.crowdsec.net/console/) is CrowdSec’s own management product. This project is an independent dashboard for personal homelabs.
 
-This dashboard exists for one narrow reason: the official console is a paid product (At the time of writing a 232$ monthly subscription to delete alerts), and for simple homelab use the only thing I needed was to delete a ban from my phone without SSH-ing into a server. The scope of this project intentionally stays small. Feature requests are welcome, but this will not grow into a general CrowdSec management tool - anything that significantly expands that scope is outside what I am willing to maintain.
+I built it to remove a ban from my phone without SSH-ing into a server. Feature requests are welcome, but I intend to keep that scope small; I am not planning a general CrowdSec management tool.
 
 Supporting CrowdSec through their paid products also funds the development of the open source agent, which benefits everyone. If this dashboard saves you time, and gives you value, consider whether the official console is worth it for your use case.

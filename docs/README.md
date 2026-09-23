@@ -30,4 +30,5 @@ The [README](../README.md) has the three-command Docker quick start if you just 
 ## Working on it
 
 - **[Contributing](CONTRIBUTING.md)** for setup, the docs site and the screenshot script.
+- **[Contributing a parser](contributing-a-parser.md)** for teaching the expanded row a log source it does not read yet.
 - **[Releasing](releasing.md)** for commit conventions and the release workflows.

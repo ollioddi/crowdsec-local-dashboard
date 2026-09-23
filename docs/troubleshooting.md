@@ -33,7 +33,7 @@ The decision synced but the alert evidence did not.
 - CrowdSec only keeps the triggering log lines for a limited window, so an old decision may genuinely have none left.
 - The decision came from CAPI or a community blocklist. Those are only mirrored when [`LAPI_DECISION_ORIGINS`](configuration.md#crowdsec-lapi) includes them, and they carry no evidence either way.
 
-If the row expands but the box says **Unknown** and lists raw meta, the alert arrived fine and the log type has no parser yet. See [Integrations](integrations.md).
+If the row expands but the box says **Unknown** and lists raw meta, the alert arrived fine and the log type has no parser yet. See [Integrations](integrations.md#a-source-with-no-parser).
 
 ## The expanded row lists fewer alerts than `cscli` does
 
