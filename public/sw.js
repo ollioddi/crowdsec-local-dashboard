@@ -3,7 +3,7 @@
  * no HTML or API response is cached. Static assets and an offline page only.
  */
 
-const VERSION = "v1";
+const VERSION = "v2";
 const ASSET_CACHE = `assets-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
 

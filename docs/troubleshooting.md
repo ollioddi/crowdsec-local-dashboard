@@ -2,7 +2,7 @@
 
 ## I log in and land back on the login page
 
-The session cookie is being dropped. The `Secure` flag is decided once at startup, and the container runs with `NODE_ENV=production`, so without `BETTER_AUTH_URL` the cookie went out as `__Secure-` and the browser discarded it on a plain HTTP origin. The login itself succeeded, which is why the logs look fine.
+Check `BETTER_AUTH_URL` against the URL in your browser. An HTTPS setting causes the session cookie to be marked `Secure`; a browser accessing the app over plain HTTP at a LAN address will reject that cookie.
 
 Browsers accept `Secure` cookies on `http://localhost`, so this only bites once you reach the dashboard at a LAN address.
 
@@ -28,8 +28,8 @@ The redirect URI changed. Register `/api/auth/callback/oidc` with your provider;
 
 The decision synced but the alert evidence did not.
 
-- No `LAPI_MACHINE_ID` and `LAPI_MACHINE_PASSWORD`. The bouncer token reads decisions but not alerts, so there is nothing to expand, and hosts get no ASN or country either. The sync banner names this case.
-- The decision came from a blocklist or from `cscli`. Those never have alerts, and the row says so.
+- No `LAPI_MACHINE_ID` and `LAPI_MACHINE_PASSWORD`. The bouncer token reads decisions but not alerts, so there is nothing to expand, and hosts get no ASN data from alerts. The sync banner names this case.
+- Blocklist and manually created decisions usually have no triggering log events.
 - CrowdSec only keeps the triggering log lines for a limited window, so an old decision may genuinely have none left.
 - The decision came from CAPI or a community blocklist. Those are only mirrored when [`LAPI_DECISION_ORIGINS`](configuration.md#crowdsec-lapi) includes them, and they carry no evidence either way.
 
@@ -45,7 +45,7 @@ The server cannot reach LAPI. Check that `LAPI_URL` includes the port and that t
 
 ## The Live dot keeps flapping
 
-Something between the browser and the server is closing the event stream. The server sends a keepalive comment every 20 seconds for exactly this reason, so a proxy dropping it usually means an idle timeout shorter than that, or response buffering that holds the stream back. Turn buffering off for the dashboard and raise the read timeout.
+Something between the browser and the server is closing the event stream. The server sends a `ping` event every 20 seconds for exactly this reason, so a proxy dropping it usually means an idle timeout shorter than that, or response buffering that holds the stream back. Turn buffering off for the dashboard and raise the read timeout.
 
 ## Every request 500s with "Invalid environment variables"
 

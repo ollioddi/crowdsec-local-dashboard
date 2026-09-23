@@ -32,9 +32,9 @@ The SQLite database lives in a Docker volume (`db`) and survives updates.
 
 ## Behind a reverse proxy
 
-Set `BETTER_AUTH_URL` to the public URL. Without it, sign-in fails with a 403 "Invalid origin", and the session cookie is not marked `Secure` even though you are serving HTTPS.
+For HTTPS, set `BETTER_AUTH_URL` to the public URL so the session cookie is marked `Secure`. If sign-in fails with “Invalid origin”, check that this URL matches the address used in the browser.
 
-The dashboard holds a Server-Sent Events stream open for live updates and sends a keepalive comment every 20 seconds. Turn response buffering off for it and keep the read timeout above 20 seconds, or the Live indicator flaps as the proxy drops the connection.
+The dashboard holds a Server-Sent Events stream open for live updates and sends a `ping` event every 20 seconds. Turn response buffering off for it and keep the read timeout above 20 seconds, or the Live indicator flaps as the proxy drops the connection.
 
 ## Upgrading from 0.5 or earlier
 
@@ -55,18 +55,25 @@ The container refuses to start and prints this command if the volume is still ow
 
 A volume from 0.2.x or earlier cannot be upgraded at all: those releases created the database without migration history, and 0.3.0 already required a reset. The container explains this too. Start over with `docker compose down -v && docker compose up -d`.
 
-## Other platforms
+## Running without Docker
 
-TanStack Start deploys to many platforms. As long as the runtime can reach your LAPI at `LAPI_URL`, it will work:
+Use a long-running Node.js process with persistent, writable storage for SQLite. From a checkout of the repository:
 
-| Platform | Notes |
-|---|---|
-| **Node.js** | Clone the repo, then `pnpm run build && node .output/server/index.mjs` |
-| **Railway** | Connect your GitHub repo, zero config required |
-| **Vercel / Netlify** | Serverless; requires LAPI to be reachable from the edge |
-| **Bun** | Replace the start command with `bun .output/server/index.mjs` |
+```sh
+pnpm install
+cp .env.example .env
+```
 
-See the [TanStack Start hosting docs](https://tanstack.com/start/latest/docs/framework/react/hosting) for the full list. While I haven't tested these, it should be a viable option for most users.
+Edit `.env`, including `DATABASE_URL`, `BETTER_AUTH_SECRET` and the LAPI credentials. Then run:
+
+```sh
+pnpm db:generate
+pnpm exec dotenv -e .env -- prisma migrate deploy
+pnpm build
+pnpm exec dotenv -e .env -- node .output/server/index.mjs
+```
+
+Use a service manager to restart the process and preserve the database file between deployments. The sync loop and live event streams require a running server; a short-lived serverless function is not a drop-in replacement for this deployment.
 
 > [!IMPORTANT]
 > If your LAPI is only reachable on a local network, the dashboard has to run on that network too, for example via Docker on the same host or over a VPN.

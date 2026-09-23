@@ -1,6 +1,6 @@
 # Contributing
 
-Everything here is for working on the dashboard. Running it is covered in the [README](../README.md).
+For installation and use, see the [README](../README.md). This page covers local development.
 
 ## Guidelines
 Contributions are welcome and appreciated. However please follow a few simple rules:
@@ -13,7 +13,8 @@ Contributions are welcome and appreciated. However please follow a few simple ru
 ```sh
 pnpm install
 cp .env.example .env   # fill in your values
-pnpm run db:push       # creates the SQLite schema and generates the Prisma client
+pnpm run db:generate   # generate the Prisma client and Zod schemas
+pnpm run db:push       # create the local SQLite schema
 pnpm run dev           # start dev server on http://localhost:3000
 ```
 
@@ -28,7 +29,7 @@ pnpm build
 
 ## Adding a parser
 
-[Contributing a parser](contributing-a-parser.md) is its own page. It covers the two extension points (an integration for a new log source, a facet for a value that can appear on several) and what a new CrowdSec scenario actually needs, which is usually nothing. Every integration ships with a fixture test built from real `cscli alerts inspect` output, with hostnames renamed.
+See [Contributing a parser](contributing-a-parser.md) for the files to change, a complete integration example and fixture tests. It also explains when to extend an existing parser instead.
 
 ## Docs
 
@@ -39,20 +40,22 @@ Two separate projects live in this repo.
 | The dashboard | root `package.json`, the pnpm workspace |
 | The docs site | `docs-site/`, its own lockfile and workspace root |
 
-`docs-site` is deliberately **not** a workspace member, so `pnpm install`, CI and the Docker build never resolve Astro. Drive it from the root instead:
+The docs site has separate dependencies. Installing or building the dashboard does not install Astro. From the repository root, run:
 
 ```sh
 pnpm docs:dev     # installs and serves on http://localhost:4321
 pnpm docs:build   # what the workflow runs
 ```
 
-`docs/*.md` is the source of truth. Plain markdown, no frontmatter, readable on GitHub at any tag. `docs-site` never writes back to it: `scripts/sync-docs.mjs` copies the files into the Starlight collection and adapts them.
+You can also run `pnpm install` and `pnpm dev` inside `docs-site/`.
+
+Edit Markdown files under `docs/`, including its subfolders. They have no frontmatter and render on GitHub as well as the site. `docs-site/scripts/sync-docs.mjs` copies them into the Starlight collection; do not edit the generated copies.
 
 That means a few rules when writing a page:
 
 - Start with a single `# H1`. It becomes the page title, and the site strips it.
 - Link between pages with relative paths (`configuration.md#retention`). Links to files outside `docs/` are rewritten to point at GitHub.
-- Reference screenshots as `images/<name>.png`, or `../images/<name>.png` from a page in a subfolder. Only referenced images are copied into the site.
+- Reference screenshots as `images/<name>.png`, or `../images/<name>.png` from a page in a subfolder. Only referenced images are copied into the site. References for upcoming release captures can stay in the Markdown: missing files render as “Screenshot pending for this release” on the site, and sync reports their names.
 - Use GitHub alerts (`> [!NOTE]`). They are converted to Starlight asides.
 - Add new pages to the sidebar in `docs-site/astro.config.mjs` and to `docs/README.md`.
 
@@ -68,11 +71,21 @@ Unauthenticated builds work but share the 60 requests per hour GitHub allows per
 
 `docs/` is the unreleased version and always lives at the site root. When a release ships, freeze its docs by adding an entry to `versions` in `docs-site/site.config.mjs`. Nothing is archivable before v0.6, because `docs/` does not exist in any earlier tag.
 
+## Testing offline behaviour
+
+The service worker registers during development on `http://localhost:3000`. Load the app once and check that the worker is active in DevTools before testing offline behaviour. In the Network panel, select Offline:
+
+- With the app open, the offline banner and grey Offline indicator should appear, and a page without loaded data should say it is waiting, provided its code finished preloading.
+- Reload while offline and you should get the "No connection" page from `public/offline.html`, which reloads itself when you set the panel back to Online.
+- Block requests to `/_serverFn/` instead of going offline to see the retry panel for an unreachable server.
+
+A LAN IP over plain HTTP is not a secure context, so no worker registers there and the offline page cannot appear. Test on localhost or behind HTTPS.
+
 ## Screenshots
 
-`pnpm screenshots` regenerates every image in `docs/images`. It seeds a throwaway database in `.demo/`, builds the app, drives Chromium through each view at desktop and phone sizes, and rewrites the screenshot blocks in the README.
+`pnpm screenshots` generates the configured captures in `docs/images`. It seeds a throwaway database in `.demo/`, builds the app, drives Chromium through each view at desktop and phone sizes, and rewrites the screenshot blocks in the README.
 
-Run it only as part of cutting a release, not after every UI change. The images live on `main` and on the docs site, so refreshing them mid-cycle shows people features that are not in any build they can pull.
+Run it only as part of cutting a release, not after every UI change. Keep references for planned captures in the docs until then; the site displays placeholders for missing files.
 
 The first run needs a browser: `pnpm exec playwright install chromium`.
 

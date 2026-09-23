@@ -59,7 +59,11 @@ const AppShell = ({ children }: Readonly<{ children: ReactNode }>) => {
 	const router = useRouter();
 	useEffect(() => {
 		for (const route of Object.values(router.routesById)) {
-			if (route.id.startsWith("/_app/")) router.loadRouteChunk(route);
+			if (route.id.startsWith("/_app/")) {
+				void router.loadRouteChunk(route)?.catch(() => {
+					// A failed prefetch must not fail the page already on screen.
+				});
+			}
 		}
 	}, [router]);
 

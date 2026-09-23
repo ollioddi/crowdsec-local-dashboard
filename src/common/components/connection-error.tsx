@@ -9,11 +9,32 @@ function isNetworkError(error: unknown): boolean {
 	return /fetch failed|failed to fetch|load failed|network/i.test(message);
 }
 
+function errorMessage(online: boolean, network: boolean) {
+	if (online) {
+		if (network) {
+			return {
+				title: "Cannot reach the dashboard",
+				description:
+					"The server did not answer. Check the connection and try again.",
+			};
+		}
+		return {
+			title: "Could not load this page",
+			description: "An error occurred while loading this page. Try again.",
+		};
+	}
+	return {
+		title: "You are offline",
+		description: "This page will load by itself once the connection is back.",
+	};
+}
+
 /** Route error view: retries by itself when the browser comes back online. */
 export function ConnectionError({ error, reset }: ErrorComponentProps) {
 	const router = useRouter();
 	const online = useOnline();
 	const network = isNetworkError(error);
+	const message = errorMessage(online, network);
 
 	const retry = () => {
 		reset();
@@ -33,13 +54,9 @@ export function ConnectionError({ error, reset }: ErrorComponentProps) {
 		<div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
 			<WifiOff className="size-8 text-muted-foreground" />
 			<div className="space-y-1">
-				<h2 className="text-lg font-semibold">
-					{online ? "Cannot reach the dashboard" : "You are offline"}
-				</h2>
+				<h2 className="text-lg font-semibold">{message.title}</h2>
 				<p className="max-w-sm text-sm text-muted-foreground">
-					{online
-						? "The server did not answer. It may be restarting, or something between you and it dropped the request."
-						: "This page will load by itself once the connection is back."}
+					{message.description}
 				</p>
 				{!network && (
 					<p className="max-w-md break-all font-mono text-xs text-muted-foreground">

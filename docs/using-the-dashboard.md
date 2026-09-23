@@ -1,24 +1,24 @@
-# Getting the most out of it
+# Using the dashboard
 
-Things the interface is telling you that are easy to miss.
+Browse decisions, inspect the alerts behind them and remove decisions from CrowdSec.
 
-## Every view is a URL
+## Saving a view
 
-Page, page size, sorting, filters, search, expanded rows and visible columns are all validated search params. A refresh, a live update or a link you paste into a chat all restore the same view, so a filtered table is worth bookmarking.
+The URL stores pagination, sorting, filters, search, expanded rows and visible columns. Bookmark or share it to return to the same view.
 
 The decisions table shows five columns by default. Status, origin, country and created date are still there for filtering and sorting, just hidden. Turn them on from the Columns menu.
 
-Filters sit behind the Filter button as chips, with per column operators and facet counts.
+Use the Filter button to add filters. Each filter appears as a chip that you can edit or remove.
 
 <img src="images/crowdsec-dashboard-desktop-decisions-filters.png" width="800" alt="The decisions table with a status filter applied and the filter picker open"/>
 
-## Live does not mean LAPI is fine
+## Connection and sync status
 
-The **Live** dot only says your browser is connected to the server. It says nothing about whether the server can reach CrowdSec.
+The **Live** indicator shows the browser’s connection to the dashboard server. The sync banner separately reports the server’s connection to CrowdSec.
 
 When a poll fails, a banner at the top of every page shows the error and the time of the last successful sync, and clears itself on the next good poll. If `LAPI_URL` or the bouncer token are missing, the banner says that instead of showing a connection error.
 
-The banner also calls out missing watcher credentials separately, because that failure is otherwise invisible: decisions keep syncing, the expanded rows are just always empty.
+Missing watcher credentials have their own warning. Decisions can sync with a bouncer token alone, but fetching alert evidence requires watcher credentials.
 
 ## Reading a decision
 
@@ -26,34 +26,33 @@ The banner also calls out missing watcher credentials separately, because that f
 
 <img src="images/crowdsec-dashboard-desktop-decisions-expanded.png" width="800" alt="An expanded decision: the alert evidence on the left, location, network, agent, log and ban length on the right"/>
 
-**Ban duration is derived, not reported.** LAPI only ever hands over the time remaining, on both the decision stream and the alerts endpoint, so a raw value would be whatever was left at the moment the sync happened to run. The dashboard measures from the triggering alert to the expiry instead, which lands on whole hours and reads `4 hours`. A decision with no linked alert says so rather than guessing.
+**Ban length** is calculated from the linked alert’s creation time to the decision’s expiry. LAPI reports the remaining duration, so the dashboard cannot use it as the original ban length. Without a linked alert, the length is shown as Unknown.
 
 **`overdue`** means the decision is still marked active but its expiry has passed.
 
-**Simulated decisions** are reported by LAPI but enforced by nobody. They are flagged, because otherwise they look exactly like a real ban and imply protection that is not there.
+**Simulated decisions** are marked with a badge. They record what CrowdSec would have decided in simulation mode.
 
 **Scope** distinguishes a Range ban from a single IP ban.
 
-**Origin** says who decided: `crowdsec` for your own agents, `cscli` for manual bans, and `CAPI`, `lists` or `console` when [`LAPI_DECISION_ORIGINS`](configuration.md#crowdsec-lapi) is opened up to include them.
+**Origin** says who decided: `crowdsec` for your own agents, `cscli` for manual bans, and `CAPI`, `lists` or `console` when included in [`LAPI_DECISION_ORIGINS`](configuration.md#crowdsec-lapi).
 
 Relative times tick live. Country codes are spelled out next to the flag.
 
 ## The alert evidence
 
-Expanding a decision splits into two columns on a desktop, and stacks into a sheet on a phone. The left column is the evidence, one box per linked alert. Top to bottom:
+Expanded decisions show evidence on the left and host details on the right. On mobile, these sections appear in a drawer. Each linked alert includes:
 
-- **The header**: the scenario, which log source the alert came from, a `simulated` badge when relevant, how many events over what window, and when. Under it, labelled: the scenario version, the bucket that fired (`10 leaking 10s` means ten hits inside a ten second leak window tripped it, the difference between a burst and a slow crawl), the scope, whether it was remediated, and the alert id.
-- **Client tags**: CVE and technology tags from the scenario, and the JA4H fingerprint, which survives a scanner rotating IPs and forging its user agent.
-- **The evidence itself**, shaped by the source: request lines for HTTP with the router, user agent and query size on each, the rule and verdict for AppSec with the ids that tie it to the access log, the ports and grouped connections for a firewall scan, the usernames for SSH. Every line of a list has the same shape, so nothing appears or vanishes depending on the other lines. See [Integrations](integrations.md) for what each one shows. An alert that mixes sources renders each of them.
-- **Other fields** and **Not parsed**, inline: everything else the alert carried. Other fields is what a parser read but the box does not draw; Not parsed is every key no parser reads, kept so nothing CrowdSec sends is silently dropped.
+- **Header**: scenario, source, event count, time window, scenario version, bucket settings, scope, remediation status and alert ID. For a leaky bucket, `10 leaking 10s` means capacity 10 with one event leaking out every ten seconds. See [CrowdSec’s scenario settings](https://docs.crowdsec.net/docs/log_processor/scenarios/format/) for the overflow rules.
+- **Client tags**: CVE, technology and JA4H values when present in the alert metadata.
+- **Evidence**: HTTP requests, AppSec rule matches, firewall connections or SSH attempts. An alert containing several sources shows each source separately. [Integrations](integrations.md) describes the available fields.
+- **Other fields**: parsed values without a dedicated display, including aggregate values absent from the retained events.
+- **Not parsed**: nonblank metadata keys the parsers did not read.
 
-The right column has the same six facts for every decision: location, network, the agent that reported it, the log it read, when it was first seen, and the ban length, with the remove and CrowdSec CTI buttons under them. A value the sync does not have reads as Unknown rather than disappearing.
-
-What each source puts in the box is on its own page under [Integrations](integrations.md).
+The details column lists location, network, reporting agent, log source, first-seen time and ban length. Remove decision and CrowdSec CTI buttons appear below it.
 
 ## On a phone
 
-The table becomes a list of cards, and expanding one opens a sheet over the list rather than growing the card, so filters and the open row stop competing for the screen. The sheet carries everything the desktop row does, in the same order. Filters take one row however many there are, scrolling sideways, with Clear pinned first.
+On a phone, decisions appear as cards. Tap a card header to open its details in a drawer. Filters scroll horizontally in one row, with Clear placed first.
 
 <table>
   <tr>
@@ -63,13 +62,13 @@ The table becomes a list of cards, and expanding one opens a sheet over the list
   </tr>
 </table>
 
-Improving a parser improves the rows already in the database: the raw events are stored and re-read every time a row is expanded, so nothing needs a re-sync.
+The detail API reparses stored events when evidence is fetched. Parser updates can improve older evidence, but cannot recover metadata that was never stored.
 
 ## Deleting a decision
 
-Deleting removes it from CrowdSec, which unbans the host, so it asks first.
+Remove decision asks for confirmation, then deletes that decision from CrowdSec. Other active decisions for the host can still block it.
 
-If CrowdSec no longer holds the decision, that counts as already gone and the row is cleared rather than erroring, so a stale row can always be removed.
+If CrowdSec has already removed it, the dashboard marks the local decision inactive.
 
 ## Hosts
 
@@ -77,11 +76,19 @@ A host with no active decisions but bans on record links through to its expired 
 
 <img src="images/crowdsec-dashboard-desktop-hosts.png" width="800" alt="The hosts table: IP, active bans, total bans, country, first and last seen"/>
 
-ASN and country enrichment comes from alerts, which means it needs the watcher credentials. Without them hosts have IPs and counts but no network data.
+ASN details come from alerts and require watcher credentials. Country information can also come from the dashboard’s local GeoIP lookup.
 
-## History sticks around
+## Retention
 
-Expired bans stay visible after CrowdSec has forgotten them, which is the point of the local database. [`DECISION_RETENTION_COUNT` and `DECISION_RETENTION_DAYS`](configuration.md#retention) decide how much is kept. Age is applied first, then the count.
+Expired decisions remain in the local database after CrowdSec removes them. [`DECISION_RETENTION_COUNT` and `DECISION_RETENTION_DAYS`](configuration.md#retention) decide how much is kept. Age is applied first, then the count.
+
+## When the connection drops
+
+The browser keeps loaded data in memory while the app is open. Offline behaviour depends on what has already loaded:
+
+- **Browser offline**: an Offline banner appears and loaded data stays visible. Requests for missing data pause until the connection returns. Navigation also needs the page’s code to have finished preloading.
+- **Server unreachable**: a failed page load shows a retry button. The live connection indicator turns red after an error or roughly 45–50 seconds without a heartbeat, and the event stream reconnects automatically.
+- **Reloaded while offline**: an active service worker shows the “No connection” page, which reloads when the browser reports that it is online. The worker must have registered during an earlier visit over HTTPS or localhost. Authentication routes are excluded from this fallback.
 
 ## Installing it as an app
 
@@ -90,7 +97,7 @@ It installs to a phone home screen or a desktop, starting on the decisions list,
 > [!NOTE]
 > Installing needs a secure context. Over plain HTTP at an IP, which is the default setup, you get the theming but no install prompt and no offline page. Serve it over HTTPS to install it.
 
-Nothing about your data is cached. The app is auth-gated and rendered per request, so the service worker holds only hashed assets and an offline page, never HTML or an API response.
+The service worker caches static assets and the offline fallback page. It does not persist authenticated pages or API responses. Loaded data in the app’s memory is lost when the page closes or reloads.
 
 ## Version and updates
 

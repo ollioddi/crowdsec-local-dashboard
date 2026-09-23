@@ -23,10 +23,10 @@ export function useSSEConnection<T>(
 	const lastSeen = useRef(0);
 	const handleMessage = useEffectEvent((data: T) => onMessage(data));
 
-	const connect = useEffectEvent(() => {
+	const connect = useEffectEvent((reconnecting = false) => {
 		source.current?.close();
 		lastSeen.current = Date.now();
-		setStatus("connecting");
+		setStatus(reconnecting ? "down" : "connecting");
 		const eventSource = new EventSource(url);
 		eventSource.onopen = () => {
 			lastSeen.current = Date.now();
@@ -57,7 +57,7 @@ export function useSSEConnection<T>(
 		connect();
 
 		const watchdog = setInterval(() => {
-			if (Date.now() - lastSeen.current > STALE_AFTER_MS) connect();
+			if (Date.now() - lastSeen.current > STALE_AFTER_MS) connect(true);
 		}, WATCHDOG_INTERVAL_MS);
 		const onVisible = () => {
 			if (
