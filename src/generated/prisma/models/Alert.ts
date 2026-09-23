@@ -29,11 +29,13 @@ export type AggregateAlert = {
 export type AlertAvgAggregateOutputType = {
   id: number | null
   eventsCount: number | null
+  capacity: number | null
 }
 
 export type AlertSumAggregateOutputType = {
   id: number | null
   eventsCount: number | null
+  capacity: number | null
 }
 
 export type AlertMinAggregateOutputType = {
@@ -47,7 +49,18 @@ export type AlertMinAggregateOutputType = {
   stopAt: Date | null
   eventsCount: number | null
   hostIp: string | null
+  integration: string | null
+  machineId: string | null
+  uuid: string | null
+  scenarioVersion: string | null
+  capacity: number | null
+  leakspeed: string | null
+  simulated: boolean | null
+  remediation: boolean | null
+  sourceScope: string | null
+  sourceRange: string | null
   events: string | null
+  meta: string | null
 }
 
 export type AlertMaxAggregateOutputType = {
@@ -61,7 +74,18 @@ export type AlertMaxAggregateOutputType = {
   stopAt: Date | null
   eventsCount: number | null
   hostIp: string | null
+  integration: string | null
+  machineId: string | null
+  uuid: string | null
+  scenarioVersion: string | null
+  capacity: number | null
+  leakspeed: string | null
+  simulated: boolean | null
+  remediation: boolean | null
+  sourceScope: string | null
+  sourceRange: string | null
   events: string | null
+  meta: string | null
 }
 
 export type AlertCountAggregateOutputType = {
@@ -75,7 +99,18 @@ export type AlertCountAggregateOutputType = {
   stopAt: number
   eventsCount: number
   hostIp: number
+  integration: number
+  machineId: number
+  uuid: number
+  scenarioVersion: number
+  capacity: number
+  leakspeed: number
+  simulated: number
+  remediation: number
+  sourceScope: number
+  sourceRange: number
   events: number
+  meta: number
   _all: number
 }
 
@@ -83,11 +118,13 @@ export type AlertCountAggregateOutputType = {
 export type AlertAvgAggregateInputType = {
   id?: true
   eventsCount?: true
+  capacity?: true
 }
 
 export type AlertSumAggregateInputType = {
   id?: true
   eventsCount?: true
+  capacity?: true
 }
 
 export type AlertMinAggregateInputType = {
@@ -101,7 +138,18 @@ export type AlertMinAggregateInputType = {
   stopAt?: true
   eventsCount?: true
   hostIp?: true
+  integration?: true
+  machineId?: true
+  uuid?: true
+  scenarioVersion?: true
+  capacity?: true
+  leakspeed?: true
+  simulated?: true
+  remediation?: true
+  sourceScope?: true
+  sourceRange?: true
   events?: true
+  meta?: true
 }
 
 export type AlertMaxAggregateInputType = {
@@ -115,7 +163,18 @@ export type AlertMaxAggregateInputType = {
   stopAt?: true
   eventsCount?: true
   hostIp?: true
+  integration?: true
+  machineId?: true
+  uuid?: true
+  scenarioVersion?: true
+  capacity?: true
+  leakspeed?: true
+  simulated?: true
+  remediation?: true
+  sourceScope?: true
+  sourceRange?: true
   events?: true
+  meta?: true
 }
 
 export type AlertCountAggregateInputType = {
@@ -129,7 +188,18 @@ export type AlertCountAggregateInputType = {
   stopAt?: true
   eventsCount?: true
   hostIp?: true
+  integration?: true
+  machineId?: true
+  uuid?: true
+  scenarioVersion?: true
+  capacity?: true
+  leakspeed?: true
+  simulated?: true
+  remediation?: true
+  sourceScope?: true
+  sourceRange?: true
   events?: true
+  meta?: true
   _all?: true
 }
 
@@ -230,7 +300,18 @@ export type AlertGroupByOutputType = {
   stopAt: Date | null
   eventsCount: number | null
   hostIp: string
+  integration: string | null
+  machineId: string | null
+  uuid: string | null
+  scenarioVersion: string | null
+  capacity: number | null
+  leakspeed: string | null
+  simulated: boolean
+  remediation: boolean | null
+  sourceScope: string | null
+  sourceRange: string | null
   events: string
+  meta: string
   _count: AlertCountAggregateOutputType | null
   _avg: AlertAvgAggregateOutputType | null
   _sum: AlertSumAggregateOutputType | null
@@ -267,7 +348,18 @@ export type AlertWhereInput = {
   stopAt?: Prisma.DateTimeNullableFilter<"Alert"> | Date | string | null
   eventsCount?: Prisma.IntNullableFilter<"Alert"> | number | null
   hostIp?: Prisma.StringFilter<"Alert"> | string
+  integration?: Prisma.StringNullableFilter<"Alert"> | string | null
+  machineId?: Prisma.StringNullableFilter<"Alert"> | string | null
+  uuid?: Prisma.StringNullableFilter<"Alert"> | string | null
+  scenarioVersion?: Prisma.StringNullableFilter<"Alert"> | string | null
+  capacity?: Prisma.IntNullableFilter<"Alert"> | number | null
+  leakspeed?: Prisma.StringNullableFilter<"Alert"> | string | null
+  simulated?: Prisma.BoolFilter<"Alert"> | boolean
+  remediation?: Prisma.BoolNullableFilter<"Alert"> | boolean | null
+  sourceScope?: Prisma.StringNullableFilter<"Alert"> | string | null
+  sourceRange?: Prisma.StringNullableFilter<"Alert"> | string | null
   events?: Prisma.StringFilter<"Alert"> | string
+  meta?: Prisma.StringFilter<"Alert"> | string
   host?: Prisma.XOR<Prisma.HostScalarRelationFilter, Prisma.HostWhereInput>
   decisions?: Prisma.DecisionListRelationFilter
 }
@@ -283,7 +375,18 @@ export type AlertOrderByWithRelationInput = {
   stopAt?: Prisma.SortOrderInput | Prisma.SortOrder
   eventsCount?: Prisma.SortOrderInput | Prisma.SortOrder
   hostIp?: Prisma.SortOrder
+  integration?: Prisma.SortOrderInput | Prisma.SortOrder
+  machineId?: Prisma.SortOrderInput | Prisma.SortOrder
+  uuid?: Prisma.SortOrderInput | Prisma.SortOrder
+  scenarioVersion?: Prisma.SortOrderInput | Prisma.SortOrder
+  capacity?: Prisma.SortOrderInput | Prisma.SortOrder
+  leakspeed?: Prisma.SortOrderInput | Prisma.SortOrder
+  simulated?: Prisma.SortOrder
+  remediation?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceScope?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceRange?: Prisma.SortOrderInput | Prisma.SortOrder
   events?: Prisma.SortOrder
+  meta?: Prisma.SortOrder
   host?: Prisma.HostOrderByWithRelationInput
   decisions?: Prisma.DecisionOrderByRelationAggregateInput
 }
@@ -302,7 +405,18 @@ export type AlertWhereUniqueInput = Prisma.AtLeast<{
   stopAt?: Prisma.DateTimeNullableFilter<"Alert"> | Date | string | null
   eventsCount?: Prisma.IntNullableFilter<"Alert"> | number | null
   hostIp?: Prisma.StringFilter<"Alert"> | string
+  integration?: Prisma.StringNullableFilter<"Alert"> | string | null
+  machineId?: Prisma.StringNullableFilter<"Alert"> | string | null
+  uuid?: Prisma.StringNullableFilter<"Alert"> | string | null
+  scenarioVersion?: Prisma.StringNullableFilter<"Alert"> | string | null
+  capacity?: Prisma.IntNullableFilter<"Alert"> | number | null
+  leakspeed?: Prisma.StringNullableFilter<"Alert"> | string | null
+  simulated?: Prisma.BoolFilter<"Alert"> | boolean
+  remediation?: Prisma.BoolNullableFilter<"Alert"> | boolean | null
+  sourceScope?: Prisma.StringNullableFilter<"Alert"> | string | null
+  sourceRange?: Prisma.StringNullableFilter<"Alert"> | string | null
   events?: Prisma.StringFilter<"Alert"> | string
+  meta?: Prisma.StringFilter<"Alert"> | string
   host?: Prisma.XOR<Prisma.HostScalarRelationFilter, Prisma.HostWhereInput>
   decisions?: Prisma.DecisionListRelationFilter
 }, "id">
@@ -318,7 +432,18 @@ export type AlertOrderByWithAggregationInput = {
   stopAt?: Prisma.SortOrderInput | Prisma.SortOrder
   eventsCount?: Prisma.SortOrderInput | Prisma.SortOrder
   hostIp?: Prisma.SortOrder
+  integration?: Prisma.SortOrderInput | Prisma.SortOrder
+  machineId?: Prisma.SortOrderInput | Prisma.SortOrder
+  uuid?: Prisma.SortOrderInput | Prisma.SortOrder
+  scenarioVersion?: Prisma.SortOrderInput | Prisma.SortOrder
+  capacity?: Prisma.SortOrderInput | Prisma.SortOrder
+  leakspeed?: Prisma.SortOrderInput | Prisma.SortOrder
+  simulated?: Prisma.SortOrder
+  remediation?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceScope?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceRange?: Prisma.SortOrderInput | Prisma.SortOrder
   events?: Prisma.SortOrder
+  meta?: Prisma.SortOrder
   _count?: Prisma.AlertCountOrderByAggregateInput
   _avg?: Prisma.AlertAvgOrderByAggregateInput
   _max?: Prisma.AlertMaxOrderByAggregateInput
@@ -340,7 +465,18 @@ export type AlertScalarWhereWithAggregatesInput = {
   stopAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Alert"> | Date | string | null
   eventsCount?: Prisma.IntNullableWithAggregatesFilter<"Alert"> | number | null
   hostIp?: Prisma.StringWithAggregatesFilter<"Alert"> | string
+  integration?: Prisma.StringNullableWithAggregatesFilter<"Alert"> | string | null
+  machineId?: Prisma.StringNullableWithAggregatesFilter<"Alert"> | string | null
+  uuid?: Prisma.StringNullableWithAggregatesFilter<"Alert"> | string | null
+  scenarioVersion?: Prisma.StringNullableWithAggregatesFilter<"Alert"> | string | null
+  capacity?: Prisma.IntNullableWithAggregatesFilter<"Alert"> | number | null
+  leakspeed?: Prisma.StringNullableWithAggregatesFilter<"Alert"> | string | null
+  simulated?: Prisma.BoolWithAggregatesFilter<"Alert"> | boolean
+  remediation?: Prisma.BoolNullableWithAggregatesFilter<"Alert"> | boolean | null
+  sourceScope?: Prisma.StringNullableWithAggregatesFilter<"Alert"> | string | null
+  sourceRange?: Prisma.StringNullableWithAggregatesFilter<"Alert"> | string | null
   events?: Prisma.StringWithAggregatesFilter<"Alert"> | string
+  meta?: Prisma.StringWithAggregatesFilter<"Alert"> | string
 }
 
 export type AlertCreateInput = {
@@ -353,7 +489,18 @@ export type AlertCreateInput = {
   startAt?: Date | string | null
   stopAt?: Date | string | null
   eventsCount?: number | null
+  integration?: string | null
+  machineId?: string | null
+  uuid?: string | null
+  scenarioVersion?: string | null
+  capacity?: number | null
+  leakspeed?: string | null
+  simulated?: boolean
+  remediation?: boolean | null
+  sourceScope?: string | null
+  sourceRange?: string | null
   events?: string
+  meta?: string
   host: Prisma.HostCreateNestedOneWithoutAlertsInput
   decisions?: Prisma.DecisionCreateNestedManyWithoutAlertsInput
 }
@@ -369,7 +516,18 @@ export type AlertUncheckedCreateInput = {
   stopAt?: Date | string | null
   eventsCount?: number | null
   hostIp: string
+  integration?: string | null
+  machineId?: string | null
+  uuid?: string | null
+  scenarioVersion?: string | null
+  capacity?: number | null
+  leakspeed?: string | null
+  simulated?: boolean
+  remediation?: boolean | null
+  sourceScope?: string | null
+  sourceRange?: string | null
   events?: string
+  meta?: string
   decisions?: Prisma.DecisionUncheckedCreateNestedManyWithoutAlertsInput
 }
 
@@ -383,7 +541,18 @@ export type AlertUpdateInput = {
   startAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventsCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  integration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leakspeed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remediation?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  sourceScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.StringFieldUpdateOperationsInput | string
+  meta?: Prisma.StringFieldUpdateOperationsInput | string
   host?: Prisma.HostUpdateOneRequiredWithoutAlertsNestedInput
   decisions?: Prisma.DecisionUpdateManyWithoutAlertsNestedInput
 }
@@ -399,7 +568,18 @@ export type AlertUncheckedUpdateInput = {
   stopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventsCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hostIp?: Prisma.StringFieldUpdateOperationsInput | string
+  integration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leakspeed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remediation?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  sourceScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.StringFieldUpdateOperationsInput | string
+  meta?: Prisma.StringFieldUpdateOperationsInput | string
   decisions?: Prisma.DecisionUncheckedUpdateManyWithoutAlertsNestedInput
 }
 
@@ -414,7 +594,18 @@ export type AlertCreateManyInput = {
   stopAt?: Date | string | null
   eventsCount?: number | null
   hostIp: string
+  integration?: string | null
+  machineId?: string | null
+  uuid?: string | null
+  scenarioVersion?: string | null
+  capacity?: number | null
+  leakspeed?: string | null
+  simulated?: boolean
+  remediation?: boolean | null
+  sourceScope?: string | null
+  sourceRange?: string | null
   events?: string
+  meta?: string
 }
 
 export type AlertUpdateManyMutationInput = {
@@ -427,7 +618,18 @@ export type AlertUpdateManyMutationInput = {
   startAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventsCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  integration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leakspeed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remediation?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  sourceScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.StringFieldUpdateOperationsInput | string
+  meta?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type AlertUncheckedUpdateManyInput = {
@@ -441,7 +643,18 @@ export type AlertUncheckedUpdateManyInput = {
   stopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventsCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hostIp?: Prisma.StringFieldUpdateOperationsInput | string
+  integration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leakspeed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remediation?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  sourceScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.StringFieldUpdateOperationsInput | string
+  meta?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type AlertListRelationFilter = {
@@ -465,12 +678,24 @@ export type AlertCountOrderByAggregateInput = {
   stopAt?: Prisma.SortOrder
   eventsCount?: Prisma.SortOrder
   hostIp?: Prisma.SortOrder
+  integration?: Prisma.SortOrder
+  machineId?: Prisma.SortOrder
+  uuid?: Prisma.SortOrder
+  scenarioVersion?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
+  leakspeed?: Prisma.SortOrder
+  simulated?: Prisma.SortOrder
+  remediation?: Prisma.SortOrder
+  sourceScope?: Prisma.SortOrder
+  sourceRange?: Prisma.SortOrder
   events?: Prisma.SortOrder
+  meta?: Prisma.SortOrder
 }
 
 export type AlertAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   eventsCount?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
 }
 
 export type AlertMaxOrderByAggregateInput = {
@@ -484,7 +709,18 @@ export type AlertMaxOrderByAggregateInput = {
   stopAt?: Prisma.SortOrder
   eventsCount?: Prisma.SortOrder
   hostIp?: Prisma.SortOrder
+  integration?: Prisma.SortOrder
+  machineId?: Prisma.SortOrder
+  uuid?: Prisma.SortOrder
+  scenarioVersion?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
+  leakspeed?: Prisma.SortOrder
+  simulated?: Prisma.SortOrder
+  remediation?: Prisma.SortOrder
+  sourceScope?: Prisma.SortOrder
+  sourceRange?: Prisma.SortOrder
   events?: Prisma.SortOrder
+  meta?: Prisma.SortOrder
 }
 
 export type AlertMinOrderByAggregateInput = {
@@ -498,12 +734,24 @@ export type AlertMinOrderByAggregateInput = {
   stopAt?: Prisma.SortOrder
   eventsCount?: Prisma.SortOrder
   hostIp?: Prisma.SortOrder
+  integration?: Prisma.SortOrder
+  machineId?: Prisma.SortOrder
+  uuid?: Prisma.SortOrder
+  scenarioVersion?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
+  leakspeed?: Prisma.SortOrder
+  simulated?: Prisma.SortOrder
+  remediation?: Prisma.SortOrder
+  sourceScope?: Prisma.SortOrder
+  sourceRange?: Prisma.SortOrder
   events?: Prisma.SortOrder
+  meta?: Prisma.SortOrder
 }
 
 export type AlertSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   eventsCount?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
 }
 
 export type AlertCreateNestedManyWithoutHostInput = {
@@ -598,6 +846,10 @@ export type NullableIntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type NullableBoolFieldUpdateOperationsInput = {
+  set?: boolean | null
+}
+
 export type AlertCreateWithoutHostInput = {
   id: number
   scenario: string
@@ -608,7 +860,18 @@ export type AlertCreateWithoutHostInput = {
   startAt?: Date | string | null
   stopAt?: Date | string | null
   eventsCount?: number | null
+  integration?: string | null
+  machineId?: string | null
+  uuid?: string | null
+  scenarioVersion?: string | null
+  capacity?: number | null
+  leakspeed?: string | null
+  simulated?: boolean
+  remediation?: boolean | null
+  sourceScope?: string | null
+  sourceRange?: string | null
   events?: string
+  meta?: string
   decisions?: Prisma.DecisionCreateNestedManyWithoutAlertsInput
 }
 
@@ -622,7 +885,18 @@ export type AlertUncheckedCreateWithoutHostInput = {
   startAt?: Date | string | null
   stopAt?: Date | string | null
   eventsCount?: number | null
+  integration?: string | null
+  machineId?: string | null
+  uuid?: string | null
+  scenarioVersion?: string | null
+  capacity?: number | null
+  leakspeed?: string | null
+  simulated?: boolean
+  remediation?: boolean | null
+  sourceScope?: string | null
+  sourceRange?: string | null
   events?: string
+  meta?: string
   decisions?: Prisma.DecisionUncheckedCreateNestedManyWithoutAlertsInput
 }
 
@@ -665,7 +939,18 @@ export type AlertScalarWhereInput = {
   stopAt?: Prisma.DateTimeNullableFilter<"Alert"> | Date | string | null
   eventsCount?: Prisma.IntNullableFilter<"Alert"> | number | null
   hostIp?: Prisma.StringFilter<"Alert"> | string
+  integration?: Prisma.StringNullableFilter<"Alert"> | string | null
+  machineId?: Prisma.StringNullableFilter<"Alert"> | string | null
+  uuid?: Prisma.StringNullableFilter<"Alert"> | string | null
+  scenarioVersion?: Prisma.StringNullableFilter<"Alert"> | string | null
+  capacity?: Prisma.IntNullableFilter<"Alert"> | number | null
+  leakspeed?: Prisma.StringNullableFilter<"Alert"> | string | null
+  simulated?: Prisma.BoolFilter<"Alert"> | boolean
+  remediation?: Prisma.BoolNullableFilter<"Alert"> | boolean | null
+  sourceScope?: Prisma.StringNullableFilter<"Alert"> | string | null
+  sourceRange?: Prisma.StringNullableFilter<"Alert"> | string | null
   events?: Prisma.StringFilter<"Alert"> | string
+  meta?: Prisma.StringFilter<"Alert"> | string
 }
 
 export type AlertCreateWithoutDecisionsInput = {
@@ -678,7 +963,18 @@ export type AlertCreateWithoutDecisionsInput = {
   startAt?: Date | string | null
   stopAt?: Date | string | null
   eventsCount?: number | null
+  integration?: string | null
+  machineId?: string | null
+  uuid?: string | null
+  scenarioVersion?: string | null
+  capacity?: number | null
+  leakspeed?: string | null
+  simulated?: boolean
+  remediation?: boolean | null
+  sourceScope?: string | null
+  sourceRange?: string | null
   events?: string
+  meta?: string
   host: Prisma.HostCreateNestedOneWithoutAlertsInput
 }
 
@@ -693,7 +989,18 @@ export type AlertUncheckedCreateWithoutDecisionsInput = {
   stopAt?: Date | string | null
   eventsCount?: number | null
   hostIp: string
+  integration?: string | null
+  machineId?: string | null
+  uuid?: string | null
+  scenarioVersion?: string | null
+  capacity?: number | null
+  leakspeed?: string | null
+  simulated?: boolean
+  remediation?: boolean | null
+  sourceScope?: string | null
+  sourceRange?: string | null
   events?: string
+  meta?: string
 }
 
 export type AlertCreateOrConnectWithoutDecisionsInput = {
@@ -727,7 +1034,18 @@ export type AlertCreateManyHostInput = {
   startAt?: Date | string | null
   stopAt?: Date | string | null
   eventsCount?: number | null
+  integration?: string | null
+  machineId?: string | null
+  uuid?: string | null
+  scenarioVersion?: string | null
+  capacity?: number | null
+  leakspeed?: string | null
+  simulated?: boolean
+  remediation?: boolean | null
+  sourceScope?: string | null
+  sourceRange?: string | null
   events?: string
+  meta?: string
 }
 
 export type AlertUpdateWithoutHostInput = {
@@ -740,7 +1058,18 @@ export type AlertUpdateWithoutHostInput = {
   startAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventsCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  integration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leakspeed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remediation?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  sourceScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.StringFieldUpdateOperationsInput | string
+  meta?: Prisma.StringFieldUpdateOperationsInput | string
   decisions?: Prisma.DecisionUpdateManyWithoutAlertsNestedInput
 }
 
@@ -754,7 +1083,18 @@ export type AlertUncheckedUpdateWithoutHostInput = {
   startAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventsCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  integration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leakspeed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remediation?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  sourceScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.StringFieldUpdateOperationsInput | string
+  meta?: Prisma.StringFieldUpdateOperationsInput | string
   decisions?: Prisma.DecisionUncheckedUpdateManyWithoutAlertsNestedInput
 }
 
@@ -768,7 +1108,18 @@ export type AlertUncheckedUpdateManyWithoutHostInput = {
   startAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventsCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  integration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leakspeed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remediation?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  sourceScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.StringFieldUpdateOperationsInput | string
+  meta?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type AlertUpdateWithoutDecisionsInput = {
@@ -781,7 +1132,18 @@ export type AlertUpdateWithoutDecisionsInput = {
   startAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventsCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  integration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leakspeed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remediation?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  sourceScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.StringFieldUpdateOperationsInput | string
+  meta?: Prisma.StringFieldUpdateOperationsInput | string
   host?: Prisma.HostUpdateOneRequiredWithoutAlertsNestedInput
 }
 
@@ -796,7 +1158,18 @@ export type AlertUncheckedUpdateWithoutDecisionsInput = {
   stopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventsCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hostIp?: Prisma.StringFieldUpdateOperationsInput | string
+  integration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leakspeed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remediation?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  sourceScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.StringFieldUpdateOperationsInput | string
+  meta?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type AlertUncheckedUpdateManyWithoutDecisionsInput = {
@@ -810,7 +1183,18 @@ export type AlertUncheckedUpdateManyWithoutDecisionsInput = {
   stopAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventsCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hostIp?: Prisma.StringFieldUpdateOperationsInput | string
+  integration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  machineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leakspeed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  simulated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remediation?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  sourceScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRange?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.StringFieldUpdateOperationsInput | string
+  meta?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -855,7 +1239,18 @@ export type AlertSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   stopAt?: boolean
   eventsCount?: boolean
   hostIp?: boolean
+  integration?: boolean
+  machineId?: boolean
+  uuid?: boolean
+  scenarioVersion?: boolean
+  capacity?: boolean
+  leakspeed?: boolean
+  simulated?: boolean
+  remediation?: boolean
+  sourceScope?: boolean
+  sourceRange?: boolean
   events?: boolean
+  meta?: boolean
   host?: boolean | Prisma.HostDefaultArgs<ExtArgs>
   decisions?: boolean | Prisma.Alert$decisionsArgs<ExtArgs>
   _count?: boolean | Prisma.AlertCountOutputTypeDefaultArgs<ExtArgs>
@@ -872,7 +1267,18 @@ export type AlertSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   stopAt?: boolean
   eventsCount?: boolean
   hostIp?: boolean
+  integration?: boolean
+  machineId?: boolean
+  uuid?: boolean
+  scenarioVersion?: boolean
+  capacity?: boolean
+  leakspeed?: boolean
+  simulated?: boolean
+  remediation?: boolean
+  sourceScope?: boolean
+  sourceRange?: boolean
   events?: boolean
+  meta?: boolean
   host?: boolean | Prisma.HostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["alert"]>
 
@@ -887,7 +1293,18 @@ export type AlertSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   stopAt?: boolean
   eventsCount?: boolean
   hostIp?: boolean
+  integration?: boolean
+  machineId?: boolean
+  uuid?: boolean
+  scenarioVersion?: boolean
+  capacity?: boolean
+  leakspeed?: boolean
+  simulated?: boolean
+  remediation?: boolean
+  sourceScope?: boolean
+  sourceRange?: boolean
   events?: boolean
+  meta?: boolean
   host?: boolean | Prisma.HostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["alert"]>
 
@@ -902,10 +1319,21 @@ export type AlertSelectScalar = {
   stopAt?: boolean
   eventsCount?: boolean
   hostIp?: boolean
+  integration?: boolean
+  machineId?: boolean
+  uuid?: boolean
+  scenarioVersion?: boolean
+  capacity?: boolean
+  leakspeed?: boolean
+  simulated?: boolean
+  remediation?: boolean
+  sourceScope?: boolean
+  sourceRange?: boolean
   events?: boolean
+  meta?: boolean
 }
 
-export type AlertOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scenario" | "message" | "createdAt" | "entries" | "entryType" | "startAt" | "stopAt" | "eventsCount" | "hostIp" | "events", ExtArgs["result"]["alert"]>
+export type AlertOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scenario" | "message" | "createdAt" | "entries" | "entryType" | "startAt" | "stopAt" | "eventsCount" | "hostIp" | "integration" | "machineId" | "uuid" | "scenarioVersion" | "capacity" | "leakspeed" | "simulated" | "remediation" | "sourceScope" | "sourceRange" | "events" | "meta", ExtArgs["result"]["alert"]>
 export type AlertInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   host?: boolean | Prisma.HostDefaultArgs<ExtArgs>
   decisions?: boolean | Prisma.Alert$decisionsArgs<ExtArgs>
@@ -935,7 +1363,18 @@ export type $AlertPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     stopAt: Date | null
     eventsCount: number | null
     hostIp: string
+    integration: string | null
+    machineId: string | null
+    uuid: string | null
+    scenarioVersion: string | null
+    capacity: number | null
+    leakspeed: string | null
+    simulated: boolean
+    remediation: boolean | null
+    sourceScope: string | null
+    sourceRange: string | null
     events: string
+    meta: string
   }, ExtArgs["result"]["alert"]>
   composites: {}
 }
@@ -1371,7 +1810,18 @@ export interface AlertFieldRefs {
   readonly stopAt: Prisma.FieldRef<"Alert", 'DateTime'>
   readonly eventsCount: Prisma.FieldRef<"Alert", 'Int'>
   readonly hostIp: Prisma.FieldRef<"Alert", 'String'>
+  readonly integration: Prisma.FieldRef<"Alert", 'String'>
+  readonly machineId: Prisma.FieldRef<"Alert", 'String'>
+  readonly uuid: Prisma.FieldRef<"Alert", 'String'>
+  readonly scenarioVersion: Prisma.FieldRef<"Alert", 'String'>
+  readonly capacity: Prisma.FieldRef<"Alert", 'Int'>
+  readonly leakspeed: Prisma.FieldRef<"Alert", 'String'>
+  readonly simulated: Prisma.FieldRef<"Alert", 'Boolean'>
+  readonly remediation: Prisma.FieldRef<"Alert", 'Boolean'>
+  readonly sourceScope: Prisma.FieldRef<"Alert", 'String'>
+  readonly sourceRange: Prisma.FieldRef<"Alert", 'String'>
   readonly events: Prisma.FieldRef<"Alert", 'String'>
+  readonly meta: Prisma.FieldRef<"Alert", 'String'>
 }
     
 

@@ -1,12 +1,12 @@
 import { cn } from "cn";
 import { ExternalLink, Trash2 } from "lucide-react";
-import moment from "moment";
 import type { DataTableColumnDef } from "@/common/components/data-table/table-features";
 import { IPLinkBadge } from "@/common/components/ip-badge";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
 import { useRelativeTime } from "@/common/hooks/use-relative-time";
 import { countryFlag, countryName } from "@/common/lib/country-flag";
+import { formatDateTime } from "@/common/lib/dates";
 import type { DecisionWithHost } from "@/features/decisions/api/decisions.types";
 
 export function shortScenario(scenario: string) {
@@ -27,9 +27,7 @@ function typeVariant(type: string) {
 /** Timestamp with the live countdown under it, matching RelativeTime. */
 function ExpiresCell({ decision }: Readonly<{ decision: DecisionWithHost }>) {
 	const relative = useRelativeTime(decision.expiresAt);
-	const exact = decision.expiresAt
-		? moment(decision.expiresAt).format("DD/MM/YYYY HH:mm")
-		: null;
+	const exact = decision.expiresAt ? formatDateTime(decision.expiresAt) : null;
 
 	if (!decision.active) {
 		return (
@@ -46,7 +44,7 @@ function ExpiresCell({ decision }: Readonly<{ decision: DecisionWithHost }>) {
 
 	return (
 		<span className="flex flex-col leading-tight tabular-nums">
-			<span className="text-sm">{exact ?? "—"}</span>
+			<span className="text-sm">{exact ?? "-"}</span>
 			<span
 				className={cn(
 					"text-xs text-muted-foreground",

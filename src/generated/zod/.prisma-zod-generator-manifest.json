@@ -1,8 +1,8 @@
 {
   "version": "1.0",
   "generatorVersion": "unknown",
-  "generatedAt": "2026-09-20T19:46:39.593Z",
-  "outputPath": "/home/oliver/development/code/HOBBY/crowdsec-dashboard/src/generated/zod",
+  "generatedAt": "2026-09-22T18:47:57.442Z",
+  "outputPath": "/home/ansible/app/crowdsec-local-dashboard/src/generated/zod",
   "files": [
     "schemas/enums/TransactionIsolationLevel.schema.ts",
     "schemas/enums/UserScalarFieldEnum.schema.ts",
@@ -15,7 +15,6 @@
     "schemas/enums/SortOrder.schema.ts",
     "schemas/enums/NullsOrder.schema.ts",
     "schemas/enums/DecisionType.schema.ts",
-    "schemas/enums/DecisionOrigin.schema.ts",
     "schemas/enums/AlertEntryType.schema.ts",
     "schemas/variants/pure/User.pure.ts",
     "schemas/variants/pure/Session.pure.ts",

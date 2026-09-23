@@ -155,6 +155,7 @@ export const DecisionScalarFieldEnum = {
   hostIp: 'hostIp',
   type: 'type',
   origin: 'origin',
+  uuid: 'uuid',
   scenario: 'scenario',
   duration: 'duration',
   scope: 'scope',
@@ -178,7 +179,18 @@ export const AlertScalarFieldEnum = {
   stopAt: 'stopAt',
   eventsCount: 'eventsCount',
   hostIp: 'hostIp',
-  events: 'events'
+  integration: 'integration',
+  machineId: 'machineId',
+  uuid: 'uuid',
+  scenarioVersion: 'scenarioVersion',
+  capacity: 'capacity',
+  leakspeed: 'leakspeed',
+  simulated: 'simulated',
+  remediation: 'remediation',
+  sourceScope: 'sourceScope',
+  sourceRange: 'sourceRange',
+  events: 'events',
+  meta: 'meta'
 } as const
 
 export type AlertScalarFieldEnum = (typeof AlertScalarFieldEnum)[keyof typeof AlertScalarFieldEnum]

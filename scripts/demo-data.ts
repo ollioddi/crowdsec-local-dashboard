@@ -2,11 +2,11 @@
 import { randomUUID } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { extractAlertData } from "@/common/alert-types/alert-types";
 import { createUserAccount } from "@/common/auth/create-user-account.server";
-import type { CrowdSecAlert } from "@/common/crowdsec-lapi/types";
 import { prisma } from "@/common/lib/db";
 import { env } from "@/common/lib/env";
+import { metaToRecord } from "@/common/parsing/meta";
+import { parseAlert } from "@/common/parsing/registry";
 import type { DecisionType } from "@/generated/prisma/enums.js";
 
 export const DEMO_LOGIN = { username: "admin", password: "crowdsec-demo" };
@@ -58,6 +58,13 @@ const SCENARIOS = [
 ] as const;
 
 type Family = (typeof SCENARIOS)[number]["family"];
+
+/** Which agent would have reported each family, for the provenance line. */
+const MACHINE_BY_FAMILY: Record<Family, string> = {
+	http: "traefik",
+	ssh: "vaultwarden",
+	pf: "opnsense",
+};
 
 const HTTP_PATHS: Record<string, string[]> = {
 	"crowdsecurity/http-probing": [
@@ -350,13 +357,13 @@ async function seedDecisions() {
 						),
 					]
 				: [];
-		const rawAlert = {
+		const alertMeta = ports.length
+			? [{ key: "dst_port", value: JSON.stringify(ports) }]
+			: [];
+		const { entries, entryType, integration } = parseAlert({
 			events,
-			meta: ports.length
-				? [{ key: "dst_port", value: JSON.stringify(ports) }]
-				: [],
-		} as unknown as CrowdSecAlert;
-		const { entries, entryType } = extractAlertData(rawAlert);
+			meta: alertMeta,
+		});
 
 		await prisma.host.upsert({
 			where: { ip: host.ip },
@@ -388,7 +395,10 @@ async function seedDecisions() {
 				hostIp: host.ip,
 				entries: JSON.stringify(entries),
 				entryType,
+				integration,
+				machineId: MACHINE_BY_FAMILY[scenario.family],
 				events: JSON.stringify(events),
+				meta: JSON.stringify(metaToRecord(alertMeta)),
 			},
 		});
 

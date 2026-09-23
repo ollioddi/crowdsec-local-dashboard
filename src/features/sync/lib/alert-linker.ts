@@ -3,6 +3,7 @@ import type {
 	CrowdSecAlert,
 	CrowdSecDecision,
 } from "@/common/crowdsec-lapi/types";
+import { env } from "@/common/lib/env";
 import { errorFields, logger } from "@/common/lib/logging/logger";
 import { describeError, recordAlertFetch } from "./status";
 
@@ -30,8 +31,9 @@ function indexAlert(
  * Fetches parent Alerts from LAPI for the given decisions and returns
  * a map of DecisionID → Alert[].
  *
- * Only locally-generated alerts (origin=crowdsec) are fetched.
- * CAPI / blocklist bulk alerts (which have no events) are skipped.
+ * Every origin is fetched: CAPI / blocklist bulk alerts carry no events and
+ * are skipped by `indexAlert`, while a console or cscli alert that does have
+ * events keeps them.
  *
  * Strategy: query alerts by IP in chunks, then invert Alert.decisions[]
  * into a lookup map keyed by decision ID.
@@ -59,7 +61,11 @@ export async function buildDecisionToAlertMap(
 		const alertsPerIp = await Promise.all(
 			chunk.map((ip) =>
 				client
-					.getAlerts({ ip, has_active_decision: true, origin: "crowdsec" })
+					.getAlerts({
+						ip,
+						has_active_decision: true,
+						limit: env.LAPI_ALERT_LIMIT,
+					})
 					.catch((e) => {
 						failures++;
 						firstError ??= describeError(e);

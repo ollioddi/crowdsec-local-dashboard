@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/common/auth/auth.middleware";
 import { logger } from "@/common/lib/logging/logger";
+import type { AlertDetail } from "@/features/decisions/api/alert-detail";
 import type { DecisionsPayload } from "@/features/decisions/api/decisions.types";
 
 /**
@@ -22,45 +23,23 @@ export const getDecisionsFn = createServerFn({ method: "GET" })
 
 /**
  * Fetch full alert data (including parsed events) for a single decision.
- * Intended for the expanded row — fetched lazily on expand.
+ * Intended for the expanded row, fetched lazily on expand.
  */
 export const getDecisionAlertsFn = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
 	.validator(z.object({ decisionId: z.number() }))
-	.handler(async ({ data }) => {
+	.handler(async ({ data }): Promise<AlertDetail[]> => {
 		const { prisma } = await import("@/common/lib/db");
-		const { parseAlertEvent } = await import(
-			"@/common/alert-types/alert-types"
+		const { alertDetailFromRow } = await import(
+			"@/features/decisions/api/alert-detail"
 		);
 
 		const decision = await prisma.decision.findUnique({
 			where: { id: data.decisionId },
 			include: { alerts: true },
 		});
-		if (!decision?.alerts.length) return [];
-
-		type AlertEventRaw = import("@/common/crowdsec-lapi/types").AlertEvent;
-
-		return decision.alerts.map((alert) => ({
-			id: alert.id,
-			scenario: alert.scenario,
-			message: alert.message,
-			createdAt: alert.createdAt,
-			startAt: alert.startAt,
-			stopAt: alert.stopAt,
-			/** LAPI's count, which can exceed the events it actually returned. */
-			eventsCount: alert.eventsCount,
-			entries: JSON.parse(alert.entries) as string[],
-			entryType: alert.entryType,
-			events: (JSON.parse(alert.events) as AlertEventRaw[]).map(
-				parseAlertEvent,
-			),
-		}));
+		return decision?.alerts.map(alertDetailFromRow) ?? [];
 	});
-
-export type DecisionAlertDetail = Awaited<
-	ReturnType<typeof getDecisionAlertsFn>
->[number];
 
 /**
  * Delete a decision from LAPI and mark inactive in DB.

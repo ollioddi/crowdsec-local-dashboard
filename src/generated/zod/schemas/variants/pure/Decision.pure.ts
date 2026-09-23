@@ -1,13 +1,13 @@
 import * as z from 'zod';
 import { DecisionTypeSchema } from '../../enums/DecisionType.schema';
-import { DecisionOriginSchema } from '../../enums/DecisionOrigin.schema';
 // prettier-ignore
 export const DecisionModelSchema = z.object({
     id: z.number().int(),
     hostIp: z.string(),
     host: z.unknown(),
     type: DecisionTypeSchema,
-    origin: DecisionOriginSchema,
+    origin: z.string(),
+    uuid: z.string().nullable(),
     scenario: z.string(),
     duration: z.string(),
     scope: z.string(),

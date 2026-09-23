@@ -68,7 +68,7 @@ This dashboard replaces all of that with a filterable table and a delete button.
 
 - **Host overview** - every IP CrowdSec has ever seen, with active ban count and country enrichment
 - **Decision management** - filter by IP, type, origin, or status; delete decisions with one click
-- **Alert Extraction** - view alerts associated with each decision. Shows which ports are scanned, and which paths are requested.
+- **Alert evidence** - expand a decision to see what tripped it: the requests behind an HTTP ban, the WAF rule that fired, the ports a scan touched, the usernames tried over SSH, plus the client fingerprint and the bucket that fired. Anything the parsers do not understand yet is still shown raw.
 - **Real-time updates** - live changes streamed via Server-Sent Events (no polling on the client)
 - **Historical tracking** - decisions are mirrored to a local SQLite database; expired bans stay visible
 - **User management** - local username/password accounts; the first registered user becomes admin
@@ -79,7 +79,7 @@ This dashboard replaces all of that with a filterable table and a delete button.
 
 ## What it is built against
 
-I run CrowdSec behind **Traefik** for HTTP and **OPNsense** for the firewall, so those are the two stacks this is actually tested on.
+I run CrowdSec behind **Traefik** for HTTP, with the **AppSec** component in front of it, and **OPNsense** for the firewall, so those are the stacks this is actually tested on.
 
 Decisions and hosts work with any CrowdSec setup. What is stack-specific is the alert evidence in the expanded row, which is parsed per log type. A stack with no parser still shows the ban, just without the breakdown.
 

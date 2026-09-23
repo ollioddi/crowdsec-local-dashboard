@@ -24,6 +24,8 @@ See [LAPI setup](lapi-setup.md) for where these values come from.
 | `LAPI_MACHINE_PASSWORD` | Yes | | Machine password for watcher authentication. |
 | `LAPI_BOUNCER_API_TOKEN` | Yes | | API token for bouncer (read) access. |
 | `LAPI_POLL_INTERVAL` | | `60` | Seconds between LAPI decision syncs. |
+| `LAPI_DECISION_ORIGINS` | | `crowdsec,cscli` | Comma-separated decision origins to mirror. The default keeps the decisions your own agents and `cscli` made. Set it to an empty value to pull every origin LAPI holds, which adds the CAPI and community blocklist decisions: tens of thousands of rows, most with no alert evidence. |
+| `LAPI_ALERT_LIMIT` | | `100` | Alerts requested per host when fetching evidence. Raise it if a busy host shows fewer alerts than `cscli alerts list` does. |
 
 Without the machine credentials there is no alert evidence and no ASN data, so the expanded row stays empty.
 

@@ -1,10 +1,11 @@
-import { extractAlertData } from "@/common/alert-types/alert-types";
 import type {
 	CrowdSecAlert,
 	CrowdSecDecision,
 } from "@/common/crowdsec-lapi/types";
 import { prisma } from "@/common/lib/db";
 import { logger } from "@/common/lib/logging/logger";
+import { parseAlert } from "@/common/parsing/registry";
+import { decodeAlertRow, encodeAlertRow } from "./alert-row";
 import { computeExpiresAt, lookupCountry } from "./transform";
 
 const log = logger("lapi-sync");
@@ -21,12 +22,32 @@ function chunks<T>(items: T[]): T[][] {
 
 /** Newest alert creation time for a decision, or null when it has no linked alerts. */
 function latestAlertTime(alerts: CrowdSecAlert[]): Date | null {
-	let latest: Date | null = null;
-	for (const alert of alerts) {
-		const t = new Date(alert.created_at);
-		if (!Number.isNaN(t.getTime()) && (!latest || t > latest)) latest = t;
-	}
-	return latest;
+	const times = alerts
+		.map((alert) => new Date(alert.created_at).getTime())
+		.filter((time) => !Number.isNaN(time));
+	return times.length > 0 ? new Date(Math.max(...times)) : null;
+}
+
+/**
+ * GeoIP fields for a host, from the alert source when LAPI enriched it and a
+ * local country lookup otherwise. Nulls mean "unknown", and `knownOnly`
+ * strips them so an update never erases a value the host already has.
+ */
+function hostEnrichment(ip: string, alerts: CrowdSecAlert[]) {
+	const src = alerts[0]?.source;
+	return {
+		country: src?.cn ?? lookupCountry(ip),
+		asNumber: src?.as_number ?? null,
+		asName: src?.as_name ?? null,
+		latitude: src?.latitude ?? null,
+		longitude: src?.longitude ?? null,
+	};
+}
+
+function knownOnly<T extends object>(fields: T): Partial<T> {
+	return Object.fromEntries(
+		Object.entries(fields).filter(([, value]) => value != null),
+	) as Partial<T>;
 }
 
 /** Returns the subset of `ids` already present in the DB. */
@@ -90,8 +111,7 @@ export async function upsertHosts(
 		await prisma.$transaction(
 			batch.map((d) => {
 				const alerts = decisionToAlerts.get(d.id) ?? [];
-				const src = alerts[0]?.source;
-				const country = src?.cn ?? lookupCountry(d.value);
+				const enrichment = hostEnrichment(d.value, alerts);
 				const seenAt = latestAlertTime(alerts) ?? now;
 
 				return prisma.host.upsert({
@@ -99,11 +119,7 @@ export async function upsertHosts(
 					create: {
 						ip: d.value,
 						scope: d.scope,
-						country,
-						asNumber: src?.as_number ?? null,
-						asName: src?.as_name ?? null,
-						latitude: src?.latitude ?? null,
-						longitude: src?.longitude ?? null,
+						...enrichment,
 						firstSeen: seenAt,
 						lastSeen: seenAt,
 						totalBans: 0, // corrected by updateHostBanCounts
@@ -111,11 +127,7 @@ export async function upsertHosts(
 					update: {
 						scope: d.scope,
 						...(newDecisionIds.has(d.id) && { lastSeen: seenAt }),
-						...(country != null && { country }),
-						...(src?.as_number != null && { asNumber: src.as_number }),
-						...(src?.as_name != null && { asName: src.as_name }),
-						...(src?.latitude != null && { latitude: src.latitude }),
-						...(src?.longitude != null && { longitude: src.longitude }),
+						...knownOnly(enrichment),
 					},
 				});
 			}),
@@ -151,25 +163,6 @@ export async function ensureHostsExist(
 	}
 }
 
-/** Parses a LAPI timestamp, or null when missing or malformed. */
-function toDate(value: string | undefined): Date | null {
-	if (!value) return null;
-	const date = new Date(value);
-	return Number.isNaN(date.getTime()) ? null : date;
-}
-
-/** Applied on update too, so older rows pick these up when re-synced. */
-function toDbExtract(alert: CrowdSecAlert) {
-	const { entries, entryType } = extractAlertData(alert);
-	return {
-		entries: JSON.stringify(entries),
-		entryType,
-		startAt: toDate(alert.start_at),
-		stopAt: toDate(alert.stop_at),
-		eventsCount: alert.events_count ?? null,
-	};
-}
-
 /**
  * Upserts alert records for the given batch of decisions.
  * Must run before upsertActiveDecisions to satisfy the join table FK.
@@ -192,14 +185,11 @@ export async function upsertAlerts(
 				where: { id: alert.id },
 				create: {
 					id: alert.id,
-					scenario: alert.scenario,
-					message: alert.message,
 					createdAt: new Date(alert.created_at),
 					hostIp: alert.source.value,
-					...toDbExtract(alert),
-					events: JSON.stringify(alert.events ?? []),
+					...encodeAlertRow(alert),
 				},
-				update: toDbExtract(alert),
+				update: encodeAlertRow(alert),
 			}),
 		),
 	);
@@ -233,6 +223,7 @@ export async function upsertActiveDecisions(
 						duration: d.duration,
 						scope: d.scope,
 						simulated: d.simulated ?? false,
+						uuid: d.uuid ?? null,
 						createdAt: latestAlertTime(alertsForDecision) ?? undefined,
 						expiresAt: computeExpiresAt(d),
 						active: true,
@@ -244,6 +235,7 @@ export async function upsertActiveDecisions(
 						scenario: d.scenario,
 						scope: d.scope,
 						simulated: d.simulated ?? false,
+						uuid: d.uuid ?? null,
 						active: true,
 						...(alertConnect.length > 0 && {
 							alerts: { connect: alertConnect },
@@ -273,6 +265,7 @@ export async function upsertInactiveDecisions(
 						duration: d.duration,
 						scope: d.scope,
 						simulated: d.simulated ?? false,
+						uuid: d.uuid ?? null,
 						expiresAt: computeExpiresAt(d),
 						active: false,
 					},
@@ -401,41 +394,35 @@ export async function pruneOldDecisions(
 }
 
 /**
- * Re-derives entries/entryType from stored events, for alerts written before
- * extraction existed. Those never refresh once their decision goes inactive.
- * Firewall alerts recover their type but not ports: dst_port was never stored.
+ * Backfills entries, entryType and integration for alerts stored before the
+ * parser wrote them. Rows never refresh on their own once their decision goes
+ * inactive, so this runs once at boot.
+ *
+ * A null `integration` is the marker: the parser writes "unknown" for a
+ * source it cannot claim, so a repaired row is never selected again.
  */
 export async function repairAlertExtracts(): Promise<number> {
 	const candidates = await prisma.alert.findMany({
-		where: { entryType: "none", NOT: { events: "[]" } },
-		select: { id: true, events: true },
+		where: { NOT: { events: "[]" }, integration: null },
+		select: { id: true, events: true, meta: true },
 	});
 	if (candidates.length === 0) return 0;
 
 	let repaired = 0;
 	for (const batch of chunks(candidates)) {
-		const updates = [];
-		for (const row of batch) {
-			let events: CrowdSecAlert["events"];
-			try {
-				events = JSON.parse(row.events);
-			} catch {
-				continue;
-			}
-			if (!events?.length) continue;
-
-			// meta is empty: alert-level meta was never persisted, so firewall
-			// alerts recover their type but not their ports
-			const { entries, entryType } = extractAlertData({ events, meta: [] });
-			if (entryType === "none") continue;
-
-			updates.push(
-				prisma.alert.update({
-					where: { id: row.id },
-					data: { entries: JSON.stringify(entries), entryType },
-				}),
-			);
-		}
+		const updates = batch.flatMap((row) => {
+			const raw = decodeAlertRow(row);
+			if (!raw?.events.length) return [];
+			const parsed = parseAlert(raw);
+			return prisma.alert.update({
+				where: { id: row.id },
+				data: {
+					entries: JSON.stringify(parsed.entries),
+					entryType: parsed.entryType,
+					integration: parsed.integration,
+				},
+			});
+		});
 		if (updates.length > 0) {
 			await prisma.$transaction(updates);
 			repaired += updates.length;

@@ -1,4 +1,5 @@
-import type { DecisionOrigin, DecisionType } from "@/generated/zod/schemas";
+import type { DecisionOrigin } from "@/common/crowdsec-lapi/types";
+import type { DecisionType } from "@/generated/zod/schemas";
 
 /** Hosts travel as a lookup keyed by IP, not embedded in every row. */
 export type DecisionHost = {
