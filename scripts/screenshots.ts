@@ -68,6 +68,8 @@ type Scene = {
 	fullPage?: boolean;
 	/** The one shot the README leads with. */
 	hero?: boolean;
+	/** Captured for the docs only; the README tables stay curated. */
+	readme?: false;
 	/** Runs before signing in */
 	signedOut?: boolean;
 	run: (page: Page, featured: Record<string, Featured>) => Promise<void>;
@@ -224,7 +226,7 @@ async function gotoDecisions(page: Page, search: Record<string, unknown>) {
 	await settle(page);
 }
 
-/** The expanded card is taller than a phone screen, so frame the evidence. */
+/** On a phone the expanded row is a sheet; wait for its evidence to render. */
 async function showEvidence(page: Page) {
 	const evidence = page.locator('[data-slot="alert-evidence"]').first();
 	await evidence.waitFor();
@@ -281,6 +283,49 @@ const scenes: Scene[] = [
 		},
 	},
 	{
+		name: "desktop-decisions-appsec",
+		device: "desktop",
+		caption: "Decisions - expanded row showing the WAF rules that fired",
+		fullPage: true,
+		run: async (page, featured) => {
+			await gotoDecisions(page, {
+				pageSize: EXPANDED_PAGE_SIZE,
+				expanded: [String(featured.rules.id)],
+			});
+			await page.locator('[data-slot="alert-evidence"]').first().waitFor();
+		},
+	},
+	{
+		name: "desktop-decisions-ports",
+		device: "desktop",
+		readme: false,
+		caption:
+			"Decisions - expanded row for a port scan, connections grouped by rule",
+		fullPage: true,
+		run: async (page, featured) => {
+			await gotoDecisions(page, {
+				pageSize: EXPANDED_PAGE_SIZE,
+				expanded: [String(featured.ports.id)],
+			});
+			await page.locator('[data-slot="alert-evidence"]').first().waitFor();
+		},
+	},
+	{
+		name: "desktop-decisions-ssh",
+		device: "desktop",
+		readme: false,
+		caption:
+			"Decisions - expanded row for an SSH brute force, one line per attempt",
+		fullPage: true,
+		run: async (page, featured) => {
+			await gotoDecisions(page, {
+				pageSize: EXPANDED_PAGE_SIZE,
+				expanded: [String(featured.usernames.id)],
+			});
+			await page.locator('[data-slot="alert-evidence"]').first().waitFor();
+		},
+	},
+	{
 		name: "desktop-hosts",
 		device: "desktop",
 		caption: "Hosts - sortable, filterable IP list with active ban counts",
@@ -319,9 +364,25 @@ const scenes: Scene[] = [
 		},
 	},
 	{
+		name: "mobile-decisions-filters",
+		device: "mobile",
+		caption: "Decisions - any number of filters costs one row on a phone",
+		run: async (page) => {
+			await gotoDecisions(page, {
+				pageSize: LIST_PAGE_SIZE,
+				filters: {
+					status: { operator: "isAnyOf", value: ["Active"] },
+					type: { operator: "isAnyOf", value: ["ban"] },
+					origin: { operator: "isAnyOf", value: ["crowdsec"] },
+				},
+			});
+		},
+	},
+	{
 		name: "mobile-decisions-http",
 		device: "mobile",
-		caption: "Decisions - expanded card showing HTTP alert details",
+		caption:
+			"Decisions - the alert sheet, here with the HTTP requests behind a ban",
 		run: async (page, featured) => {
 			await gotoDecisions(page, {
 				pageSize: EXPANDED_PAGE_SIZE,
@@ -334,12 +395,41 @@ const scenes: Scene[] = [
 	{
 		name: "mobile-decisions-ports",
 		device: "mobile",
-		caption: "Decisions - expanded card showing a port scan",
+		caption:
+			"Decisions - the alert sheet for a port scan, connections grouped by rule",
 		run: async (page, featured) => {
 			await gotoDecisions(page, {
 				pageSize: EXPANDED_PAGE_SIZE,
 				q: featured.ports.ip,
 				expanded: [String(featured.ports.id)],
+			});
+			await showEvidence(page);
+		},
+	},
+	{
+		name: "mobile-decisions-ssh",
+		device: "mobile",
+		caption:
+			"Decisions - the alert sheet for an SSH brute force, one line per attempt",
+		run: async (page, featured) => {
+			await gotoDecisions(page, {
+				pageSize: EXPANDED_PAGE_SIZE,
+				q: featured.usernames.ip,
+				expanded: [String(featured.usernames.id)],
+			});
+			await showEvidence(page);
+		},
+	},
+	{
+		name: "mobile-decisions-appsec",
+		device: "mobile",
+		readme: false,
+		caption: "Decisions - the alert sheet for the WAF rules that fired",
+		run: async (page, featured) => {
+			await gotoDecisions(page, {
+				pageSize: EXPANDED_PAGE_SIZE,
+				q: featured.rules.ip,
+				expanded: [String(featured.rules.id)],
 			});
 			await showEvidence(page);
 		},
@@ -489,12 +579,17 @@ function updateReadme() {
 			? `<img src="${imageDir}/crowdsec-dashboard-${hero.name}.png" width="600" alt="${hero.caption}"/><br/>`
 			: "",
 		desktop: readmeTable(
-			scenes.filter((scene) => scene.device === "desktop" && !scene.hero),
+			scenes.filter(
+				(scene) =>
+					scene.device === "desktop" && !scene.hero && scene.readme !== false,
+			),
 			420,
 			2,
 		),
 		mobile: readmeTable(
-			scenes.filter((scene) => scene.device === "mobile"),
+			scenes.filter(
+				(scene) => scene.device === "mobile" && scene.readme !== false,
+			),
 			230,
 			3,
 		),

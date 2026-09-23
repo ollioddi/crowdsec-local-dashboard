@@ -55,6 +55,7 @@ const SCENARIOS = [
 	{ name: "crowdsecurity/ssh-bf", family: "ssh", weight: 16 },
 	{ name: "crowdsecurity/ssh-slow-bf", family: "ssh", weight: 6 },
 	{ name: "firewallservices/pf-scan-multi_ports", family: "pf", weight: 12 },
+	{ name: "crowdsecurity/appsec-vpatch", family: "appsec", weight: 6 },
 ] as const;
 
 type Family = (typeof SCENARIOS)[number]["family"];
@@ -64,7 +65,44 @@ const MACHINE_BY_FAMILY: Record<Family, string> = {
 	http: "traefik",
 	ssh: "vaultwarden",
 	pf: "opnsense",
+	appsec: "traefik",
 };
+
+/** Hostnames the demo's Traefik fronts, for the host on each request line. */
+const TARGET_HOSTS = [
+	"www.example.com",
+	"cloud.example.com",
+	"mail.example.com",
+];
+
+/** Firewall rules a scan trips, few enough that the grouped list shows counts. */
+const PF_RULES = [
+	{ iface: "igc0", rulenr: "83", ruleid: "855c22845f898770b30860cbb6f9867a" },
+	{ iface: "igc0", rulenr: "91", ruleid: "2f6e0c7b1d4a4e9b8c3d5e6f7a8b9c0d" },
+	{ iface: "vtnet0", rulenr: "12", ruleid: "9a1b2c3d4e5f60718293a4b5c6d7e8f9" },
+];
+
+/** WAF virtual patches, as the AppSec component names and describes them. */
+const APPSEC_RULES = [
+	{
+		name: "crowdsecurity/vpatch-env-access",
+		msg: "Detect access to .env files",
+		uri: "/.env",
+		ids: "373950650",
+	},
+	{
+		name: "crowdsecurity/vpatch-git-config",
+		msg: "Detect access to .git/config",
+		uri: "/.git/config",
+		ids: "292483017",
+	},
+	{
+		name: "crowdsecurity/vpatch-symfony-profiler",
+		msg: "Detect access to the Symfony profiler",
+		uri: "/_profiler/phpinfo",
+		ids: "373950651",
+	},
+];
 
 const HTTP_PATHS: Record<string, string[]> = {
 	"crowdsecurity/http-probing": [
@@ -201,7 +239,12 @@ function buildEvents(
 	network: (typeof NETWORKS)[number],
 	at: Date,
 ) {
-	const count = family === "pf" ? between(6, 40) : between(3, 9);
+	const count =
+		family === "pf"
+			? between(6, 40)
+			: family === "appsec"
+				? between(2, 3)
+				: between(3, 9);
 	const common = {
 		source_ip: ip,
 		ASNNumber: network.asNumber,
@@ -227,7 +270,9 @@ function buildEvents(
 					http_path: paths[index % paths.length],
 					http_status: rand() < 0.75 ? 404 : pick([403, 401, 200, 301]),
 					http_user_agent: pick(USER_AGENTS),
+					http_args_len: rand() < 0.3 ? between(12, 240) : 0,
 					traefik_router_name: pick(ROUTERS),
+					target_fqdn: pick(TARGET_HOSTS),
 					datasource_path: "/var/log/traefik/access.log",
 				}),
 			};
@@ -245,17 +290,41 @@ function buildEvents(
 				}),
 			};
 		}
+		if (family === "appsec") {
+			const rule = APPSEC_RULES[index % APPSEC_RULES.length];
+			return {
+				timestamp,
+				meta: meta({
+					...common,
+					timestamp,
+					log_type: "appsec-block",
+					appsec_action: "deny",
+					appsec_interrupted: "true",
+					rule_name: rule.name,
+					rule_ids: JSON.stringify([rule.ids]),
+					msg: rule.msg,
+					method: "GET",
+					target_fqdn: pick(TARGET_HOSTS),
+					target_uri: rule.uri,
+					request_uuid: randomUUID(),
+					remediation_cmpt_ip: "172.20.0.1",
+					datasource_type: "appsec",
+					datasource_path: "appsec",
+				}),
+			};
+		}
+		const rule = pick(PF_RULES);
 		return {
 			timestamp,
 			meta: meta({
 				...common,
 				timestamp,
 				log_type: "pf_drop",
-				iface: pick(["igc0", "vtnet0"]),
-				rulenr: String(between(1, 24)),
-				ruleid: String(between(100000, 999999)),
+				iface: rule.iface,
+				rulenr: rule.rulenr,
+				ruleid: rule.ruleid,
 				machine: "opnsense.lan",
-				service: "pf",
+				service: rand() < 0.85 ? "tcp" : "udp",
 				datasource_path: "/var/log/filter/latest.log",
 			}),
 		};
@@ -310,139 +379,173 @@ async function seedUsers() {
 	});
 }
 
-async function seedDecisions() {
-	const now = Date.now();
+type Host = {
+	ip: string;
+	network: (typeof NETWORKS)[number];
+	firstSeen: number;
+	lastSeen: number;
+	bans: number;
+};
+
+type Scenario = { name: string; family: Family };
+
+/** Ids and hosts the seeder hands out, so every row is reproducible. */
+type Seeder = { hosts: Host[]; nextDecisionId: number; nextAlertId: number };
+
+function makeHosts(now: number): Host[] {
 	const usedIps = new Set<string>();
-	const hosts = Array.from({ length: HOST_COUNT }, () => ({
+	return Array.from({ length: HOST_COUNT }, () => ({
 		ip: makeIp(usedIps),
 		network: pick(NETWORKS),
 		firstSeen: now,
 		lastSeen: 0,
 		bans: 0,
 	}));
+}
 
-	let decisionId = 100_000;
-	let alertId = 900_000;
+/** Only pf alerts carry alert-level meta: the ports the scan touched. */
+function buildAlertMeta(family: Family) {
+	if (family !== "pf") return [];
+	const ports = [
+		...new Set(Array.from({ length: between(3, 9) }, () => pick(SCAN_PORTS))),
+	];
+	return [{ key: "dst_port", value: JSON.stringify(ports) }];
+}
 
-	type Host = (typeof hosts)[number];
-	type Scenario = { name: string; family: Family };
+async function insertAlert(
+	id: number,
+	host: Host,
+	scenario: Scenario,
+	createdAt: Date,
+) {
+	const events = buildEvents(
+		scenario.family,
+		scenario.name,
+		host.ip,
+		host.network,
+		createdAt,
+	);
+	const alertMeta = buildAlertMeta(scenario.family);
+	const { entries, entryType, integration } = parseAlert({
+		events,
+		meta: alertMeta,
+	});
 
-	async function addDecision(
-		host: Host,
-		scenario: Scenario,
-		duration: string,
-		createdAt: Date,
-		active: boolean,
-		type: DecisionType = rand() < 0.88 ? "ban" : "captcha",
-	) {
-		const expiresAt = new Date(
-			createdAt.getTime() + parseDurationHours(duration) * 3_600_000,
-		);
-		host.firstSeen = Math.min(host.firstSeen, createdAt.getTime());
-		host.lastSeen = Math.max(host.lastSeen, createdAt.getTime());
-		host.bans += 1;
+	// Attack span: most scenarios are bursts, some pace themselves for hours
+	const spanSeconds = rand() < 0.75 ? between(2, 90) : between(1800, 21_600);
+	const startAt = new Date(createdAt.getTime() - spanSeconds * 1000);
 
-		const events = buildEvents(
-			scenario.family,
-			scenario.name,
-			host.ip,
-			host.network,
+	await prisma.alert.create({
+		data: {
+			id,
+			scenario: scenario.name,
+			message: `Ip ${host.ip} performed '${scenario.name}' (${events.length} events over ${spanSeconds}s)`,
 			createdAt,
-		);
-		const ports =
-			scenario.family === "pf"
-				? [
-						...new Set(
-							Array.from({ length: between(3, 9) }, () => pick(SCAN_PORTS)),
-						),
-					]
-				: [];
-		const alertMeta = ports.length
-			? [{ key: "dst_port", value: JSON.stringify(ports) }]
-			: [];
-		const { entries, entryType, integration } = parseAlert({
-			events,
-			meta: alertMeta,
-		});
+			startAt,
+			stopAt: createdAt,
+			eventsCount: events.length,
+			hostIp: host.ip,
+			entries: JSON.stringify(entries),
+			entryType,
+			integration,
+			machineId: MACHINE_BY_FAMILY[scenario.family],
+			uuid: randomUUID(),
+			scenarioVersion: pick(["0.3", "0.5", "1.2"]),
+			capacity: between(2, 10),
+			leakspeed: pick(["10s", "1m0s", "5m0s"]),
+			remediation: true,
+			sourceScope: "Ip",
+			sourceRange: `${host.ip.replace(/\.\d+$/, ".0")}/24`,
+			events: JSON.stringify(events),
+			meta: JSON.stringify(metaToRecord(alertMeta)),
+		},
+	});
+	return entryType;
+}
 
-		await prisma.host.upsert({
-			where: { ip: host.ip },
-			create: {
-				ip: host.ip,
-				firstSeen: createdAt,
-				lastSeen: createdAt,
-				country: host.network.country,
-				asNumber: host.network.asNumber,
-				asName: host.network.asName,
-			},
-			update: {},
-		});
+async function addDecision(
+	seeder: Seeder,
+	host: Host,
+	scenario: Scenario,
+	duration: string,
+	createdAt: Date,
+	active: boolean,
+	type: DecisionType = rand() < 0.88 ? "ban" : "captcha",
+) {
+	const id = seeder.nextDecisionId++;
+	const alertId = seeder.nextAlertId++;
+	const expiresAt = new Date(
+		createdAt.getTime() + parseDurationHours(duration) * 3_600_000,
+	);
+	host.firstSeen = Math.min(host.firstSeen, createdAt.getTime());
+	host.lastSeen = Math.max(host.lastSeen, createdAt.getTime());
+	host.bans += 1;
 
-		// Attack span: most scenarios are bursts, some pace themselves for hours
-		const spanSeconds = rand() < 0.75 ? between(2, 90) : between(1800, 21_600);
-		const stopAt = new Date(createdAt.getTime());
-		const startAt = new Date(stopAt.getTime() - spanSeconds * 1000);
+	await prisma.host.upsert({
+		where: { ip: host.ip },
+		create: {
+			ip: host.ip,
+			firstSeen: createdAt,
+			lastSeen: createdAt,
+			country: host.network.country,
+			asNumber: host.network.asNumber,
+			asName: host.network.asName,
+		},
+		update: {},
+	});
+	const entryType = await insertAlert(alertId, host, scenario, createdAt);
+	await prisma.decision.create({
+		data: {
+			id,
+			hostIp: host.ip,
+			type,
+			origin: rand() < 0.9 ? "crowdsec" : "cscli",
+			scenario: scenario.name,
+			duration,
+			scope: "Ip",
+			simulated: rand() < 0.06, // a few, so the badge shows in demos
+			createdAt,
+			expiresAt,
+			active,
+			alerts: { connect: { id: alertId } },
+		},
+	});
+	return { id, entryType };
+}
 
-		await prisma.alert.create({
-			data: {
-				id: alertId,
-				scenario: scenario.name,
-				message: `Ip ${host.ip} performed '${scenario.name}' (${events.length} events over ${spanSeconds}s)`,
-				createdAt,
-				startAt,
-				stopAt,
-				eventsCount: events.length,
-				hostIp: host.ip,
-				entries: JSON.stringify(entries),
-				entryType,
-				integration,
-				machineId: MACHINE_BY_FAMILY[scenario.family],
-				events: JSON.stringify(events),
-				meta: JSON.stringify(metaToRecord(alertMeta)),
-			},
-		});
+/**
+ * How old a decision is. Active stays inside its window, half an hour old at
+ * least, leaving the newest rows to the showcase; expired ones spread over
+ * the history.
+ */
+function ageHours(duration: string, active: boolean): number {
+	const durationHours = parseDurationHours(duration);
+	if (!active) return durationHours + rand() * DAYS_OF_HISTORY * 24;
+	const window = Math.min(durationHours, DAYS_OF_HISTORY * 24) * 0.9;
+	return 0.5 + rand() * Math.max(window - 0.5, 0.1);
+}
 
-		await prisma.decision.create({
-			data: {
-				id: decisionId,
-				hostIp: host.ip,
-				type,
-				origin: rand() < 0.9 ? "crowdsec" : "cscli",
-				scenario: scenario.name,
-				duration,
-				scope: "Ip",
-				simulated: rand() < 0.06, // a few, so the badge shows in demos
-				createdAt,
-				expiresAt,
-				active,
-				alerts: { connect: { id: alertId } },
-			},
-		});
-
-		const id = decisionId;
-		decisionId++;
-		alertId++;
-		return { id, entryType };
-	}
+async function seedDecisions() {
+	const now = Date.now();
+	const seeder: Seeder = {
+		hosts: makeHosts(now),
+		nextDecisionId: 100_000,
+		nextAlertId: 900_000,
+	};
+	const { hosts } = seeder;
 
 	for (let i = 0; i < DECISION_COUNT; i++) {
 		// Every host gets a first decision before any host gets a second one.
 		const host =
 			i < hosts.length ? hosts[i] : hosts[Math.floor(rand() * hosts.length)];
-		const scenario = weightedScenario();
 		const duration = pick(DURATIONS);
-		const durationHours = parseDurationHours(duration);
 		const active = rand() < 0.55;
-		// Active stays inside its window, half an hour old at least, leaving the newest rows to the showcase
-		const window = Math.min(durationHours, DAYS_OF_HISTORY * 24) * 0.9;
-		const ageHours = active
-			? 0.5 + rand() * Math.max(window - 0.5, 0.1)
-			: durationHours + rand() * DAYS_OF_HISTORY * 24;
 		await addDecision(
+			seeder,
 			host,
-			scenario,
+			weightedScenario(),
 			duration,
-			new Date(now - ageHours * 3600_000),
+			new Date(now - ageHours(duration, active) * 3600_000),
 			active,
 		);
 	}
@@ -453,9 +556,11 @@ async function seedDecisions() {
 		{ name: "crowdsecurity/http-crawl-non_statics", family: "http" },
 		{ name: "firewallservices/pf-scan-multi_ports", family: "pf" },
 		{ name: "crowdsecurity/ssh-bf", family: "ssh" },
+		{ name: "crowdsecurity/appsec-vpatch", family: "appsec" },
 	];
 	for (const [index, scenario] of showcase.entries()) {
 		const { id, entryType } = await addDecision(
+			seeder,
 			hosts[index],
 			scenario,
 			"4h",
