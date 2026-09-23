@@ -8,6 +8,7 @@ import { LiveIndicator } from "@/common/components/live-indicator";
 import { PageHeader } from "@/common/components/page-header";
 import { useSSEConnection } from "@/common/hooks/use-sse-connection";
 import { useTitle } from "@/common/hooks/use-title";
+import { describeRequestFailure } from "@/common/lib/request-error";
 import {
 	deleteDecisionFn,
 	getDecisionsFn,
@@ -40,7 +41,7 @@ export function DecisionsPage() {
 	const decisions = useMemo(() => joinDecisionHosts(data), [data]);
 	useTitle(`Decisions (${decisions.length})`);
 
-	const connected = useSSEConnection<DecisionsPayload>(
+	const status = useSSEConnection<DecisionsPayload>(
 		"/sse/decisions",
 		(incoming) => {
 			queryClient.setQueryData<DecisionsPayload>(["decisions"], (old) => {
@@ -96,7 +97,7 @@ export function DecisionsPage() {
 		},
 		onError: (error, id) => {
 			toast.error(`Failed to delete decision ${id}`, {
-				description: error instanceof Error ? error.message : "Unknown error",
+				description: describeRequestFailure(error),
 			});
 		},
 	});
@@ -113,9 +114,7 @@ export function DecisionsPage() {
 					{ label: "active", value: activeCount, highlight: true },
 					{ label: "total", value: decisions.length },
 				]}
-				actions={
-					<LiveIndicator connected={connected} updatedAt={dataUpdatedAt} />
-				}
+				actions={<LiveIndicator status={status} updatedAt={dataUpdatedAt} />}
 			/>
 			<DataTable
 				columns={createColumns(setPendingDelete, deletingId)}

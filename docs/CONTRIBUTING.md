@@ -68,6 +68,16 @@ Unauthenticated builds work but share the 60 requests per hour GitHub allows per
 
 `docs/` is the unreleased version and always lives at the site root. When a release ships, freeze its docs by adding an entry to `versions` in `docs-site/site.config.mjs`. Nothing is archivable before v0.6, because `docs/` does not exist in any earlier tag.
 
+## Testing offline behaviour
+
+The service worker registers in dev too, so everything works against `pnpm dev` at `http://localhost:3000`, which counts as a secure context. In DevTools, set the Network panel to Offline:
+
+- With the app open, the banner and the grey Live dot should appear at once, and navigating to a page you have not opened yet should say it is waiting.
+- Reload while offline and you should get the "No connection" page from `public/offline.html`, which reloads itself when you set the panel back to Online.
+- Block requests to `/_serverFn/` instead of going offline to see the retry panel for an unreachable server.
+
+A LAN IP over plain HTTP is not a secure context, so no worker registers there and the offline page cannot appear. Test on localhost or behind HTTPS.
+
 ## Screenshots
 
 `pnpm screenshots` regenerates every image in `docs/images`. It seeds a throwaway database in `.demo/`, builds the app, drives Chromium through each view at desktop and phone sizes, and rewrites the screenshot blocks in the README.

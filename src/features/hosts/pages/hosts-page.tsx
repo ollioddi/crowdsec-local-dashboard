@@ -30,22 +30,19 @@ export function HostsPage() {
 	} = useQuery(hostsQueryOptions);
 	useTitle(`Hosts (${hosts.length})`);
 
-	const connected = useSSEConnection<HostWithCount[]>(
-		"/sse/hosts",
-		(incoming) => {
-			queryClient.setQueryData<HostWithCount[]>(["hosts"], (old) => {
-				if (old) {
-					const knownIps = new Set(old.map((h) => h.ip));
-					for (const host of incoming) {
-						if (!knownIps.has(host.ip)) {
-							toast.success("New host discovered", { description: host.ip });
-						}
+	const status = useSSEConnection<HostWithCount[]>("/sse/hosts", (incoming) => {
+		queryClient.setQueryData<HostWithCount[]>(["hosts"], (old) => {
+			if (old) {
+				const knownIps = new Set(old.map((h) => h.ip));
+				for (const host of incoming) {
+					if (!knownIps.has(host.ip)) {
+						toast.success("New host discovered", { description: host.ip });
 					}
 				}
-				return incoming;
-			});
-		},
-	);
+			}
+			return incoming;
+		});
+	});
 
 	const bannedNow = hosts.filter((h) => h._count.decisions > 0).length;
 	const repeatOffenders = hosts.filter((h) => h.totalBans > 1).length;
@@ -59,9 +56,7 @@ export function HostsPage() {
 					{ label: "repeat offenders", value: repeatOffenders },
 					{ label: "seen", value: hosts.length },
 				]}
-				actions={
-					<LiveIndicator connected={connected} updatedAt={dataUpdatedAt} />
-				}
+				actions={<LiveIndicator status={status} updatedAt={dataUpdatedAt} />}
 			/>
 			<DataTable
 				columns={columns}

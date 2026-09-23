@@ -10,7 +10,8 @@ const channels = new Map<
 >();
 
 const encoder = new TextEncoder();
-const heartbeat = encoder.encode(": ping\n\n");
+// Named, not a comment: the client listens for it to detect a dead stream
+const heartbeat = encoder.encode("event: ping\ndata: {}\n\n");
 
 let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 

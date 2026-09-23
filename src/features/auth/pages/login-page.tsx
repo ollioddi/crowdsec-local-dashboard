@@ -22,6 +22,7 @@ import {
 } from "@/common/components/ui/field";
 import { Input } from "@/common/components/ui/input";
 import { useTitle } from "@/common/hooks/use-title";
+import { describeRequestFailure } from "@/common/lib/request-error";
 
 const signInWithOidc = () =>
 	authClient.signIn.social({ provider: "oidc", callbackURL: "/" });
@@ -55,9 +56,9 @@ export const LoginPage = () => {
 				} else {
 					router.navigate({ to: "/" });
 				}
-			} catch {
+			} catch (error) {
 				form.setErrorMap({
-					onSubmit: { form: "Login failed. Please try again.", fields: {} },
+					onSubmit: { form: describeRequestFailure(error), fields: {} },
 				});
 			}
 		},
