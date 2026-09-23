@@ -33,7 +33,10 @@ function statusColor(status: number | undefined): string {
 }
 
 /** The labelled second row: everything about the request but the path. */
-function RequestDetails({ fields }: Readonly<{ fields: HttpEventFields }>) {
+function RequestDetails({
+	fields,
+	time,
+}: Readonly<{ fields: HttpEventFields; time?: string }>) {
 	const { routerName, authUser, argsLength, userAgent } = fields;
 	if (!routerName && !authUser && !argsLength && !userAgent) return null;
 	return (
@@ -41,7 +44,17 @@ function RequestDetails({ fields }: Readonly<{ fields: HttpEventFields }>) {
 			{routerName && <Labeled label="Router">{routerName}</Labeled>}
 			{authUser && <Labeled label="User">{authUser}</Labeled>}
 			{argsLength ? <Labeled label="Query">{argsLength} B</Labeled> : null}
-			{userAgent && <Labeled label="User agent">{userAgent}</Labeled>}
+			{userAgent && (
+				<span className="flex min-w-0 basis-full flex-col md:flex-row md:gap-1">
+					<span className="flex shrink-0 items-baseline justify-between gap-2 text-muted-foreground">
+						<span>User agent</span>
+						{time && (
+							<span className="text-xs tabular-nums md:hidden">{time}</span>
+						)}
+					</span>
+					<span className="min-w-0 wrap-anywhere">{userAgent}</span>
+				</span>
+			)}
 		</p>
 	);
 }
@@ -49,10 +62,12 @@ function RequestDetails({ fields }: Readonly<{ fields: HttpEventFields }>) {
 function RequestLine({ event }: Readonly<{ event: EventOf<"traefik-http"> }>) {
 	const { fields } = event;
 	const fqdn = event.facets.target?.fqdn;
+	const time = event.timestamp ? formatTime(event.timestamp) : undefined;
 	return (
 		<Line
 			tag={fields.verb}
 			tagClassName={verbColor(fields.verb)}
+			details={<RequestDetails fields={fields} time={time} />}
 			trailing={
 				<>
 					{fields.status !== undefined && (
@@ -60,9 +75,11 @@ function RequestLine({ event }: Readonly<{ event: EventOf<"traefik-http"> }>) {
 							{fields.status}
 						</span>
 					)}
-					{event.timestamp && (
-						<span className="tabular-nums text-muted-foreground">
-							{formatTime(event.timestamp)}
+					{time && (
+						<span
+							className={`tabular-nums text-muted-foreground ${fields.userAgent ? "hidden md:inline" : ""}`}
+						>
+							{time}
 						</span>
 					)}
 				</>
@@ -72,7 +89,6 @@ function RequestLine({ event }: Readonly<{ event: EventOf<"traefik-http"> }>) {
 				{fqdn && <span className="text-muted-foreground">{fqdn}</span>}
 				{fields.path ?? "-"}
 			</p>
-			<RequestDetails fields={fields} />
 		</Line>
 	);
 }

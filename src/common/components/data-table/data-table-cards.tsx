@@ -248,17 +248,18 @@ function CardHeader<TData extends RowData>({
 	const actions = cellsByRole(row, "action");
 	return (
 		<div className="group/header relative flex items-center gap-1 rounded-t-lg pr-1 transition-colors has-[>button:hover]:bg-muted/50">
-			{/* after: stretches the hit area across the header, so the hover
-			    highlight and the click target are the same shape */}
+			{/* Keep links and copy buttons out of the expansion button. */}
 			<button
 				type="button"
 				disabled={!expandable}
 				aria-expanded={expandable ? isExpanded : undefined}
+				aria-label={isExpanded ? "Collapse row details" : "Expand row details"}
 				onClick={() => row.toggleExpanded()}
-				className="flex min-w-0 flex-1 self-stretch p-2.5 text-left outline-none after:absolute after:inset-0 after:rounded-t-lg focus-visible:after:ring-[3px] focus-visible:after:ring-ring/50 disabled:pointer-events-none"
-			>
+				className="absolute inset-0 rounded-t-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none"
+			/>
+			<div className="pointer-events-none min-w-0 flex-1 p-2.5 [&_a]:pointer-events-auto [&_a]:relative [&_a]:z-10 [&_button]:pointer-events-auto [&_button]:relative [&_button]:z-10">
 				<CardSummary row={row} />
-			</button>
+			</div>
 			{!expandable && actions.length > 0 && (
 				<div className="relative z-10 flex shrink-0 items-center">
 					{actions.map(renderCell)}

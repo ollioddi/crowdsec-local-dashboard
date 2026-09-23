@@ -77,15 +77,17 @@ export function Line({
 	tag,
 	tagClassName,
 	trailing,
+	details,
 	children,
 }: Readonly<{
 	tag?: string;
 	tagClassName?: string;
 	trailing?: ReactNode;
+	details?: ReactNode;
 	children: ReactNode;
 }>) {
 	return (
-		<div className="flex items-start gap-2 px-2 py-1.5 font-mono text-xs">
+		<div className="flex flex-wrap items-start gap-x-2 px-2 py-1.5 font-mono text-xs">
 			{tag && (
 				<span
 					className={cn(
@@ -103,6 +105,7 @@ export function Line({
 					{trailing}
 				</div>
 			)}
+			{details && <div className="min-w-0 basis-full">{details}</div>}
 		</div>
 	);
 }

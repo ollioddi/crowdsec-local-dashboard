@@ -16,16 +16,14 @@ import {
  */
 function PfEvidence({ alert, events }: EvidenceProps<"opnsense-pf">) {
 	const groups = groupPfEvents(events);
-	const passed =
-		groups.length > 0 && groups.every((g) => g.fields.action === "pass");
 
 	return (
 		<div className="space-y-2 text-xs">
-			<Chips label="Ports probed" values={alert.entries} />
+			{alert.entryType === "ports" && (
+				<Chips label="Ports probed" values={alert.entries} />
+			)}
 			{groups.length > 0 && (
-				<EventList
-					label={`${passed ? "Passed" : "Dropped"} connections (${alert.eventsCount})`}
-				>
+				<EventList label={`Connections (${events.length})`}>
 					{groups.map(({ key, fields, count, first, last }) => (
 						<Line
 							key={key}

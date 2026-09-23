@@ -49,3 +49,26 @@ describe("collectUnparsed", () => {
 		});
 	});
 });
+
+describe("evidence not present in retained events", () => {
+	it("keeps aggregate-only rule names and user agents visible", () => {
+		const detail = alertDetailFromRow(pfRow);
+		detail.aggregates = { kind: "appsec", rules: ["extra-rule"] };
+		detail.facets.client = { userAgents: ["scanner/1.0"] };
+		expect(collectDetails(detail)).toMatchObject({
+			rules: "extra-rule",
+			"user agents": "scanner/1.0",
+		});
+	});
+	it("keeps a target visible for sources without a request line", () => {
+		const detail = alertDetailFromRow(pfRow);
+		detail.events[0].facets.target = {
+			fqdn: "firewall.example",
+			uri: "/probe",
+		};
+		expect(collectDetails(detail)).toMatchObject({
+			"target fqdn": "firewall.example",
+			"target uri": "/probe",
+		});
+	});
+});

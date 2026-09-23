@@ -64,21 +64,26 @@ export default function DataTableToolbar<TData extends RowData>({
 				)}
 			</div>
 
-			<FilterBar table={table} />
+			{/* One strip that scrolls sideways on a phone, so any number of
+			    filters costs a single line; wide screens wrap as before */}
+			<div className="-my-1 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1 scrollbar-none sm:flex-wrap sm:overflow-visible">
+				<FilterBar table={table} />
 
-			{hasFilters && (
-				<Button
-					variant="ghost"
-					size="sm"
-					className="h-8 px-2"
-					onClick={onResetFilters}
-				>
-					Clear
-					<X className="size-3.5" />
-				</Button>
-			)}
+				{/* First on a phone, where the chips scroll away; last on a desktop */}
+				{hasFilters && (
+					<Button
+						variant="ghost"
+						size="sm"
+						className="h-8 px-2 max-sm:order-first"
+						onClick={onResetFilters}
+					>
+						Clear
+						<X className="size-3.5" />
+					</Button>
+				)}
+			</div>
 
-			<div className="ml-auto flex items-center gap-2">
+			<div className="flex items-center gap-2">
 				<SortMenu table={table} />
 				{showColumnSelector && <ColumnSelector table={table} />}
 			</div>

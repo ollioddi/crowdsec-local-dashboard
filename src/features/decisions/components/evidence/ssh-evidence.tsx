@@ -13,9 +13,19 @@ import {
  * per attempt LAPI kept, with its service and time.
  */
 function SshEvidence({ alert, events }: EvidenceProps<"ssh">) {
+	const usernames =
+		alert.entryType === "usernames"
+			? alert.entries
+			: [
+					...new Set(
+						events.flatMap((event) =>
+							event.fields.user ? [event.fields.user] : [],
+						),
+					),
+				];
 	return (
 		<div className="space-y-2 text-xs">
-			<Chips label="Usernames tried" values={alert.entries} />
+			<Chips label="Usernames tried" values={usernames} />
 			{events.length > 0 && (
 				<EventList label={`Login attempts (${events.length})`}>
 					{events.map((event) => (
