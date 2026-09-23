@@ -19,15 +19,14 @@ enum DecisionType {
   whitelist
 }
 
-enum DecisionOrigin {
-  crowdsec
-  cscli
-}
+// Decision.origin is a plain string: LAPI also emits CAPI, lists, console and
+// cscli-import, and an enum would reject those rows outright.
 
 enum AlertEntryType {
   paths
   ports
   usernames
+  rules
   none
 }
 
@@ -108,7 +107,8 @@ model Decision {
   host       Host     @relation(fields: [hostIp], references: [ip])
 
   type       DecisionType    // ban, captcha
-  origin     DecisionOrigin  // crowdsec, cscli
+  origin     String          // crowdsec, cscli, CAPI, lists, console…
+  uuid       String?
   scenario   String
   duration   String   // original duration (e.g. "4h")
   scope      String   @default("Ip")    // Ip, Range, Country
@@ -144,6 +144,22 @@ model Alert {
   // Link to Decisions (many-to-many)
   decisions   Decision[] @relation("DecisionAlerts")
 
+  // Provenance: which agent saw it, and the bucket that fired
+  integration String? // resolved by the parser registry: traefik-http, appsec…
+  machineId   String? // traefik, opnsense, nextcloud…
+  uuid        String?
+  scenarioVersion String?
+  capacity    Int? // bucket size; with leakspeed, burst vs slow crawl
+  leakspeed   String?
+  simulated   Boolean  @default(false)
+  remediation Boolean?
+  sourceScope String?
+  sourceRange String? // e.g. 136.112.0.0/13, for same-range correlation
+
   // Store raw logs as JSON because they are unstructured
   events      String   @default("[]") // JSON string of the log lines
+  // Alert-level aggregates (ja4h, user_agent, dst_port…), JSON key → string
+  meta        String   @default("{}")
+
+  @@index([hostIp])
 }
