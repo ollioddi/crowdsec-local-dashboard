@@ -8,15 +8,23 @@ import moment from "moment";
  */
 const DATE_TIME_FORMAT = "DD/MM/YYYY HH:mm";
 
+/** Anything moment accepts: a Date, an ISO string, or epoch milliseconds. */
+type DateInput = Date | string | number;
+
 /** Compact form for dense lists, where the year is noise. */
 const SHORT_DATE_TIME_FORMAT = "DD/MM HH:mm";
 
-export function formatDateTime(value: Date | string | number): string {
+export function formatDateTime(value: DateInput): string {
 	return moment(value).format(DATE_TIME_FORMAT);
 }
 
-export function formatShortDateTime(value: Date | string | number): string {
+export function formatShortDateTime(value: DateInput): string {
 	return moment(value).format(SHORT_DATE_TIME_FORMAT);
+}
+
+/** Clock time to the second, for lines inside a window the header dates. */
+export function formatTime(value: DateInput): string {
+	return moment(value).format("HH:mm:ss");
 }
 
 /** A parsed date, or null when the input is missing or malformed. */

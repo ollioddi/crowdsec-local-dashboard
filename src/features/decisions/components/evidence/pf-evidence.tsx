@@ -1,33 +1,78 @@
-import { Chips, type EvidenceProps } from "./shared";
+import { formatTime } from "@/common/lib/dates";
+import { groupPfEvents } from "./pf-groups";
+import {
+	Chips,
+	EventList,
+	type EvidenceProps,
+	type EvidenceRenderer,
+	Labeled,
+	Line,
+} from "./shared";
 
 /**
- * OPNsense pf evidence. The ports are the alert's `entries`; individual pf
- * events only carry the interface and rule that dropped them, so the first
- * event stands in for all of them.
+ * OPNsense pf evidence. The ports are the alert's `entries`; the events
+ * carry the interface, protocol and rule that dropped them, folded into one
+ * line per distinct combination with a count and its time span.
  */
-export function PfEvidence({ alert, events }: EvidenceProps) {
-	const first = events[0];
-	const fields =
-		first?.fields.kind === "opnsense-pf" ? first.fields : undefined;
-	const count = alert.eventsCount;
+function PfEvidence({ alert, events }: EvidenceProps<"opnsense-pf">) {
+	const groups = groupPfEvents(events);
+	const passed =
+		groups.length > 0 && groups.every((g) => g.fields.action === "pass");
 
 	return (
-		<div className="space-y-1.5 text-xs">
-			<p className="text-muted-foreground">
-				{count} {fields?.action === "pass" ? "passed" : "dropped"} connection
-				{count === 1 ? "" : "s"}
-				{fields?.machine && ` · ${fields.machine}`}
-				{fields?.interface && ` · ${fields.interface}`}
-				{fields?.protocol && ` · ${fields.protocol}`}
-				{fields?.ruleNumber && ` · rule ${fields.ruleNumber}`}
-				{fields?.ruleId && (
-					<span title={`Rule id ${fields.ruleId}`}>
-						{" "}
-						({fields.ruleId.slice(0, 8)})
-					</span>
-				)}
-			</p>
-			<Chips values={alert.entries} />
+		<div className="space-y-2 text-xs">
+			<Chips label="Ports probed" values={alert.entries} />
+			{groups.length > 0 && (
+				<EventList
+					label={`${passed ? "Passed" : "Dropped"} connections (${alert.eventsCount})`}
+				>
+					{groups.map(({ key, fields, count, first, last }) => (
+						<Line
+							key={key}
+							tag={fields.action ?? "?"}
+							trailing={
+								<>
+									<span className="text-muted-foreground">×{count}</span>
+									{first && (
+										<span className="tabular-nums text-muted-foreground">
+											{formatTime(first)}
+											{last && last.getTime() !== first.getTime()
+												? ` – ${formatTime(last)}`
+												: ""}
+										</span>
+									)}
+								</>
+							}
+						>
+							<p className="flex flex-wrap gap-x-3 gap-y-0.5">
+								<Labeled label="Interface">{fields.interface ?? "-"}</Labeled>
+								<Labeled label="Protocol">{fields.protocol ?? "-"}</Labeled>
+								<Labeled label="Rule">{fields.ruleNumber ?? "-"}</Labeled>
+							</p>
+							<p className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]">
+								{fields.machine && (
+									<Labeled label="Firewall">{fields.machine}</Labeled>
+								)}
+								{fields.ruleId && (
+									<Labeled label="Rule id">{fields.ruleId}</Labeled>
+								)}
+							</p>
+						</Line>
+					))}
+				</EventList>
+			)}
 		</div>
 	);
 }
+
+export const pfEvidence = {
+	Component: PfEvidence,
+	shownFields: new Set([
+		"action",
+		"interface",
+		"protocol",
+		"ruleNumber",
+		"ruleId",
+		"machine",
+	] as const),
+} satisfies EvidenceRenderer<"opnsense-pf">;

@@ -1,12 +1,13 @@
-import type { EventFacets, ParsedEvent } from "@/common/parsing/types";
 import type {
-	AlertDetail,
-	AlertProvenance,
-} from "@/features/decisions/api/alert-detail";
+	EventFacets,
+	IntegrationId,
+	ParsedEvent,
+} from "@/common/parsing/types";
+import type { AlertDetail } from "@/features/decisions/api/alert-detail";
 
 /**
- * Facets the generic loop below must not repeat: the headline box renders
- * these four, and geo gets hand-written labels in `addEventDetails`.
+ * Facets the generic loop below must not repeat. The evidence renders target,
+ * cve, technology and fingerprint; the facts column renders geo.
  */
 const FACETS_SHOWN_ELSEWHERE: ReadonlySet<keyof EventFacets> = new Set([
 	"target",
@@ -16,14 +17,7 @@ const FACETS_SHOWN_ELSEWHERE: ReadonlySet<keyof EventFacets> = new Set([
 	"geo",
 ]);
 
-/** Provenance the headline box shows in its header or footer line. */
-const PROVENANCE_SHOWN_ELSEWHERE: ReadonlySet<keyof AlertProvenance> = new Set([
-	"machineId",
-	"capacity",
-	"leakspeed",
-	"simulated",
-	"sourceRange",
-]);
+type Collected = Map<string, Set<string>>;
 
 /** `asnNumber` → "asn number", `target_uri` → "target uri". */
 function label(key: string): string {
@@ -33,9 +27,17 @@ function label(key: string): string {
 		.toLowerCase();
 }
 
-function add(out: Map<string, Set<string>>, key: string, value: unknown): void {
+function isBlank(value: unknown): boolean {
+	return value === undefined || value === null || value === "";
+}
+
+function isPlainObject(value: unknown): value is object {
+	return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function add(out: Collected, key: string, value: unknown): void {
 	for (const entry of Array.isArray(value) ? value : [value]) {
-		if (entry === undefined || entry === null || entry === "") continue;
+		if (isBlank(entry)) continue;
 		const set = out.get(key) ?? new Set<string>();
 		set.add(String(entry));
 		out.set(key, set);
@@ -43,37 +45,29 @@ function add(out: Map<string, Set<string>>, key: string, value: unknown): void {
 }
 
 /** Flattens one object's own fields, skipping the discriminator. */
-function addObject(
-	out: Map<string, Set<string>>,
-	prefix: string,
-	source: object,
-	skip: ReadonlySet<string> = new Set(),
-): void {
+function addObject(out: Collected, prefix: string, source: object): void {
 	for (const [key, value] of Object.entries(source)) {
-		if (key === "kind" || skip.has(key)) continue;
-		if (value !== null && typeof value === "object" && !Array.isArray(value)) {
-			addObject(out, `${prefix}${key} `, value);
-			continue;
-		}
-		add(out, `${prefix}${label(key)}`, value);
+		if (key === "kind") continue;
+		if (isPlainObject(value)) addObject(out, `${prefix}${key} `, value);
+		else add(out, `${prefix}${label(key)}`, value);
 	}
 }
 
-function addEventDetails(
-	out: Map<string, Set<string>>,
-	event: ParsedEvent,
-): void {
-	add(out, "source ip", event.sourceIp);
-	add(out, "datasource", event.datasourcePath);
-	add(out, "datasource type", event.datasourceType);
+/** Which of an integration's fields its renderer draws. */
+export type ShownFields = (kind: IntegrationId) => ReadonlySet<string>;
 
-	const geo = event.facets.geo;
-	if (geo) {
-		add(out, "asn", geo.asnNumber);
-		add(out, "asn org", geo.asnOrg);
-		add(out, "country code", geo.isoCode);
-		add(out, "in eu", geo.isInEU);
-		add(out, "source range", geo.sourceRange);
+function addEventDetails(
+	out: Collected,
+	event: ParsedEvent,
+	hostIp: string | undefined,
+	shown: ShownFields,
+): void {
+	// The decision's own IP heads the row; only a differing one is news
+	if (event.sourceIp !== hostIp) add(out, "source ip", event.sourceIp);
+
+	const drawn = shown(event.fields.kind);
+	for (const [key, value] of Object.entries(event.fields)) {
+		if (key !== "kind" && !drawn.has(key)) add(out, label(key), value);
 	}
 
 	for (const [name, facet] of Object.entries(event.facets)) {
@@ -83,26 +77,31 @@ function addEventDetails(
 	}
 }
 
-/**
- * Everything the parsers understood but the headline box has no room for:
- * geo enrichment, datasource paths, alert-level aggregates, provenance ids.
- * Flattened into label → distinct values, ready for a disclosure, so nothing
- * a parser claimed vanishes.
- *
- * Data-driven on purpose: a field added to an aggregate or a new facet shows
- * up here without touching the UI. Values are collected as sets so a key that
- * differs across events shows every value rather than the last one.
- */
-export function collectDetails(alert: AlertDetail): Record<string, string> {
-	const out = new Map<string, Set<string>>();
-
-	addObject(out, "", alert.aggregates);
-	addObject(out, "", alert.provenance, PROVENANCE_SHOWN_ELSEWHERE);
-	for (const event of alert.events) addEventDetails(out, event);
-
+function toRecord(out: Collected): Record<string, string> {
 	return Object.fromEntries(
 		[...out.entries()].map(([key, values]) => [key, [...values].join(", ")]),
 	);
+}
+
+const NOTHING_SHOWN: ShownFields = () => new Set();
+
+/**
+ * Whatever the parsers understood that nothing else in the panel renders:
+ * a field the integration reads but its renderer does not draw yet, a facet
+ * no slot claims yet, and a source IP that differs from the decision's.
+ * Aggregates are left out on purpose: they restate the lines. Provenance is
+ * on the header.
+ */
+export function collectDetails(
+	alert: AlertDetail,
+	hostIp?: string,
+	shown: ShownFields = NOTHING_SHOWN,
+): Record<string, string> {
+	const out: Collected = new Map();
+	for (const event of alert.events) {
+		addEventDetails(out, event, hostIp, shown);
+	}
+	return toRecord(out);
 }
 
 /**
@@ -112,7 +111,7 @@ export function collectDetails(alert: AlertDetail): Record<string, string> {
  * prints the whole bag, and listing it twice reads as a bug.
  */
 export function collectUnparsed(alert: AlertDetail): Record<string, string> {
-	const out = new Map<string, Set<string>>();
+	const out: Collected = new Map();
 	for (const [key, value] of Object.entries(alert.unparsed))
 		add(out, key, value);
 	for (const event of alert.events) {
@@ -120,7 +119,5 @@ export function collectUnparsed(alert: AlertDetail): Record<string, string> {
 		for (const [key, value] of Object.entries(event.unparsed))
 			add(out, key, value);
 	}
-	return Object.fromEntries(
-		[...out.entries()].map(([key, values]) => [key, [...values].join(", ")]),
-	);
+	return toRecord(out);
 }
