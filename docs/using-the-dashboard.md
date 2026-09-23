@@ -83,6 +83,14 @@ ASN and country enrichment comes from alerts, which means it needs the watcher c
 
 Expired bans stay visible after CrowdSec has forgotten them, which is the point of the local database. [`DECISION_RETENTION_COUNT` and `DECISION_RETENTION_DAYS`](configuration.md#retention) decide how much is kept. Age is applied first, then the count.
 
+## When the connection drops
+
+The dashboard does not cache data, but it does not fall over either.
+
+- **Offline**, as the browser reports it: a banner says so on every page, the Live dot turns grey, and whatever was last loaded stays on screen. Opening a page you have not visited waits for the connection rather than failing. An expanded row whose evidence was not loaded yet says it is waiting. Everything resumes by itself when the network is back.
+- **Online but the server does not answer**: the page you asked for shows a retry panel in place of its content, with the rest of the app still around it. The Live dot turns red once the event stream misses two pings, and reconnects on its own.
+- **Opened from cold while offline**, from the home screen or a bookmark: a plain "No connection" page, which reloads itself when the network returns. This needs the app to be installed or at least visited once over HTTPS, since browsers only run the service worker in a secure context.
+
 ## Installing it as an app
 
 It installs to a phone home screen or a desktop, starting on the decisions list, with long-press shortcuts to Decisions and Hosts.
