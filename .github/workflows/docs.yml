@@ -45,6 +45,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm test
+
       # Reads ../docs, and the releases for the changelog. Fails on a broken
       # internal link, which is the point of running this on pull requests too.
       - run: pnpm build

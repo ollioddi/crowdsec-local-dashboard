@@ -283,8 +283,8 @@ function buildEvents(
 				meta: meta({
 					...common,
 					timestamp,
-					log_type: "ssh_auth",
-					ssh_user: pick(SSH_USERS),
+					log_type: "ssh_failed-auth",
+					target_user: pick(SSH_USERS),
 					service: "sshd",
 					datasource_path: "/var/log/auth.log",
 				}),

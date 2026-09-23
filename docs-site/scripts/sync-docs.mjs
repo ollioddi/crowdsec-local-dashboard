@@ -1,14 +1,6 @@
 // Copies ../docs into the Starlight collection, adding the frontmatter and
 // absolute URLs the site needs. Nothing is ever written back to ../docs.
-import {
-	cp,
-	mkdir,
-	readdir,
-	readFile,
-	rm,
-	stat,
-	writeFile,
-} from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { base, repo } from "../site.config.mjs";
@@ -62,11 +54,12 @@ function rewriteLinks(text, fromDir) {
 // from any depth: a page in docs/integrations/ writes ../images/x.png.
 const IMAGE_REF = /(src="|\]\()(?:\.\.\/)*images\/([^")]+)/g;
 
-/** Screenshots live outside docs/, so they are copied into the site's public/. */
-function rewriteImages(text) {
+/** Screenshots are copied from docs/images into the site's public directory. */
+function rewriteImages(text, pending) {
 	return text.replace(
 		IMAGE_REF,
-		(_m, open, name) => `${open}${base}/images/${name}`,
+		(_m, open, name) =>
+			`${open}${base}/images/${name}${pending.has(name) ? ".svg" : ""}`,
 	);
 }
 
@@ -97,13 +90,29 @@ async function write(file, text) {
 	await writeFile(file, text);
 }
 
-async function unchangedSize(from, to) {
+const SCREENSHOT_PENDING = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Screenshot pending for this release">
+  <rect width="800" height="450" rx="12" fill="#242424"/>
+  <text x="400" y="225" text-anchor="middle" dominant-baseline="middle" fill="#aaa" font-family="sans-serif" font-size="22">Screenshot pending for this release</text>
+</svg>\n`;
+
+/** Release screenshots may be referenced before they have been captured. */
+export async function syncScreenshot(from, to) {
+	let contents;
 	try {
-		const [a, b] = await Promise.all([stat(from), stat(to)]);
-		return a.size === b.size;
-	} catch {
+		contents = await readFile(from);
+	} catch (error) {
+		if (error.code !== "ENOENT") throw error;
+		await write(`${to}.svg`, SCREENSHOT_PENDING);
 		return false;
 	}
+	try {
+		if (contents.equals(await readFile(to))) return true;
+	} catch (error) {
+		if (error.code !== "ENOENT") throw error;
+	}
+	await mkdir(path.dirname(to), { recursive: true });
+	await cp(from, to);
+	return true;
 }
 
 /** Drops files left behind by a page or screenshot that no longer exists. */
@@ -122,7 +131,7 @@ async function renderPage(file) {
 	const raw = await readFile(path.join(srcDocs, file), "utf8");
 	const { title, body } = splitTitle(raw, file);
 	const fromDir = path.dirname(path.join(srcDocs, file));
-	const content = rewriteImages(rewriteLinks(body, fromDir));
+	const content = rewriteLinks(body, fromDir);
 	const slug = slugOf(file);
 	return {
 		out: path.join(outDocs, `${slug || "index"}.md`),
@@ -137,23 +146,35 @@ export async function syncDocs() {
 
 	const pages = await Promise.all(files.map(renderPage));
 	await mkdir(outDocs, { recursive: true });
-	await Promise.all(pages.map((page) => write(page.out, page.text)));
-	await prune(outDocs, new Set(pages.map((page) => page.out)));
 
 	// Only the screenshots the docs actually embed.
 	const images = new Set(pages.flatMap((page) => page.images));
 	await mkdir(outImages, { recursive: true });
-	const wanted = new Set([...images].map((n) => path.join(outImages, n)));
+	const pending = new Set();
+	const wanted = new Set();
 	await Promise.all(
 		[...images].map(async (name) => {
 			const to = path.join(outImages, name);
-			if (await unchangedSize(path.join(srcDocs, "images", name), to)) return;
-			await cp(path.join(srcDocs, "images", name), to);
+			const exists = await syncScreenshot(
+				path.join(srcDocs, "images", name),
+				to,
+			);
+			if (!exists) pending.add(name);
+			wanted.add(exists ? to : `${to}.svg`);
 		}),
 	);
 	await prune(outImages, wanted);
+	await Promise.all(
+		pages.map((page) => write(page.out, rewriteImages(page.text, pending))),
+	);
+	await prune(outDocs, new Set(pages.map((page) => page.out)));
+	if (pending.size > 0) {
+		console.warn(
+			`Screenshots pending capture: ${[...pending].sort().join(", ")}`,
+		);
+	}
 
-	return { pages: pages.length, images: images.size };
+	return { pages: pages.length, images: images.size - pending.size };
 }
 
 // Also runs as `pnpm sync`; the dev server imports syncDocs directly.

@@ -1,34 +1,69 @@
-# Documentation
+# Getting started
 
-A self-hosted dashboard for the decisions your CrowdSec instance has made. It reads your Local API, mirrors it to SQLite so expired bans stay visible, and lets you delete a ban without opening a terminal.
+CrowdSec Local Dashboard displays decisions from your CrowdSec Local API (LAPI), keeps a local history in SQLite and lets you remove decisions from the browser.
 
-## Start here
+<img src="images/crowdsec-dashboard-desktop-decisions.png" width="800" alt="The decisions table on a desktop"/>
 
-Three things have to be true before anything syncs.
+## 1. Download the Compose files
 
-| | |
-|---|---|
-| **LAPI is reachable** | from wherever the dashboard runs, at a URL including the port |
-| **You have both credentials** | watcher for the alert evidence, bouncer for the decisions |
-| **`LAPI_*` is set** | in a `.env` beside the compose file |
+You need Docker with the Compose plugin and a running CrowdSec instance. On the host where you want to run the dashboard:
 
-Work through them in this order:
+```sh
+mkdir crowdsec-dashboard
+cd crowdsec-dashboard
+curl -fLO https://raw.githubusercontent.com/ollioddi/crowdsec-local-dashboard/main/docker-compose.yml
+curl -fL -o .env https://raw.githubusercontent.com/ollioddi/crowdsec-local-dashboard/main/.env.example
+```
 
-1. **[CrowdSec LAPI setup](lapi-setup.md)** gets the two sets of credentials. Do this first, the rest needs them.
-2. **[Configuration](configuration.md)** is the full variable reference once you know what to put in.
-3. **[Deployment](deployment.md)** covers the container, updating, and running it somewhere other than Docker.
-4. **[SSO / OIDC](sso.md)** is optional, and only worth doing once the basics work.
+Keep `docker-compose.yml` and `.env` in this directory. The Compose file selects a tagged dashboard image; you do not need to clone or build the repository.
 
-The [README](../README.md) has the three-command Docker quick start if you just want it running.
+## 2. Connect to CrowdSec
 
-## Then
+Edit these four values in `.env`:
 
-- **[Getting the most out of it](using-the-dashboard.md)** covers what the interface is telling you: what Live means, why a ban says `overdue`, what a simulated decision is.
-- **[Integrations](integrations.md)** is what the expanded row can show for your stack, and the one Traefik setting that is easy to miss.
-- **[Troubleshooting](troubleshooting.md)** for when you land back on the login page, or the expanded row is empty.
+```env
+LAPI_URL=http://192.168.1.100:8080
+LAPI_MACHINE_ID=your-machine-login
+LAPI_MACHINE_PASSWORD=your-machine-password
+LAPI_BOUNCER_API_TOKEN=your-bouncer-token
+```
 
-## Working on it
+Use your actual LAPI address and credentials:
 
-- **[Contributing](CONTRIBUTING.md)** for setup, the docs site and the screenshot script.
-- **[Contributing a parser](contributing-a-parser.md)** for teaching the expanded row a log source it does not read yet.
-- **[Releasing](releasing.md)** for commit conventions and the release workflows.
+- **LAPI URL:** an address reachable from the dashboard container, including the port. `localhost` inside the container refers to that container, not your CrowdSec host.
+- **Machine ID and password:** copy `login` and `password` from `/etc/crowdsec/local_api_credentials.yaml` on your CrowdSec host. These let the dashboard fetch alert evidence.
+- **Bouncer token:** run `cscli bouncers add crowdsec-local-dashboard` on the CrowdSec host and copy the token it prints. This lets the dashboard read decisions.
+
+[LAPI setup](lapi-setup.md) explains the credentials and network requirements. Leave `BETTER_AUTH_SECRET` empty for Docker: the container generates and stores one in its data volume. If you will serve the dashboard over HTTPS, also set `BETTER_AUTH_URL` to its public URL.
+
+The remaining settings can stay at their defaults. See [Configuration](configuration.md) for the full reference.
+
+## 3. Start the dashboard
+
+```sh
+docker compose up -d
+```
+
+Open `http://<dashboard-host>:3000`, or `http://localhost:3000` if it is running on your computer. Create the first account when prompted.
+
+The first sync starts automatically. If it fails, check the sync banner and the container logs:
+
+```sh
+docker compose logs --tail=100 dashboard
+```
+
+The dashboard can start without CrowdSec credentials, but decisions will not appear until the LAPI settings are filled in. After changing `.env`, run `docker compose up -d` again.
+
+## Next steps
+
+- [Using the dashboard](using-the-dashboard.md): filters, alert evidence, connection status and decision removal.
+- [Integrations](integrations.md): the evidence available for Traefik, AppSec, OPNsense and SSH.
+- [Deployment](deployment.md): updates, persistent storage and reverse proxies.
+- [SSO / OIDC](sso.md): optional single sign-on.
+- [Troubleshooting](troubleshooting.md): login problems, missing evidence and sync failures.
+
+## Contributing
+
+- [Development setup](CONTRIBUTING.md): running the app, docs and screenshot tooling locally.
+- [Contributing a parser](contributing-a-parser.md): adding fields or supporting another log source.
+- [Releasing](releasing.md): commit conventions and release workflows.

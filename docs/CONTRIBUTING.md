@@ -52,7 +52,7 @@ That means a few rules when writing a page:
 
 - Start with a single `# H1`. It becomes the page title, and the site strips it.
 - Link between pages with relative paths (`configuration.md#retention`). Links to files outside `docs/` are rewritten to point at GitHub.
-- Reference screenshots as `images/<name>.png`. Only referenced images are copied into the site.
+- Reference screenshots as `images/<name>.png`, or `../images/<name>.png` from a page in a subfolder. Only referenced images are copied into the site.
 - Use GitHub alerts (`> [!NOTE]`). They are converted to Starlight asides.
 - Add new pages to the sidebar in `docs-site/astro.config.mjs` and to `docs/README.md`.
 

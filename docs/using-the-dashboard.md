@@ -10,6 +10,8 @@ The decisions table shows five columns by default. Status, origin, country and c
 
 Filters sit behind the Filter button as chips, with per column operators and facet counts.
 
+<img src="images/crowdsec-dashboard-desktop-decisions-filters.png" width="800" alt="The decisions table with a status filter applied and the filter picker open"/>
+
 ## Live does not mean LAPI is fine
 
 The **Live** dot only says your browser is connected to the server. It says nothing about whether the server can reach CrowdSec.
@@ -21,6 +23,8 @@ The banner also calls out missing watcher credentials separately, because that f
 ## Reading a decision
 
 **Click anywhere on a row** to expand it. Clicks on a link or a button inside the row still do their own thing.
+
+<img src="images/crowdsec-dashboard-desktop-decisions-expanded.png" width="800" alt="An expanded decision: the alert evidence on the left, location, network, agent, log and ban length on the right"/>
 
 **Ban duration is derived, not reported.** LAPI only ever hands over the time remaining, on both the decision stream and the alerts endpoint, so a raw value would be whatever was left at the moment the sync happened to run. The dashboard measures from the triggering alert to the expiry instead, which lands on whole hours and reads `4 hours`. A decision with no linked alert says so rather than guessing.
 
@@ -51,6 +55,14 @@ What each source puts in the box is on its own page under [Integrations](integra
 
 The table becomes a list of cards, and expanding one opens a sheet over the list rather than growing the card, so filters and the open row stop competing for the screen. The sheet carries everything the desktop row does, in the same order. Filters take one row however many there are, scrolling sideways, with Clear pinned first.
 
+<table>
+  <tr>
+    <td><img src="images/crowdsec-dashboard-mobile-decisions.png" width="200" alt="The decisions list as cards on a phone"/></td>
+    <td><img src="images/crowdsec-dashboard-mobile-decisions-filters.png" width="200" alt="Three filters in one scrolling row"/></td>
+    <td><img src="images/crowdsec-dashboard-mobile-decisions-http.png" width="200" alt="A decision opened as a sheet"/></td>
+  </tr>
+</table>
+
 Improving a parser improves the rows already in the database: the raw events are stored and re-read every time a row is expanded, so nothing needs a re-sync.
 
 ## Deleting a decision
@@ -62,6 +74,8 @@ If CrowdSec no longer holds the decision, that counts as already gone and the ro
 ## Hosts
 
 A host with no active decisions but bans on record links through to its expired decisions rather than an empty list.
+
+<img src="images/crowdsec-dashboard-desktop-hosts.png" width="800" alt="The hosts table: IP, active bans, total bans, country, first and last seen"/>
 
 ASN and country enrichment comes from alerts, which means it needs the watcher credentials. Without them hosts have IPs and counts but no network data.
 

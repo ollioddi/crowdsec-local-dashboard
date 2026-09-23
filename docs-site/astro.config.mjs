@@ -84,7 +84,7 @@ export default defineConfig({
 				{
 					label: "Start here",
 					items: [
-						{ label: "Overview", slug: "" },
+						{ label: "Getting started", slug: "" },
 						{ label: "CrowdSec LAPI setup", slug: "lapi-setup" },
 						{ label: "Configuration", slug: "configuration" },
 						{ label: "Deployment", slug: "deployment" },
@@ -95,10 +95,19 @@ export default defineConfig({
 					label: "Using it",
 					items: [
 						{
-							label: "Getting the most out of it",
+							label: "Using the dashboard",
 							slug: "using-the-dashboard",
 						},
-						{ label: "Integrations", slug: "integrations" },
+						{
+							label: "Integrations",
+							items: [
+								{ label: "Overview", slug: "integrations" },
+								{ label: "Traefik", slug: "integrations/traefik" },
+								{ label: "AppSec WAF", slug: "integrations/appsec" },
+								{ label: "OPNsense", slug: "integrations/opnsense" },
+								{ label: "SSH", slug: "integrations/ssh" },
+							],
+						},
 						{ label: "Troubleshooting", slug: "troubleshooting" },
 					],
 				},
