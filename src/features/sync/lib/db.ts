@@ -22,12 +22,32 @@ function chunks<T>(items: T[]): T[][] {
 
 /** Newest alert creation time for a decision, or null when it has no linked alerts. */
 function latestAlertTime(alerts: CrowdSecAlert[]): Date | null {
-	let latest: Date | null = null;
-	for (const alert of alerts) {
-		const t = new Date(alert.created_at);
-		if (!Number.isNaN(t.getTime()) && (!latest || t > latest)) latest = t;
-	}
-	return latest;
+	const times = alerts
+		.map((alert) => new Date(alert.created_at).getTime())
+		.filter((time) => !Number.isNaN(time));
+	return times.length > 0 ? new Date(Math.max(...times)) : null;
+}
+
+/**
+ * GeoIP fields for a host, from the alert source when LAPI enriched it and a
+ * local country lookup otherwise. Nulls mean "unknown", and `knownOnly`
+ * strips them so an update never erases a value the host already has.
+ */
+function hostEnrichment(ip: string, alerts: CrowdSecAlert[]) {
+	const src = alerts[0]?.source;
+	return {
+		country: src?.cn ?? lookupCountry(ip),
+		asNumber: src?.as_number ?? null,
+		asName: src?.as_name ?? null,
+		latitude: src?.latitude ?? null,
+		longitude: src?.longitude ?? null,
+	};
+}
+
+function knownOnly<T extends object>(fields: T): Partial<T> {
+	return Object.fromEntries(
+		Object.entries(fields).filter(([, value]) => value != null),
+	) as Partial<T>;
 }
 
 /** Returns the subset of `ids` already present in the DB. */
@@ -91,8 +111,7 @@ export async function upsertHosts(
 		await prisma.$transaction(
 			batch.map((d) => {
 				const alerts = decisionToAlerts.get(d.id) ?? [];
-				const src = alerts[0]?.source;
-				const country = src?.cn ?? lookupCountry(d.value);
+				const enrichment = hostEnrichment(d.value, alerts);
 				const seenAt = latestAlertTime(alerts) ?? now;
 
 				return prisma.host.upsert({
@@ -100,11 +119,7 @@ export async function upsertHosts(
 					create: {
 						ip: d.value,
 						scope: d.scope,
-						country,
-						asNumber: src?.as_number ?? null,
-						asName: src?.as_name ?? null,
-						latitude: src?.latitude ?? null,
-						longitude: src?.longitude ?? null,
+						...enrichment,
 						firstSeen: seenAt,
 						lastSeen: seenAt,
 						totalBans: 0, // corrected by updateHostBanCounts
@@ -112,11 +127,7 @@ export async function upsertHosts(
 					update: {
 						scope: d.scope,
 						...(newDecisionIds.has(d.id) && { lastSeen: seenAt }),
-						...(country != null && { country }),
-						...(src?.as_number != null && { asNumber: src.as_number }),
-						...(src?.as_name != null && { asName: src.as_name }),
-						...(src?.latitude != null && { latitude: src.latitude }),
-						...(src?.longitude != null && { longitude: src.longitude }),
+						...knownOnly(enrichment),
 					},
 				});
 			}),
@@ -399,23 +410,19 @@ export async function repairAlertExtracts(): Promise<number> {
 
 	let repaired = 0;
 	for (const batch of chunks(candidates)) {
-		const updates = [];
-		for (const row of batch) {
+		const updates = batch.flatMap((row) => {
 			const raw = decodeAlertRow(row);
-			if (!raw?.events.length) continue;
+			if (!raw?.events.length) return [];
 			const parsed = parseAlert(raw);
-
-			updates.push(
-				prisma.alert.update({
-					where: { id: row.id },
-					data: {
-						entries: JSON.stringify(parsed.entries),
-						entryType: parsed.entryType,
-						integration: parsed.integration,
-					},
-				}),
-			);
-		}
+			return prisma.alert.update({
+				where: { id: row.id },
+				data: {
+					entries: JSON.stringify(parsed.entries),
+					entryType: parsed.entryType,
+					integration: parsed.integration,
+				},
+			});
+		});
 		if (updates.length > 0) {
 			await prisma.$transaction(updates);
 			repaired += updates.length;
