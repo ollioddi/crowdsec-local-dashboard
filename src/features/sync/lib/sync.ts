@@ -86,7 +86,8 @@ export async function syncDecisions(options?: {
 		}
 		const stream = await client.getDecisionStream({
 			startup: useStartup,
-			origins: "crowdsec,cscli",
+			// Unset pulls every origin, including CAPI and blocklist decisions
+			origins: env.LAPI_DECISION_ORIGINS,
 		});
 
 		const newDecisions = stream.new ?? [];

@@ -15,6 +15,15 @@ export const env = createEnv({
 		LAPI_MACHINE_PASSWORD: z.string().min(1).optional(),
 		LAPI_BOUNCER_API_TOKEN: z.string().min(1).optional(),
 		LAPI_POLL_INTERVAL: z.coerce.number().positive().default(60),
+		// Decision origins to mirror. Set it empty to pull every origin LAPI
+		// has, including CAPI and blocklists: tens of thousands of rows whose
+		// alert lookups alone take hours, so nothing ever gets written.
+		LAPI_DECISION_ORIGINS: z
+			.string()
+			.default("crowdsec,cscli")
+			.transform((value) => value.trim() || undefined),
+		// Alerts requested per host. LAPI defaults to 100 when omitted.
+		LAPI_ALERT_LIMIT: z.coerce.number().int().positive().default(100),
 		// Oldest inactive pruned first. 0 keeps everything.
 		DECISION_RETENTION_COUNT: z.coerce.number().int().min(0).default(20000),
 		// Applied before the count limit. 0 disables.
@@ -22,7 +31,7 @@ export const env = createEnv({
 		LOG_LEVEL: z.enum(LOG_LEVELS).default("info"),
 		LOG_FORMAT: z.enum(LOG_FORMATS).default("human"),
 		UPDATE_CHECK: z.stringbool().default(true),
-		// OIDC/OAuth SSO (optional — leave unset to disable SSO login)
+		// OIDC/OAuth SSO (optional; leave unset to disable SSO login)
 		OIDC_CLIENT_ID: z.string().min(1).optional(),
 		OIDC_CLIENT_SECRET: z.string().min(1).optional(),
 		OIDC_ISSUER_URL: z.url().optional(),
