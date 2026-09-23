@@ -4,10 +4,12 @@ import {
 	Outlet,
 	redirect,
 	useLoaderData,
+	useRouter,
 } from "@tanstack/react-router";
 import { type ReactNode, useCallback, useEffect } from "react";
 import { getSessionFn } from "@/common/auth/auth.functions";
 import { AppSidebar } from "@/common/components/app-sidebar";
+import { OfflineBanner } from "@/common/components/offline-banner";
 import {
 	SidebarInset,
 	SidebarProvider,
@@ -26,6 +28,9 @@ import { SyncStatusBanner } from "@/features/sync/components/sync-status-banner"
 
 export const Route = createFileRoute("/_app")({
 	component: AppLayout,
+	// Server functions check the session themselves; re-running this per
+	// navigation tore down the whole shell when offline
+	staleTime: Infinity,
 	loader: async ({ context }) => {
 		const session = await getSessionFn();
 		if (!session) {
@@ -48,6 +53,15 @@ const AppShell = ({ children }: Readonly<{ children: ReactNode }>) => {
 		[queryClient],
 	);
 	useSSEConnection<SyncStatus>("/sse/sync-status", handleSyncStatus);
+
+	// Route components are code-split; fetching them now means a page never
+	// visited still opens offline instead of failing on its chunk
+	const router = useRouter();
+	useEffect(() => {
+		for (const route of Object.values(router.routesById)) {
+			if (route.id.startsWith("/_app/")) router.loadRouteChunk(route);
+		}
+	}, [router]);
 
 	useEffect(() => {
 		let hiddenAt = 0;
@@ -79,6 +93,7 @@ const AppShell = ({ children }: Readonly<{ children: ReactNode }>) => {
 							<header className="flex h-12 shrink-0 items-center gap-2 border-b px-2 pt-[env(safe-area-inset-top)] sm:px-4">
 								<SidebarTrigger className="-ml-1 size-9 sm:size-8" />
 							</header>
+							<OfflineBanner />
 							<SyncStatusBanner status={syncStatus} />
 							<div className="flex min-h-0 flex-1 flex-col">{children}</div>
 						</SidebarInset>

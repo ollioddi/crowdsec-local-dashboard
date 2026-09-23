@@ -5,6 +5,7 @@ import { useSession } from "@/common/auth/auth-client";
 import { DataTable } from "@/common/components/data-table/data-table";
 import { PageHeader } from "@/common/components/page-header";
 import { useTitle } from "@/common/hooks/use-title";
+import { describeRequestFailure } from "@/common/lib/request-error";
 import { deleteUserFn, getUsersFn } from "@/features/users/api/users.functions";
 import { createColumns } from "@/features/users/components/columns";
 import {
@@ -38,7 +39,10 @@ export function UsersPage() {
 			toast.success("User deleted");
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 		},
-		onError: () => toast.error("Failed to delete user"),
+		onError: (error) =>
+			toast.error("Failed to delete user", {
+				description: describeRequestFailure(error),
+			}),
 	});
 
 	const deletingId = deleteMutation.isPending
