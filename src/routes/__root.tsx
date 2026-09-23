@@ -85,25 +85,12 @@ function NotFound() {
 	);
 }
 
-/** Production only: in dev the worker would serve stale Vite chunks. */
+/** Registered in dev too; the worker never caches Vite's dev chunks. */
 function ServiceWorker() {
 	useEffect(() => {
 		if (!("serviceWorker" in navigator)) return;
-
-		if (import.meta.env.PROD) {
-			navigator.serviceWorker.register("/sw.js").catch(() => {
-				// A worker that fails to register only costs offline support
-			});
-			return;
-		}
-
-		// Running a production build once on the dev port leaves a worker behind
-		// that keeps intercepting `pnpm dev` on that origin.
-		navigator.serviceWorker.getRegistrations().then(async (registrations) => {
-			for (const registration of registrations) await registration.unregister();
-			if (registrations.length > 0 && "caches" in globalThis) {
-				for (const key of await caches.keys()) await caches.delete(key);
-			}
+		navigator.serviceWorker.register("/sw.js").catch(() => {
+			// A worker that fails to register only costs offline support
 		});
 	}, []);
 	return null;
