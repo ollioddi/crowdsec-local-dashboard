@@ -36,9 +36,10 @@ This dashboard replaces all of that with a filterable table and a delete button.
   </tr>
   <tr>
     <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-decisions-expanded.png" width="420" alt="Decisions - expanded row showing the HTTP requests behind a ban"/><br/><sub>Decisions - expanded row showing the HTTP requests behind a ban</sub></td>
-    <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-hosts.png" width="420" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-decisions-appsec.png" width="420" alt="Decisions - expanded row showing the WAF rules that fired"/><br/><sub>Decisions - expanded row showing the WAF rules that fired</sub></td>
   </tr>
   <tr>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-hosts.png" width="420" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
     <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-users.png" width="420" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
   </tr>
 </table>
@@ -51,14 +52,20 @@ This dashboard replaces all of that with a filterable table and a delete button.
   <tr>
     <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-login.png" width="230" alt="Login with optional OIDC SSO (the button label is configurable)"/><br/><sub>Login with optional OIDC SSO (the button label is configurable)</sub></td>
     <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-decisions.png" width="230" alt="Decisions - cards instead of a sideways scroll"/><br/><sub>Decisions - cards instead of a sideways scroll</sub></td>
-    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-decisions-http.png" width="230" alt="Decisions - expanded card showing HTTP alert details"/><br/><sub>Decisions - expanded card showing HTTP alert details</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-decisions-filters.png" width="230" alt="Decisions - any number of filters costs one row on a phone"/><br/><sub>Decisions - any number of filters costs one row on a phone</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-decisions-ports.png" width="230" alt="Decisions - expanded card showing a port scan"/><br/><sub>Decisions - expanded card showing a port scan</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-decisions-http.png" width="230" alt="Decisions - the alert sheet, here with the HTTP requests behind a ban"/><br/><sub>Decisions - the alert sheet, here with the HTTP requests behind a ban</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-decisions-ports.png" width="230" alt="Decisions - the alert sheet for a port scan, connections grouped by rule"/><br/><sub>Decisions - the alert sheet for a port scan, connections grouped by rule</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-decisions-ssh.png" width="230" alt="Decisions - the alert sheet for an SSH brute force, one line per attempt"/><br/><sub>Decisions - the alert sheet for an SSH brute force, one line per attempt</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-users-create.png" width="230" alt="Users - the create form opens in a drawer instead of squashing the table"/><br/><sub>Users - the create form opens in a drawer instead of squashing the table</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-hosts-refresh.png" width="230" alt="Hosts - pull the list down to resync with CrowdSec"/><br/><sub>Hosts - pull the list down to resync with CrowdSec</sub></td>
     <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-hosts.png" width="230" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
-    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-users.png" width="230" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
   </tr>
   <tr>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-users.png" width="230" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
     <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-sidebar.png" width="230" alt="Sidebar - slide-out navigation with theme toggle"/><br/><sub>Sidebar - slide-out navigation with theme toggle</sub></td>
   </tr>
 </table>

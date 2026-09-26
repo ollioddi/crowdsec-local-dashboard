@@ -9,8 +9,8 @@ CrowdSec Local Dashboard displays decisions from your CrowdSec Local API (LAPI),
 You need Docker with the Compose plugin and a running CrowdSec instance. On the host where you want to run the dashboard:
 
 ```sh
-mkdir crowdsec-dashboard
-cd crowdsec-dashboard
+mkdir crowdsec-local-dashboard
+cd crowdsec-local-dashboard
 curl -fLO https://raw.githubusercontent.com/ollioddi/crowdsec-local-dashboard/main/docker-compose.yml
 curl -fL -o .env https://raw.githubusercontent.com/ollioddi/crowdsec-local-dashboard/main/.env.example
 ```
