@@ -289,15 +289,19 @@ export async function upsertInactiveDecisions(
 export async function deactivateStaleDecisions(
 	activeIds: number[],
 ): Promise<number> {
-	const where =
-		activeIds.length > 0
-			? { active: true, id: { notIn: activeIds } }
-			: { active: true };
-	const result = await prisma.decision.updateMany({
-		where,
-		data: { active: false },
+	const keep = new Set(activeIds);
+	const active = await prisma.decision.findMany({
+		where: { active: true },
+		select: { id: true },
 	});
-	return result.count;
+	const stale = active.map((row) => row.id).filter((id) => !keep.has(id));
+	for (const batch of chunks(stale)) {
+		await prisma.decision.updateMany({
+			where: { id: { in: batch } },
+			data: { active: false },
+		});
+	}
+	return stale.length;
 }
 
 /**
@@ -338,8 +342,8 @@ async function deleteDecisions(
  * down to `retentionLimit`, then removes anything orphaned by that.
  *
  * Both limits are optional (0 disables). Age runs first and commits before
- * the count pass, so the second query needs no `notIn` list, which would
- * exceed SQLite's parameter limit at large retention values.
+ * the count pass, so the second query needs no `notIn` list, which Prisma
+ * rejects past 996 values.
  *
  * Returns the host IPs whose decisions were pruned so counts can be refreshed.
  */
