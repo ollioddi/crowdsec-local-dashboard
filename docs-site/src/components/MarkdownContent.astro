@@ -1,5 +1,6 @@
 ---
 import Default from "@astrojs/starlight/components/MarkdownContent.astro";
+import ImageZoom from "starlight-image-zoom/components/ImageZoom.astro";
 
 // Pagefind scales the ranking of content inside an element carrying this.
 // A release note from ten versions back is rarely what someone searching the
@@ -11,13 +12,17 @@ const isChangelog = Astro.url.pathname.includes("/changelog");
 {
 	isChangelog ? (
 		<div data-pagefind-weight="0.2">
+			<ImageZoom />
 			<Default>
 				<slot />
 			</Default>
 		</div>
 	) : (
-		<Default>
-			<slot />
-		</Default>
+		<>
+			<ImageZoom />
+			<Default>
+				<slot />
+			</Default>
+		</>
 	)
 }
