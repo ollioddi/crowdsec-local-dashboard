@@ -4,7 +4,8 @@
   "type": "module",
   "packageManager": "pnpm@12.4.2",
   "scripts": {
-    "dev": "vite dev --port 3000",
+    "dev": "VITE_DEV_TLS=1 vite dev --port 3000",
+    "dev:http": "vite dev --port 3000",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -66,6 +67,7 @@
     "@types/node": "^24.19.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-react": "^6.1.1",
     "babel-plugin-react-compiler": "^1.0.0",
     "dotenv-cli": "^11.0.0",
