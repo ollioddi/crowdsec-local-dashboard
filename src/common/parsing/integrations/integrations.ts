@@ -1,6 +1,8 @@
 import type { EventFields, Integration } from "../types";
 import { appsec } from "./appsec";
+import { dovecot } from "./dovecot";
 import { opnsensePf } from "./opnsense-pf";
+import { postfix } from "./postfix";
 import { ssh } from "./ssh";
 import { traefikHttp } from "./traefik-http";
 
@@ -14,5 +16,7 @@ export const INTEGRATIONS: ReadonlyArray<Integration<EventFields>> = [
 	appsec,
 	opnsensePf,
 	ssh,
+	postfix,
+	dovecot,
 	traefikHttp,
 ];

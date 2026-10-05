@@ -57,7 +57,7 @@ The dashboard can start without CrowdSec credentials, but decisions will not app
 ## Next steps
 
 - [Using the dashboard](using-the-dashboard.md): filters, alert evidence, connection status and decision removal.
-- [Integrations](integrations.md): the evidence available for Traefik, AppSec, OPNsense and SSH.
+- [Integrations](integrations.md): the evidence available for Traefik, AppSec, OPNsense, SSH and mailcow.
 - [Deployment](deployment.md): updates, persistent storage and reverse proxies.
 - [SSO / OIDC](sso.md): optional single sign-on.
 - [Troubleshooting](troubleshooting.md): login problems, missing evidence and sync failures.

@@ -60,6 +60,32 @@ describe("evidence not present in retained events", () => {
 			"user agents": "scanner/1.0",
 		});
 	});
+	it("leaves Dovecot aggregates to the Dovecot box", () => {
+		const detail = alertDetailFromRow(pfRow);
+		detail.aggregates = {
+			kind: "dovecot",
+			mailboxes: ["info@example.com"],
+			protocols: ["imap"],
+			loginMessages: ["Password mismatch"],
+		};
+		const details = collectDetails(detail);
+		expect(details).not.toHaveProperty("mailboxes");
+		expect(details).not.toHaveProperty("protocols");
+		expect(details).not.toHaveProperty("login messages");
+	});
+	it("leaves Postfix aggregates to the Postfix box", () => {
+		const detail = alertDetailFromRow(pfRow);
+		detail.aggregates = {
+			kind: "postfix",
+			clientSent: ["EHLO User"],
+			lostAfter: ["AUTH"],
+			commands: ["GET / HTTP/1.1"],
+		};
+		const details = collectDetails(detail);
+		expect(details).not.toHaveProperty("client sent");
+		expect(details).not.toHaveProperty("lost after");
+		expect(details).not.toHaveProperty("commands");
+	});
 	it("keeps a target visible for sources without a request line", () => {
 		const detail = alertDetailFromRow(pfRow);
 		detail.events[0].facets.target = {

@@ -123,6 +123,18 @@ function representedSummaries(alert: AlertDetail): Collected {
 				break;
 		}
 	}
+	if (alert.aggregates.kind === "dovecot") {
+		// The Dovecot box draws its aggregates directly
+		add(out, "mailboxes", alert.aggregates.mailboxes);
+		add(out, "protocols", alert.aggregates.protocols);
+		add(out, "login messages", alert.aggregates.loginMessages);
+	}
+	if (alert.aggregates.kind === "postfix") {
+		// The Postfix box draws its aggregates directly
+		add(out, "client sent", alert.aggregates.clientSent);
+		add(out, "lost after", alert.aggregates.lostAfter);
+		add(out, "commands", alert.aggregates.commands);
+	}
 	if (alert.entryType === "ports") add(out, "dst ports", alert.entries);
 	if (alert.entryType === "usernames") add(out, "usernames", alert.entries);
 	return out;
