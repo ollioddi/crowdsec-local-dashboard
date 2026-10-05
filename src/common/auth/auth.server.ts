@@ -55,6 +55,8 @@ export const auth = betterAuth({
 	},
 	emailAndPassword: {
 		enabled: true,
+		// Local accounts are created by first-time setup or authenticated users.
+		disableSignUp: true,
 	},
 	logger: {
 		level: "warn",
