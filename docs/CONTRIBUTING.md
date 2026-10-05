@@ -15,8 +15,19 @@ pnpm install
 cp .env.example .env   # fill in your values
 pnpm run db:generate   # generate the Prisma client and Zod schemas
 pnpm run db:push       # create the local SQLite schema
-pnpm run dev           # start dev server on http://localhost:3000
+pnpm run dev           # start dev server on https://localhost:3000
 ```
+
+### HTTPS in development
+
+`pnpm dev` serves `https://localhost:3000` with a self-signed certificate, so the browser speaks HTTP/2. Over HTTP/1.1 Chrome allows 6 connections per host across all tabs, and every open dashboard tab holds 2 SSE streams, so a few tabs leave requests pending forever with nothing in the server log.
+
+- On first visit Chrome warns that the connection is not private. Click Advanced, then Proceed to localhost. Chrome remembers this per origin.
+- Set `BETTER_AUTH_URL=https://localhost:3000` in `.env`, or sign-in fails the origin check. The session cookie becomes `__Secure-` prefixed, so sign in again after switching.
+- For SSO, register `https://localhost:3000/api/auth/callback/oidc` as a redirect URI with your provider.
+- `pnpm dev:http` serves plain `http://localhost:3000` on HTTP/1.1 for the cases below that need it.
+
+Deployments reached over plain HTTP, such as a LAN IP, run on HTTP/1.1 and have the same limit. Browsers only use HTTP/2 over TLS, so put HTTPS in front of the dashboard there.
 
 Before opening a pull request:
 
@@ -73,7 +84,7 @@ Unauthenticated builds work but share the 60 requests per hour GitHub allows per
 
 ## Testing offline behaviour
 
-The service worker registers during development on `http://localhost:3000`. Load the app once and check that the worker is active in DevTools before testing offline behaviour. In the Network panel, select Offline:
+Chrome does not register a service worker from a self-signed certificate, so test offline behaviour with `pnpm dev:http`. The service worker registers on `http://localhost:3000`. Load the app once and check that the worker is active in DevTools before testing offline behaviour. In the Network panel, select Offline:
 
 - With the app open, the offline banner and grey Offline indicator should appear, and a page without loaded data should say it is waiting, provided its code finished preloading.
 - Reload while offline and you should get the "No connection" page from `public/offline.html`, which reloads itself when you set the panel back to Online.
