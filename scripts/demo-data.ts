@@ -8,6 +8,8 @@ import { env } from "@/common/lib/env";
 import { metaToRecord } from "@/common/parsing/meta";
 import { parseAlert } from "@/common/parsing/registry";
 import type { DecisionType } from "@/generated/prisma/enums.js";
+import dovecotFixture from "../src/common/parsing/fixtures/mailcow-dovecot.json";
+import postscreenFixture from "../src/common/parsing/fixtures/mailcow-postscreen.json";
 
 export const DEMO_LOGIN = { username: "admin", password: "crowdsec-demo" };
 
@@ -58,10 +60,18 @@ const SCENARIOS = [
 	{ name: "crowdsecurity/appsec-vpatch", family: "appsec", weight: 6 },
 ] as const;
 
-type Family = (typeof SCENARIOS)[number]["family"];
+type Family = (typeof SCENARIOS)[number]["family"] | "dovecot" | "postfix";
+
+function mailFixture(family: Family) {
+	if (family === "dovecot") return dovecotFixture;
+	if (family === "postfix") return postscreenFixture;
+	return undefined;
+}
 
 /** Which agent would have reported each family, for the provenance line. */
 const MACHINE_BY_FAMILY: Record<Family, string> = {
+	dovecot: "mailcow",
+	postfix: "mailcow",
 	http: "traefik",
 	ssh: "vaultwarden",
 	pf: "opnsense",
@@ -239,6 +249,30 @@ function buildEvents(
 	network: (typeof NETWORKS)[number],
 	at: Date,
 ) {
+	const fixture = mailFixture(family);
+	if (fixture) {
+		const lastTimestamp = fixture.events
+			.at(-1)
+			?.meta.find((entry) => entry.key === "timestamp")?.value;
+		const offset =
+			at.getTime() - new Date(lastTimestamp ?? fixture.stop_at).getTime();
+		return fixture.events.map((event) => {
+			const rawTime = event.meta.find(
+				(entry) => entry.key === "timestamp",
+			)?.value;
+			const timestamp = new Date(
+				new Date(rawTime ?? fixture.stop_at).getTime() + offset,
+			).toISOString();
+			return {
+				timestamp,
+				meta: event.meta.map((entry) => {
+					if (entry.key === "timestamp") return { ...entry, value: timestamp };
+					if (entry.key === "source_ip") return { ...entry, value: ip };
+					return entry;
+				}),
+			};
+		});
+	}
 	const count =
 		family === "pf"
 			? between(6, 40)
@@ -403,8 +437,33 @@ function makeHosts(now: number): Host[] {
 	}));
 }
 
-/** Only pf alerts carry alert-level meta: the ports the scan touched. */
+/** Mailboxes a Dovecot brute force tries, as alert context would report them. */
+const MAILBOXES = [
+	"info@example.com",
+	"admin@example.com",
+	"postmaster@example.com",
+	"sales@example.com",
+];
+
+/**
+ * Alert-level meta: the ports a pf scan touched, and the alert context a
+ * mailcow agent sends. Other families carry none.
+ */
 function buildAlertMeta(family: Family) {
+	if (family === "dovecot") {
+		const mailboxes = [
+			...new Set(Array.from({ length: between(1, 3) }, () => pick(MAILBOXES))),
+		];
+		return meta({
+			target_user: JSON.stringify(mailboxes),
+			protocol: JSON.stringify(["imap"]),
+			login_message: JSON.stringify(["Password mismatch"]),
+		});
+	}
+	if (family === "postfix") {
+		// The demo's Postfix alerts are postscreen PREGREETs
+		return meta({ client_sent: JSON.stringify(["EHLO User\\r\\n"]) });
+	}
 	if (family !== "pf") return [];
 	const ports = [
 		...new Set(Array.from({ length: between(3, 9) }, () => pick(SCAN_PORTS))),
@@ -432,7 +491,14 @@ async function insertAlert(
 	});
 
 	// Attack span: most scenarios are bursts, some pace themselves for hours
-	const spanSeconds = rand() < 0.75 ? between(2, 90) : between(1800, 21_600);
+	const fixture = mailFixture(scenario.family);
+	const spanSeconds = fixture
+		? (new Date(fixture.stop_at).getTime() -
+				new Date(fixture.start_at).getTime()) /
+			1000
+		: rand() < 0.75
+			? between(2, 90)
+			: between(1800, 21_600);
 	const startAt = new Date(createdAt.getTime() - spanSeconds * 1000);
 
 	await prisma.alert.create({
@@ -450,9 +516,9 @@ async function insertAlert(
 			integration,
 			machineId: MACHINE_BY_FAMILY[scenario.family],
 			uuid: randomUUID(),
-			scenarioVersion: pick(["0.3", "0.5", "1.2"]),
-			capacity: between(2, 10),
-			leakspeed: pick(["10s", "1m0s", "5m0s"]),
+			scenarioVersion: fixture?.scenario_version ?? pick(["0.3", "0.5", "1.2"]),
+			capacity: fixture?.capacity ?? between(2, 10),
+			leakspeed: fixture?.leakspeed ?? pick(["10s", "1m0s", "5m0s"]),
 			remediation: true,
 			sourceScope: "Ip",
 			sourceRange: `${host.ip.replace(/\.\d+$/, ".0")}/24`,
@@ -557,6 +623,8 @@ async function seedDecisions() {
 		{ name: "firewallservices/pf-scan-multi_ports", family: "pf" },
 		{ name: "crowdsecurity/ssh-bf", family: "ssh" },
 		{ name: "crowdsecurity/appsec-vpatch", family: "appsec" },
+		{ name: "crowdsecurity/dovecot-spam", family: "dovecot" },
+		{ name: "crowdsecurity/postscreen-rbl", family: "postfix" },
 	];
 	for (const [index, scenario] of showcase.entries()) {
 		const { id, entryType } = await addDecision(
@@ -568,7 +636,10 @@ async function seedDecisions() {
 			true,
 			"ban",
 		);
-		featured[entryType] = { id, ip: hosts[index].ip };
+		featured[mailFixture(scenario.family) ? scenario.family : entryType] = {
+			id,
+			ip: hosts[index].ip,
+		};
 	}
 
 	for (const host of hosts) {
@@ -581,6 +652,24 @@ async function seedDecisions() {
 			},
 		});
 	}
+
+	// A compact, real host from the seeded history fits both scenarios and
+	// targets in the phone drawer without cutting through a long scenario list.
+	const overviewHosts = await prisma.host.findMany({
+		where: { decisions: { some: { active: true } } },
+		orderBy: { lastSeen: "desc" },
+		include: {
+			alerts: { select: { scenario: true, integration: true } },
+			decisions: { select: { id: true }, take: 1 },
+		},
+	});
+	const overview = overviewHosts.find(
+		(host) =>
+			new Set(host.alerts.map((alert) => alert.scenario)).size === 2 &&
+			host.alerts.every((alert) => alert.integration === "traefik-http"),
+	);
+	if (overview)
+		featured.hostOverview = { id: overview.decisions[0].id, ip: overview.ip };
 
 	return featured;
 }

@@ -216,14 +216,48 @@ async function settle(page: Page) {
 }
 
 async function gotoDecisions(page: Page, search: Record<string, unknown>) {
+	await gotoTable(page, "decisions", search);
+}
+
+async function gotoTable(
+	page: Page,
+	route: "decisions" | "hosts",
+	search: Record<string, unknown>,
+) {
 	const query = Object.entries(search)
 		.map(
 			([key, value]) =>
 				`${key}=${encodeURIComponent(typeof value === "string" ? value : JSON.stringify(value))}`,
 		)
 		.join("&");
-	await page.goto(`${origin}/decisions?${query}`);
+	await page.goto(`${origin}/${route}?${query}`);
 	await settle(page);
+}
+
+/** Host evidence is fetched lazily, and a phone presents it in a drawer. */
+async function showHostActivity(page: Page, host: Featured, device: Device) {
+	await gotoTable(page, "hosts", {
+		q: host.ip,
+		pageSize: EXPANDED_PAGE_SIZE,
+		...(device === "desktop" ? { expanded: [host.ip] } : {}),
+	});
+	if (device === "mobile") {
+		await page.getByRole("button", { name: "Expand", exact: true }).click();
+	}
+	await page.getByRole("heading", { name: "Scenarios", exact: true }).waitFor();
+	const targets = page.locator("section").filter({
+		has: page.getByRole("heading", { name: "Observed targets", exact: true }),
+	});
+	await targets.waitFor();
+	// Wait for fonts, the lazy request, and drawer layout before positioning it.
+	await settle(page);
+	if (device === "mobile") {
+		await page.getByRole("dialog").waitFor();
+		// Show the enriched content rather than a drawer dominated by card fields.
+		// Its host summary stays fixed above this scrollable content.
+		await targets.scrollIntoViewIfNeeded();
+		await page.evaluate(() => new Promise(requestAnimationFrame));
+	}
 }
 
 /** On a phone the expanded row is a sheet; wait for its evidence to render. */
@@ -328,11 +362,10 @@ const scenes: Scene[] = [
 	{
 		name: "desktop-hosts",
 		device: "desktop",
-		caption: "Hosts - sortable, filterable IP list with active ban counts",
+		caption: "Hosts - expanded history with scenarios and observed targets",
 		fullPage: true,
-		run: async (page) => {
-			await page.goto(`${origin}/hosts?pageSize=${LIST_PAGE_SIZE}`);
-			await settle(page);
+		run: async (page, featured) => {
+			await showHostActivity(page, featured.paths, "desktop");
 		},
 	},
 	{
@@ -460,10 +493,13 @@ const scenes: Scene[] = [
 	{
 		name: "mobile-hosts",
 		device: "mobile",
-		caption: "Hosts - sortable, filterable IP list with active ban counts",
-		run: async (page) => {
-			await page.goto(`${origin}/hosts?pageSize=${LIST_PAGE_SIZE}`);
-			await settle(page);
+		caption: "Hosts - activity drawer with scenarios and observed targets",
+		run: async (page, featured) => {
+			await showHostActivity(
+				page,
+				featured.hostOverview ?? featured.paths,
+				"mobile",
+			);
 		},
 	},
 	{
@@ -493,6 +529,40 @@ const scenes: Scene[] = [
 		},
 	},
 ];
+
+// Mail integration captures stay in the docs; use the captured event shapes.
+for (const device of ["desktop", "mobile"] as const) {
+	for (const integration of ["dovecot", "postfix"] as const) {
+		scenes.push({
+			name: `${device}-mailcow-${integration}`,
+			device,
+			readme: false,
+			caption: `Mailcow - ${integration} alert evidence`,
+			fullPage: device === "desktop",
+			run: async (page, featured) => {
+				const decision = featured[integration];
+				await gotoDecisions(page, {
+					q: decision.ip,
+					pageSize: EXPANDED_PAGE_SIZE,
+					expanded: [String(decision.id)],
+				});
+				await showEvidence(page);
+				const evidence = page.locator('[data-slot="alert-evidence"]').first();
+				await evidence
+					.getByText(
+						integration === "dovecot"
+							? "Mail authentication (4)"
+							: "SMTP events (1)",
+						{ exact: true },
+					)
+					.waitFor();
+				if (await evidence.getByText(/Unparsed events|Not parsed/).count()) {
+					throw new Error(`Unparsed ${integration} evidence in screenshot`);
+				}
+			},
+		});
+	}
+}
 
 async function capture(
 	browser: Browser,
@@ -634,6 +704,7 @@ async function main() {
 
 	const server = await startServer();
 	const browser = await chromium.launch().catch((error) => {
+		server.kill();
 		throw new Error(
 			`Could not start Chromium: ${error.message}\nRun "pnpm exec playwright install chromium" once before the first capture.`,
 		);
@@ -649,7 +720,7 @@ async function main() {
 		await browser.close();
 		server.kill();
 	}
-	console.log(`\n${selected.length} screenshots written to readme/`);
+	console.log(`\n${selected.length} screenshots written to ${imageDir}`);
 	// Always built from the full scene list, so --only never drops images.
 	if (!flag("no-readme")) updateReadme();
 }
