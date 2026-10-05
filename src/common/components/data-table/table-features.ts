@@ -39,6 +39,8 @@ export type DataTableColumnMeta = {
 	sortable?: boolean;
 	/** Filter UI and filter function for the column */
 	filter?: FilterType;
+	/** Suggest existing faceted values while retaining text operators. */
+	filterSuggestions?: boolean;
 	/** Include this column's value in the global text search */
 	globalFilter?: boolean;
 	visibleByDefault?: boolean;
