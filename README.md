@@ -39,7 +39,7 @@ This dashboard replaces all of that with a filterable table and a delete button.
     <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-decisions-appsec.png" width="420" alt="Decisions - expanded row showing the WAF rules that fired"/><br/><sub>Decisions - expanded row showing the WAF rules that fired</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-hosts.png" width="420" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-hosts.png" width="420" alt="Hosts - expanded history with scenarios and observed targets"/><br/><sub>Hosts - expanded history with scenarios and observed targets</sub></td>
     <td align="center"><img src="docs/images/crowdsec-dashboard-desktop-users.png" width="420" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
   </tr>
 </table>
@@ -62,7 +62,7 @@ This dashboard replaces all of that with a filterable table and a delete button.
   <tr>
     <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-users-create.png" width="230" alt="Users - the create form opens in a drawer instead of squashing the table"/><br/><sub>Users - the create form opens in a drawer instead of squashing the table</sub></td>
     <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-hosts-refresh.png" width="230" alt="Hosts - pull the list down to resync with CrowdSec"/><br/><sub>Hosts - pull the list down to resync with CrowdSec</sub></td>
-    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-hosts.png" width="230" alt="Hosts - sortable, filterable IP list with active ban counts"/><br/><sub>Hosts - sortable, filterable IP list with active ban counts</sub></td>
+    <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-hosts.png" width="230" alt="Hosts - activity drawer with scenarios and observed targets"/><br/><sub>Hosts - activity drawer with scenarios and observed targets</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/images/crowdsec-dashboard-mobile-users.png" width="230" alt="Users - local accounts and SSO logins side by side"/><br/><sub>Users - local accounts and SSO logins side by side</sub></td>
