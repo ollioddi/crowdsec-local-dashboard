@@ -10,8 +10,10 @@ import type {
 import { shortScenario } from "../columns";
 import { appsecEvidence } from "./appsec-evidence";
 import { collectDetails, collectUnparsed } from "./details";
+import { dovecotEvidence } from "./dovecot-evidence";
 import { httpEvidence } from "./http-evidence";
 import { pfEvidence } from "./pf-evidence";
+import { postfixEvidence } from "./postfix-evidence";
 import {
 	type EvidenceProps,
 	type EvidenceRenderer,
@@ -32,6 +34,8 @@ const RENDERERS: { [K in IntegrationId]: EvidenceRenderer<K> } = {
 	appsec: appsecEvidence,
 	"opnsense-pf": pfEvidence,
 	ssh: sshEvidence,
+	postfix: postfixEvidence,
+	dovecot: dovecotEvidence,
 	unknown: unknownEvidence,
 };
 
@@ -76,12 +80,17 @@ function distinct(
 	return [...seen];
 }
 
-/** "10 leaking 10s": how full the bucket had to get, and how fast it drains. */
+/**
+ * "10 leaking 10s": how full the bucket had to get, and how fast it drains.
+ * A trigger scenario has no bucket and fires on its first event; LAPI
+ * reports it as capacity 0.
+ */
 function describeBucket(
 	capacity: number | null,
 	leakspeed: string | null,
 ): string | null {
 	if (capacity === null) return null;
+	if (capacity === 0) return "trigger";
 	return leakspeed ? `${capacity} leaking ${leakspeed}` : String(capacity);
 }
 

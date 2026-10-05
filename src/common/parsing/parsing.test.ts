@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import dovecotAlert from "./fixtures/mailcow-dovecot.json";
+import postfixCommandAlert from "./fixtures/mailcow-postfix-non-smtp-command.json";
+import postfixSpamAlert from "./fixtures/mailcow-postfix-spam.json";
+import postscreenAlert from "./fixtures/mailcow-postscreen.json";
 import { MetaView, metaToRecord, recordToMeta } from "./meta";
 import { parseAlert, parseEvent } from "./registry";
 
@@ -85,6 +89,25 @@ const pfEvent = {
 		rulenr: "11",
 		service: "tcp",
 		source_ip: "37.120.148.140",
+	}),
+};
+
+/** crowdsecurity/postscreen-rbl from mailcow's postfix container. */
+const postscreenEvent = {
+	timestamp: "2026-09-26 18:21:48 +0000 UTC",
+	meta: meta({
+		ASNNumber: "208137",
+		ASNOrg: "Feo Prest SRL",
+		IsInEU: "false",
+		IsoCode: "TW",
+		SourceRange: "203.0.113.0/24",
+		datasource_path: "mailcow-postfix-mailcow-1",
+		datasource_type: "docker",
+		machine: "c2be7414663a",
+		pregreet: "PREGREET",
+		service: "postscreen",
+		source_ip: "203.0.113.126",
+		timestamp: "2026-09-26T18:21:48Z",
 	}),
 };
 
@@ -178,6 +201,49 @@ describe("opnsense-pf", () => {
 			kind: "opnsense-pf",
 			dstPorts: ["tcp:3389", "tcp:445"],
 		});
+	});
+});
+
+describe("postfix", () => {
+	it("claims a postscreen event, which has no log_type", () => {
+		const parsed = parseEvent(postscreenEvent);
+		expect(parsed.integration).toBe("postfix");
+		expect(parsed.fields).toEqual({
+			kind: "postfix",
+			service: "postscreen",
+			violation: "PREGREET",
+		});
+		expect(parsed.datasourcePath).toBe("mailcow-postfix-mailcow-1");
+		expect(parsed.unparsed).toEqual({});
+	});
+
+	it("types an smtpd reject", () => {
+		const parsed = parseEvent({
+			meta: meta({
+				log_type: "postfix",
+				service: "postfix",
+				action: "reject",
+				reason: "Relay access denied",
+				source_hostname: "unknown",
+				source_ip: "203.0.113.7",
+			}),
+		});
+		expect(parsed.fields).toEqual({
+			kind: "postfix",
+			service: "postfix",
+			action: "reject",
+			reason: "Relay access denied",
+			clientHostname: "unknown",
+		});
+		expect(parsed.unparsed).toEqual({});
+	});
+
+	it("has no entries, only the events", () => {
+		const alert = parseAlert({ events: [postscreenEvent] });
+		expect(alert.integration).toBe("postfix");
+		expect(alert.entryType).toBe("none");
+		expect(alert.entries).toEqual([]);
+		expect(alert.aggregates).toEqual({ kind: "postfix" });
 	});
 });
 
@@ -335,5 +401,126 @@ describe("SSH upstream metadata", () => {
 			],
 		});
 		expect(parsed.entries).toEqual(["root", "admin"]);
+	});
+});
+
+describe("captured mailcow alerts", () => {
+	it.each(["postfix", "dovecot_logs"])(
+		"preserves the machine for non-Docker %s events",
+		(logType) => {
+			const parsed = parseEvent({
+				meta: meta({
+					log_type: logType,
+					machine: "mail.example.net",
+					datasource_type: "file",
+					datasource_path: "/var/log/mail.log",
+				}),
+			});
+			expect(parsed.unparsed).toEqual({ machine: "mail.example.net" });
+		},
+	);
+	it.each([
+		["dovecot", dovecotAlert],
+		["postfix", postscreenAlert],
+		["postfix", postfixSpamAlert],
+		["postfix", postfixCommandAlert],
+	] as const)(
+		"recognises %s and consumes captured metadata",
+		(integration, fixture) => {
+			const parsed = parseAlert(fixture);
+			expect(parsed.integration).toBe(integration);
+			expect(parsed.events).toHaveLength(fixture.events_count);
+			for (const event of parsed.events) {
+				expect(event.integration).toBe(integration);
+				expect(event.unparsed).toEqual({});
+			}
+			expect(parsed.entries).toEqual([]);
+		},
+	);
+	it("reads Dovecot mailboxes, protocols and reasons from alert context", () => {
+		const parsed = parseAlert({
+			...dovecotAlert,
+			meta: meta({
+				target_user: '["info@example.com","admin@example.com"]',
+				protocol: '["imap","submission"]',
+				login_message: '["Password mismatch"]',
+			}),
+		});
+		expect(parsed.entryType).toBe("usernames");
+		expect(parsed.entries).toEqual(["info@example.com", "admin@example.com"]);
+		expect(parsed.aggregates).toEqual({
+			kind: "dovecot",
+			mailboxes: ["info@example.com", "admin@example.com"],
+			protocols: ["imap", "submission"],
+			loginMessages: ["Password mismatch"],
+		});
+		expect(parsed.unparsed).toEqual({});
+	});
+
+	it("reads what the Postfix client sent from alert context", () => {
+		const parsed = parseAlert({
+			...postfixSpamAlert,
+			meta: meta({
+				client_sent: '["EHLO User"]',
+				lost_after: '["AUTH","CONNECT"]',
+				smtp_command: '["GET / HTTP/1.1"]',
+			}),
+		});
+		expect(parsed.aggregates).toEqual({
+			kind: "postfix",
+			clientSent: ["EHLO User"],
+			lostAfter: ["AUTH", "CONNECT"],
+			commands: ["GET / HTTP/1.1"],
+		});
+		expect(parsed.entries).toEqual([]);
+		expect(parsed.unparsed).toEqual({});
+	});
+
+	it("drops the escaped line ending Postfix logs after a command", () => {
+		const parsed = parseAlert({
+			...postfixCommandAlert,
+			meta: meta({
+				client_sent: JSON.stringify(["EHLO User\\r\\n"]),
+				smtp_command: JSON.stringify(["GET / HTTP/1.1\\r"]),
+			}),
+		});
+		expect(parsed.aggregates).toMatchObject({
+			clientSent: ["EHLO User"],
+			commands: ["GET / HTTP/1.1"],
+		});
+	});
+
+	it("drops per-attempt detail from Dovecot reasons", () => {
+		const parsed = parseAlert({
+			...dovecotAlert,
+			meta: meta({
+				login_message: JSON.stringify([
+					"Password mismatch (SHA1 of given password: a4b48a)",
+					"Disconnected: Connection closed (auth failed, 1 attempts in 2 secs)",
+					"Disconnected: Connection closed (auth failed, 1 attempts in 6 secs)",
+				]),
+			}),
+		});
+		expect(parsed.aggregates).toMatchObject({
+			loginMessages: [
+				"Password mismatch",
+				"Disconnected: Connection closed (auth failed)",
+			],
+		});
+	});
+
+	it("preserves future Dovecot values and unknown metadata", () => {
+		const parsed = parseEvent({
+			meta: meta({
+				log_type: "dovecot_logs",
+				dovecot_login_result: "future_result",
+				extra: "keep",
+			}),
+		});
+		expect(parsed.fields).toMatchObject({
+			kind: "dovecot",
+			loginResult: "future_result",
+		});
+		expect(parsed.unparsed).toEqual({ extra: "keep" });
 	});
 });

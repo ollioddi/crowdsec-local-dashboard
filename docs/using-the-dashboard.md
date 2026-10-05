@@ -102,3 +102,7 @@ The service worker caches static assets and the offline fallback page. It does n
 ## Version and updates
 
 The sidebar footer shows the version the build was made from. Unless `UPDATE_CHECK=false`, the server asks GitHub for the newest release a few times a day and the badge reads **Update available** when there is one. Local and untagged builds show `dev` and are never flagged.
+
+## Scenario suggestions
+
+The Scenario filter suggests scenario names present in the current data, with counts reflecting the other active filters. Type to narrow the suggestions, then select a name and Apply. You can also enter a partial name and use the existing text operators, such as Contains or Starts with. Saved filter URLs keep working.

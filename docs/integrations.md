@@ -8,8 +8,10 @@ The dashboard syncs decisions independently of their log source. Integrations de
 | `appsec-block`, in-band rule events | [CrowdSec AppSec (WAF)](integrations/appsec.md) | The rule that fired, whether the request was blocked, what matched, the ids that tie it to the log |
 | `pf_drop`, `pf_pass` | [OPNsense](integrations/opnsense.md) | The ports touched, and the connections grouped by interface, protocol and rule |
 | `ssh_failed-auth` and other SSH event types | [sshd](integrations/ssh.md) | The usernames tried, one line per attempt |
+| `postfix`, postscreen events | [Postfix](integrations/postfix.md) (and mailcow) | What the client sent, then the postscreen test or smtpd verdict and reason |
+| `dovecot_logs` | [Dovecot](integrations/dovecot.md) (and mailcow) | The mailboxes tried, protocols and reason, then the result of each attempt |
 
-I run Traefik, the AppSec component and OPNsense, so those are the ones this is actually tested on. The `sshd` parser is written from the collection's documented fields, not from live data.
+Traefik, AppSec, OPNsense, Postfix and Dovecot have tests built from captured alerts. SSH tests use upstream field definitions.
 
 ## What every source gets
 

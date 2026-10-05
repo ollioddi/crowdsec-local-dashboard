@@ -84,7 +84,7 @@ export function Line({
 	tagClassName?: string;
 	trailing?: ReactNode;
 	details?: ReactNode;
-	children: ReactNode;
+	children?: ReactNode;
 }>) {
 	return (
 		<div className="flex flex-wrap items-start gap-x-2 px-2 py-1.5 font-mono text-xs">
@@ -110,27 +110,63 @@ export function Line({
 	);
 }
 
+export function ChipRow({
+	values,
+	emptyLabel = "None recorded",
+}: Readonly<{ values: string[]; emptyLabel?: string }>) {
+	if (values.length === 0) {
+		return <p className="text-xs text-muted-foreground">{emptyLabel}</p>;
+	}
+	return (
+		<div className="flex flex-wrap gap-1">
+			{Array.from(new Set(values)).map((value) => (
+				<span
+					key={value}
+					className="rounded border bg-background px-1.5 py-0.5 font-mono text-[11px]"
+				>
+					{value}
+				</span>
+			))}
+		</div>
+	);
+}
+
 export function Chips({
 	label,
 	values,
 }: Readonly<{ label: string; values: string[] }>) {
 	return (
 		<Section label={label}>
-			{values.length > 0 ? (
-				<div className="flex flex-wrap gap-1">
-					{values.map((value) => (
-						<span
-							key={value}
-							className="rounded border bg-background px-1.5 py-0.5 font-mono text-[11px]"
-						>
-							{value}
-						</span>
-					))}
-				</div>
-			) : (
-				<p className="text-xs text-muted-foreground">None recorded</p>
-			)}
+			<ChipRow values={values} />
 		</Section>
+	);
+}
+
+/** One value per line, or "-" when there are none. */
+export function Lines({
+	values,
+	emptyLabel = "-",
+}: Readonly<{ values: string[] | undefined; emptyLabel?: string }>) {
+	if (!values || values.length === 0) return emptyLabel;
+	return Array.from(new Set(values)).map((value) => <p key={value}>{value}</p>);
+}
+
+/**
+ * Alert-level values beside one column of aligned labels, a row per label,
+ * the same on a phone and on desktop.
+ */
+export function SummaryGrid({
+	rows,
+}: Readonly<{ rows: Array<{ label: string; value: ReactNode }> }>) {
+	return (
+		<dl className="grid grid-cols-[max-content_minmax(0,1fr)] items-baseline gap-x-3 gap-y-1.5 text-xs">
+			{rows.map(({ label, value }) => (
+				<div key={label} className="contents">
+					<dt className="text-muted-foreground">{label}</dt>
+					<dd className="min-w-0 wrap-anywhere">{value}</dd>
+				</div>
+			))}
+		</dl>
 	);
 }
 

@@ -106,6 +106,8 @@ export default defineConfig({
 								{ label: "AppSec WAF", slug: "integrations/appsec" },
 								{ label: "OPNsense", slug: "integrations/opnsense" },
 								{ label: "SSH", slug: "integrations/ssh" },
+								{ label: "Postfix", slug: "integrations/postfix" },
+								{ label: "Dovecot", slug: "integrations/dovecot" },
 							],
 						},
 						{ label: "Troubleshooting", slug: "troubleshooting" },

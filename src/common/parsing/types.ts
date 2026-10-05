@@ -7,6 +7,8 @@ export type IntegrationId =
 	| "opnsense-pf"
 	| "appsec"
 	| "ssh"
+	| "postfix"
+	| "dovecot"
 	| "unknown";
 
 /**
@@ -146,6 +148,31 @@ export type SshEventFields = {
 	service?: string;
 };
 
+/**
+ * One Postfix line, from either postscreen (the pre-SMTP gate) or smtpd.
+ * postscreen lines carry only `violation`; the rest are smtpd's.
+ */
+export type PostfixEventFields = {
+	kind: "postfix";
+	/** `postscreen` or `postfix` (smtpd), as the hub parser names it. */
+	service?: string;
+	/** postscreen's test the client failed, e.g. `PREGREET`. */
+	violation?: string;
+	/** smtpd's category, e.g. `spam-attempt` or `non-smtp-command`. */
+	category?: string;
+	/** smtpd's NOQUEUE verdict, e.g. `reject`. */
+	action?: string;
+	/** Why smtpd refused, e.g. `Relay access denied`. */
+	reason?: string;
+	/** What the client's IP resolved to, or `unknown`. */
+	clientHostname?: string;
+};
+
+export type DovecotEventFields = {
+	kind: "dovecot";
+	loginResult?: string;
+};
+
 export type UnknownEventFields = {
 	kind: "unknown";
 };
@@ -155,6 +182,8 @@ export type EventFields =
 	| PfEventFields
 	| AppsecEventFields
 	| SshEventFields
+	| PostfixEventFields
+	| DovecotEventFields
 	| UnknownEventFields;
 
 // ---------------------------------------------------------------------------
@@ -212,6 +241,23 @@ export type SshAggregates = {
 	usernames?: string[];
 };
 
+export type PostfixAggregates = {
+	kind: "postfix";
+	/** What a postscreen client sent before the greeting. */
+	clientSent?: string[];
+	/** The SMTP stage smtpd lost the connection after, e.g. `AUTH`. */
+	lostAfter?: string[];
+	/** Non-SMTP lines the client sent, e.g. `GET / HTTP/1.1`. */
+	commands?: string[];
+};
+
+export type DovecotAggregates = {
+	kind: "dovecot";
+	mailboxes?: string[];
+	protocols?: string[];
+	loginMessages?: string[];
+};
+
 export type UnknownAggregates = {
 	kind: "unknown";
 };
@@ -221,11 +267,13 @@ export type AlertAggregates =
 	| AppsecAggregates
 	| PfAggregates
 	| SshAggregates
+	| PostfixAggregates
+	| DovecotAggregates
 	| UnknownAggregates;
 
 /**
  * An integration: who produced the log line. Traefik, OPNsense pf, the AppSec
- * WAF, sshd. One integration owns an event's shape end to end: the fields it
+ * WAF, sshd, Postfix. One integration owns an event's shape end to end: the fields it
  * yields, what `entries[]` holds, and how the UI groups it. Adding one means
  * one file written as `{ ... } satisfies Integration<XEventFields, XAggregates>`
  * plus one line in `integrations/integrations.ts`.
