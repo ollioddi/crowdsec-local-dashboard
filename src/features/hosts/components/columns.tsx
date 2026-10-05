@@ -66,8 +66,8 @@ export const columns: DataTableColumnDef<HostWithCount>[] = [
 	},
 	{
 		accessorKey: "totalBans",
-		header: "Total bans",
-		size: 110,
+		header: "Stored decisions",
+		size: 150,
 		meta: { sortable: true, filter: "number" },
 	},
 	{

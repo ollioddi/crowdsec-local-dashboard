@@ -42,6 +42,7 @@ export function HostsPage() {
 			}
 			return incoming;
 		});
+		void queryClient.invalidateQueries({ queryKey: ["host-activity"] });
 	});
 
 	const bannedNow = hosts.filter((h) => h._count.decisions > 0).length;
@@ -52,8 +53,8 @@ export function HostsPage() {
 			<PageHeader
 				title="Hosts"
 				summary={[
-					{ label: "banned now", value: bannedNow, highlight: true },
-					{ label: "repeat offenders", value: repeatOffenders },
+					{ label: "with active decisions", value: bannedNow, highlight: true },
+					{ label: "with multiple decisions", value: repeatOffenders },
 					{ label: "seen", value: hosts.length },
 				]}
 				actions={<LiveIndicator status={status} updatedAt={dataUpdatedAt} />}
@@ -67,7 +68,12 @@ export function HostsPage() {
 				searchPlaceholder="Search IP…"
 				emptyState="No hosts discovered yet."
 				renderSubComponent={(row) => <HostExpandedRow row={row} />}
-				onRefresh={refetch}
+				onRefresh={async () => {
+					await Promise.all([
+						refetch(),
+						queryClient.invalidateQueries({ queryKey: ["host-activity"] }),
+					]);
+				}}
 			/>
 		</div>
 	);

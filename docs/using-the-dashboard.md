@@ -74,7 +74,11 @@ If CrowdSec has already removed it, the dashboard marks the local decision inact
 
 A host with no active decisions but bans on record links through to its expired decisions rather than an empty list.
 
-<img src="images/crowdsec-dashboard-desktop-hosts.png" width="800" alt="The hosts table: IP, active bans, total bans, country, first and last seen"/>
+Expand a host to load its retained history on demand. Scenarios show alert and decision counts, the latest occurrence, and separate active and simulated counts. Select a scenario to open matching decisions, or use the footer actions for all or active decisions.
+
+Observed targets summarize values from stored evidence, counting each value once per alert—not as a request total. Select a chip to read the full value. Larger sets have a bounded browser showing up to the 20 most frequently mentioned values; the distinct count can be higher. The overview refreshes with live updates and manual refreshes.
+
+<img src="images/crowdsec-dashboard-desktop-hosts.png" width="800" alt="An expanded host showing scenarios and observed targets"/>
 
 ASN details come from alerts and require watcher credentials. Country information can also come from the dashboard’s local GeoIP lookup.
 
