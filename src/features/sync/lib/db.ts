@@ -116,6 +116,7 @@ export async function upsertHosts(
 
 				return prisma.host.upsert({
 					where: { ip: d.value },
+					select: { ip: true },
 					create: {
 						ip: d.value,
 						scope: d.scope,
@@ -148,6 +149,7 @@ export async function ensureHostsExist(
 			batch.map((d) =>
 				prisma.host.upsert({
 					where: { ip: d.value },
+					select: { ip: true },
 					create: {
 						ip: d.value,
 						scope: d.scope,
@@ -183,6 +185,7 @@ export async function upsertAlerts(
 		Array.from(uniqueAlerts.values()).map((alert) =>
 			prisma.alert.upsert({
 				where: { id: alert.id },
+				select: { id: true },
 				create: {
 					id: alert.id,
 					createdAt: new Date(alert.created_at),
@@ -214,6 +217,7 @@ export async function upsertActiveDecisions(
 
 				return prisma.decision.upsert({
 					where: { id: d.id },
+					select: { id: true },
 					create: {
 						id: d.id,
 						hostIp: d.value,
@@ -256,6 +260,7 @@ export async function upsertInactiveDecisions(
 			batch.map((d) =>
 				prisma.decision.upsert({
 					where: { id: d.id },
+					select: { id: true },
 					create: {
 						id: d.id,
 						hostIp: d.value,

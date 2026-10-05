@@ -4,6 +4,7 @@ import type {
 	DecisionStreamResponse,
 } from "@/common/crowdsec-lapi/types";
 import { broadcastCurrentState } from "@/common/lib/broadcast-state.server";
+import { optimizeDatabase } from "@/common/lib/db";
 import { env } from "@/common/lib/env";
 import { logger } from "@/common/lib/logging/logger";
 import { buildDecisionToAlertMap } from "./alert-linker";
@@ -120,6 +121,7 @@ async function pruneIfConfigured(): Promise<boolean> {
 	);
 	if (prunedIps.length === 0) return false;
 	await updateHostBanCounts(prunedIps);
+	await optimizeDatabase();
 	return true;
 }
 

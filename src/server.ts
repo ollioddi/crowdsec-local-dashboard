@@ -1,5 +1,5 @@
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
-import { prisma } from "@/common/lib/db";
+import { configureDatabase, prisma } from "@/common/lib/db";
 import { env } from "@/common/lib/env";
 import { errorFields, initLogging, logger } from "@/common/lib/logging/logger";
 import { closeAllSSEConnections } from "@/common/lib/sse.server";
@@ -81,8 +81,13 @@ async function boot() {
 	log.info("CrowdSec Local Dashboard {version} starting", {
 		version: APP_VERSION,
 	});
-	await prisma.$queryRaw`SELECT 1`;
-	log.info("Database reachable", { url: env.DATABASE_URL });
+	const journalMode = await configureDatabase();
+	log.info("Database reachable", { url: env.DATABASE_URL, journalMode });
+	if (journalMode !== "wal") {
+		log.warn("SQLite WAL unavailable, using {journalMode} journal", {
+			journalMode,
+		});
+	}
 	// Alerts stored before entry extraction existed never refresh on their own
 	await repairAlertExtracts();
 	startDecisionPolling();

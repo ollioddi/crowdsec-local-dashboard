@@ -27,6 +27,8 @@ Check the [release notes](https://github.com/ollioddi/crowdsec-local-dashboard/r
 
 The SQLite database lives in a Docker volume (`db`) and survives updates.
 
+SQLite runs in WAL mode, so `app.db-wal` and `app.db-shm` appear next to `app.db` while the server is up. Keep `/data` on a local disk: WAL does not work on network shares such as NFS or SMB, and the server logs a warning when it has to fall back. To back up a running instance, copy all three files together or use `sqlite3 app.db ".backup backup.db"`.
+
 > [!NOTE]
 > While the project is in beta, use tagged releases rather than the `main` branch to avoid unexpected breaking changes.
 
