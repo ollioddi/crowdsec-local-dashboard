@@ -107,7 +107,8 @@ function networkFacts(host: DecisionHost, facts: AlertFacts) {
 function useDecisionAlerts(decision: DecisionWithHost) {
 	return useQuery({
 		queryKey: ["decision-alerts", decision.id],
-		queryFn: () => getDecisionAlertsFn({ data: { decisionId: decision.id } }),
+		queryFn: ({ signal }) =>
+			getDecisionAlertsFn({ data: { decisionId: decision.id }, signal }),
 		enabled: (decision.alertCount ?? 0) > 0,
 		staleTime: Infinity,
 	});
