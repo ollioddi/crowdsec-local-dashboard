@@ -12,7 +12,7 @@ count.txt
 .vinxi
 todos.json
 .demo
-*.db
+*.db*
 *.db-journal
 
 .tanstack

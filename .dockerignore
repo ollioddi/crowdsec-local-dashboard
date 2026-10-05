@@ -3,7 +3,7 @@ node_modules
 .output
 .nitro
 .tanstack
-*.db
+*.db*
 *.db-journal
 *.db-shm
 *.db-wal
