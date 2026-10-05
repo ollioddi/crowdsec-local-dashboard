@@ -102,16 +102,24 @@ export function FilterEditor<TData extends RowData>({
 					</SelectContent>
 				</Select>
 
-				{type === "text" && operator !== "isEmpty" && (
-					<Input
-						autoFocus
-						className="h-8 text-xs"
-						placeholder="Value…"
-						value={String(value)}
-						onChange={(e) => setValue(e.target.value)}
-						onKeyDown={onEnter}
-					/>
-				)}
+				{type === "text" &&
+					operator !== "isEmpty" &&
+					(column.columnDef.meta?.filterSuggestions ? (
+						<TextSuggestions
+							column={column}
+							value={String(value)}
+							onChange={setValue}
+						/>
+					) : (
+						<Input
+							autoFocus
+							className="h-8 text-xs"
+							placeholder="Value…"
+							value={String(value)}
+							onChange={(e) => setValue(e.target.value)}
+							onKeyDown={onEnter}
+						/>
+					))}
 				{type === "number" && (
 					<Input
 						autoFocus
@@ -246,6 +254,50 @@ function FacetPicker<TData extends RowData>({
 							<span className="truncate">{option.value}</span>
 							<span className="ml-auto font-mono text-muted-foreground">
 								{option.count}
+							</span>
+						</CommandItem>
+					))}
+				</CommandGroup>
+			</CommandList>
+		</Command>
+	);
+}
+
+/** Free text plus current facet values; old bookmarked text filters still work. */
+function TextSuggestions<TData extends RowData>({
+	column,
+	value,
+	onChange,
+}: Readonly<{
+	column: DataTableColumn<TData>;
+	value: string;
+	onChange: (value: string) => void;
+}>) {
+	const options = Array.from(column.getFacetedUniqueValues().entries())
+		.filter(([option]) => option != null && String(option) !== "")
+		.sort(([a], [b]) => String(a).localeCompare(String(b)));
+	return (
+		<Command className="rounded-md border">
+			<CommandInput
+				autoFocus
+				placeholder="Value…"
+				value={value}
+				onValueChange={onChange}
+				className="h-8 text-xs"
+			/>
+			<CommandList className="max-h-56">
+				<CommandEmpty>No suggestions. Apply to use your text.</CommandEmpty>
+				<CommandGroup>
+					{options.map(([option, count]) => (
+						<CommandItem
+							key={String(option)}
+							value={String(option)}
+							onSelect={onChange}
+							className="text-xs"
+						>
+							<span className="min-w-0 break-all">{String(option)}</span>
+							<span className="ml-auto shrink-0 font-mono text-muted-foreground">
+								{count}
 							</span>
 						</CommandItem>
 					))}

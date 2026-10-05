@@ -128,7 +128,12 @@ export function createColumns(
 		{
 			accessorKey: "scenario",
 			header: "Scenario",
-			meta: { sortable: true, filter: "text", globalFilter: true },
+			meta: {
+				sortable: true,
+				filter: "text",
+				filterSuggestions: true,
+				globalFilter: true,
+			},
 			cell: ({ row }) => {
 				const { scenario, origin } = row.original;
 				const entryCount = row.original.entryCount ?? 0;
