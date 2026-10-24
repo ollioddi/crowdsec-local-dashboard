@@ -9,7 +9,15 @@ Docker Compose is the recommended approach for homelab use. The container applie
 
 The image runs as the unprivileged `node` user (uid 1000), keeps its own files read-only, and needs no Linux capabilities. The bundled compose file also mounts the root filesystem read-only and drops every capability.
 
-`GET /api/health` answers `200` as soon as the server is up, and the image ships a `HEALTHCHECK` that polls it. It is a liveness check only and never touches the database.
+The image ships a `HEALTHCHECK` that polls `/healthz`. The probe is baked into the image, so updating the image needs no Compose health-check change. The endpoints are:
+
+- `GET /livez`: returns `200` when the HTTP server can respond. Use this for Kubernetes liveness probes.
+- `GET /healthz`: returns `200` after auth initializes, or `503` if auth initialization fails or configured OIDC was skipped. Docker polls this endpoint; it does not repeat OIDC discovery.
+- `GET /readyz`: returns `200` only after startup completes, auth is healthy, the database responds, and configured LAPI sync has succeeded without a current error. It also checks LAPI connectivity and, when watcher credentials are configured, that alerts can be fetched. Use this for Kubernetes readiness probes. It returns `503` during startup, shutdown, or dependency failure. Unconfigured optional integrations do not block readiness.
+
+`/api/health` has been removed.
+
+Failed OIDC discovery can leave the provider unavailable until the dashboard restarts. Once your identity provider is reachable again, run `docker compose up -d dashboard` if the container is stopped, or `docker compose restart dashboard` if it is running, from your deployment's compose directory. Docker marks a failed health check as unhealthy; `restart: unless-stopped` does not restart a container solely because it is unhealthy.
 
 The sidebar shows the running version and, unless `UPDATE_CHECK=false`, the newest release on GitHub.
 

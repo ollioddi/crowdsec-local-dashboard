@@ -12,6 +12,8 @@ Create an OAuth2/OIDC application in your identity provider (Authentik, Keycloak
 
 Note the client ID, client secret and issuer URL it gives you.
 
+The provider must be reachable when Better Auth initializes OIDC discovery. If discovery fails and the provider is skipped, `/healthz` and `/readyz` return `503` and Docker reports the dashboard as unhealthy. Restore the provider's availability, then restart the dashboard to retry discovery. Local username and password login remains available when the OIDC provider is skipped.
+
 ## 2. Set the environment variables
 
 ```env
