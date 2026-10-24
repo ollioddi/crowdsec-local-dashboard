@@ -1,14 +1,12 @@
-# Build output and local state
-node_modules
+# Build output and local state, at any depth
+**/node_modules
 .output
 .nitro
 .tanstack
-*.db*
-*.db-journal
-*.db-shm
-*.db-wal
-.env
-.env.*
+**/*.db*
+**/.env
+**/.env.*
+.demo
 
 # Not needed to build the image
 .git
@@ -16,6 +14,7 @@ node_modules
 .vscode
 .claude
 .cta.json
+docs-site
 readme
 *.md
 LICENSE
