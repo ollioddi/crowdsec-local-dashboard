@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { firstAdminSchema } from "./credentials";
+import { firstAdminSchema, signInSchema } from "./credentials";
 
 describe("credential rules", () => {
 	it("rejects passwords under 12 characters for new accounts", () => {
@@ -27,5 +27,18 @@ describe("credential rules", () => {
 			password: "a-long-enough-passphrase",
 		});
 		expect(result.success).toBe(true);
+	});
+
+	it("still lets older short passwords sign in", () => {
+		expect(
+			signInSchema.safeParse({ username: "old", password: "abcd" }).success,
+		).toBe(true);
+	});
+
+	it("caps sign-in input size", () => {
+		expect(
+			signInSchema.safeParse({ username: "old", password: "x".repeat(129) })
+				.success,
+		).toBe(false);
 	});
 });

@@ -1,17 +1,19 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
 	user: { create: vi.fn(), findUnique: vi.fn() },
 	account: { create: vi.fn() },
 }));
 
-vi.mock("@/common/lib/db", () => ({ prisma: db }));
-vi.mock("@/common/lib/env", () => ({
-	env: {
-		BETTER_AUTH_SECRET: "a-long-test-secret-for-public-signup-regression",
-		BETTER_AUTH_URL: "http://localhost:3000",
-	},
+const testEnv = vi.hoisted(() => ({
+	BETTER_AUTH_SECRET: "a-long-test-secret-for-public-signup-regression",
+	BETTER_AUTH_URL: "http://localhost:3000",
+	SIGN_IN_RATE_LIMIT_MAX: 5,
+	SIGN_IN_RATE_LIMIT_WINDOW: 60,
 }));
+
+vi.mock("@/common/lib/db", () => ({ prisma: db }));
+vi.mock("@/common/lib/env", () => ({ env: testEnv }));
 vi.mock("better-auth/adapters/prisma", async () => {
 	const { memoryAdapter } = await import("better-auth/adapters/memory");
 	return {
@@ -74,5 +76,77 @@ describe("local account registration", () => {
 				password: "long-enough-password",
 			}),
 		).toBe(true);
+	});
+});
+
+describe("sign-in rate limit", () => {
+	// 401: attempt allowed, wrong password. 429: blocked by the rate limit.
+	const MAX = testEnv.SIGN_IN_RATE_LIMIT_MAX;
+	const ALLOWED: number[] = Array(MAX).fill(401);
+
+	// A failed sign-in from the given IP
+	const signIn = async (ip: string) =>
+		auth.handler(
+			new Request("http://localhost:3000/api/auth/sign-in/username", {
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+					origin: "http://localhost:3000",
+					"x-forwarded-for": ip,
+				},
+				body: JSON.stringify({
+					username: "nobody",
+					password: "wrong-password-guess",
+				}),
+			}),
+		);
+
+	const statusesFor = async (ip: string, attempts: number) => {
+		const statuses: number[] = [];
+		for (let i = 0; i < attempts; i++) statuses.push((await signIn(ip)).status);
+		return statuses;
+	};
+
+	// Counters carry over between tests, so each test uses its own IP
+	afterEach(() => vi.useRealTimers());
+
+	it("lets exactly the allowed attempts through, then refuses the next", async () => {
+		expect(await statusesFor("203.0.113.1", MAX + 1)).toEqual([
+			...ALLOWED,
+			429,
+		]);
+	});
+
+	it("does not limit a different IP", async () => {
+		expect(await statusesFor("203.0.113.2", MAX + 1)).toEqual([
+			...ALLOWED,
+			429,
+		]);
+
+		// Another IP is not affected
+		expect(await statusesFor("203.0.113.3", 1)).toEqual([401]);
+	});
+
+	it("lets the IP in again once X-Retry-After has passed", async () => {
+		vi.useFakeTimers({ toFake: ["Date"] });
+		const ip = "203.0.113.4";
+		expect(await statusesFor(ip, MAX)).toEqual(ALLOWED);
+
+		const limited = await signIn(ip);
+		expect(limited.status).toBe(429);
+		const retryAfterSeconds = Number(limited.headers.get("X-Retry-After"));
+		// Never longer than the window
+		expect(retryAfterSeconds).toBeGreaterThan(0);
+		expect(retryAfterSeconds).toBeLessThanOrEqual(
+			testEnv.SIGN_IN_RATE_LIMIT_WINDOW,
+		);
+
+		// One second early: still blocked
+		vi.advanceTimersByTime((retryAfterSeconds - 1) * 1000);
+		expect((await signIn(ip)).status).toBe(429);
+
+		// On time: allowed again
+		vi.advanceTimersByTime(1000);
+		expect((await signIn(ip)).status).toBe(401);
 	});
 });

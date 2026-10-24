@@ -10,6 +10,9 @@ export const env = createEnv({
 		// would be incorrect (e.g. BETTER_AUTH_URL=https://dashboard.example.com).
 		BETTER_AUTH_URL: z.url().optional(),
 		BETTER_AUTH_SECRET: z.string().min(1),
+		// Sign-in attempts per IP, per window in seconds
+		SIGN_IN_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(5),
+		SIGN_IN_RATE_LIMIT_WINDOW: z.coerce.number().int().positive().default(60),
 		LAPI_URL: z.url().optional(),
 		LAPI_MACHINE_ID: z.string().min(1).optional(),
 		LAPI_MACHINE_PASSWORD: z.string().min(1).optional(),

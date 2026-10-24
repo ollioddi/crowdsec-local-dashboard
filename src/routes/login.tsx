@@ -1,14 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getOidcConfigFn, isFirstSetupFn } from "@/common/auth/auth.functions";
+import {
+	getOidcConfigFn,
+	getSignInWindowFn,
+	isFirstSetupFn,
+} from "@/common/auth/auth.functions";
 import { LoginPage } from "@/features/auth/pages/login-page";
 
 export const Route = createFileRoute("/login")({
 	component: LoginPage,
 	loader: async () => {
-		const [isFirstSetup, oidcConfig] = await Promise.all([
+		const [isFirstSetup, oidcConfig, signInWindowSeconds] = await Promise.all([
 			isFirstSetupFn(),
 			getOidcConfigFn(),
+			getSignInWindowFn(),
 		]);
-		return { isFirstSetup, oidcConfig };
+		return { isFirstSetup, oidcConfig, signInWindowSeconds };
 	},
 });
