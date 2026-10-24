@@ -59,6 +59,8 @@ export const auth = betterAuth({
 		// check compares against the container's own URL and rejects logins.
 		trustedProxyHeaders: true,
 		useSecureCookies,
+		// See withPeerAddress in server.ts
+		ipAddress: { trustedProxies: env.TRUSTED_PROXIES },
 	},
 	emailAndPassword: {
 		enabled: true,

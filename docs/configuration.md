@@ -14,6 +14,7 @@ Every setting is an environment variable. The shipped [`.env.example`](../.env.e
 | `BETTER_AUTH_URL` | | _(inferred from the proxy headers)_ | The public URL of the dashboard, e.g. `https://dashboard.example.com`. Leave it unset for plain HTTP at `http://<host>:3000`. Set it when you serve over HTTPS, so the session cookie is marked `Secure`. The flag is picked at startup, so without this it stays unmarked even behind an HTTPS proxy, and the dashboard warns when it notices. Also set it if logins fail with "Invalid origin". |
 | `SIGN_IN_RATE_LIMIT_MAX` | | `5` | Password sign-in attempts allowed per client IP in each window. Further attempts get "Too many sign-in attempts" and a countdown. |
 | `SIGN_IN_RATE_LIMIT_WINDOW` | | `60` | Length of that window in seconds. |
+| `TRUSTED_PROXIES` | | loopback and private ranges | Comma-separated IPs or CIDR ranges of your reverse proxies. Sign-in is rate limited per client IP, and the dashboard only believes `X-Forwarded-For` when the connection comes from one of these. The default covers a proxy on the same host or LAN. Narrow it, e.g. to your Docker network `172.18.0.0/16`, if untrusted machines share those ranges. |
 
 ## CrowdSec LAPI
 

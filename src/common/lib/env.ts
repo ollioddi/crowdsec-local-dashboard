@@ -13,6 +13,18 @@ export const env = createEnv({
 		// Sign-in attempts per IP, per window in seconds
 		SIGN_IN_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(5),
 		SIGN_IN_RATE_LIMIT_WINDOW: z.coerce.number().int().positive().default(60),
+		// Proxies allowed to set X-Forwarded-For. Default: loopback and private ranges
+		TRUSTED_PROXIES: z
+			.string()
+			.default(
+				"127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,::1/128,fc00::/7",
+			)
+			.transform((value) =>
+				value
+					.split(",")
+					.map((entry) => entry.trim())
+					.filter(Boolean),
+			),
 		LAPI_URL: z.url().optional(),
 		LAPI_MACHINE_ID: z.string().min(1).optional(),
 		LAPI_MACHINE_PASSWORD: z.string().min(1).optional(),
