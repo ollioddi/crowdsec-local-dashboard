@@ -44,7 +44,7 @@ The remaining settings can stay at their defaults. See [Configuration](configura
 docker compose up -d
 ```
 
-Open `http://<dashboard-host>:3000`, or `http://localhost:3000` if it is running on your computer. Create the first account when prompted.
+Open `http://<dashboard-host>:3000`, or `http://localhost:3000` if it is running on your computer. Create the first account when prompted. The form asks for a one-time setup code, so nobody else who finds a fresh instance can claim it. The dashboard prints the code to its log on every start until the first account exists: `docker compose logs dashboard | grep "setup code"`. With `pnpm dev` it appears in the terminal.
 
 The first sync starts automatically. If it fails, check the sync banner and the container logs:
 

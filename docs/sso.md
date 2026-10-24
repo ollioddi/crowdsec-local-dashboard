@@ -33,7 +33,7 @@ OIDC_AUTO_REDIRECT=true
 ```
 
 > [!NOTE]
-> `OIDC_AUTO_REDIRECT` is ignored on first launch, so the admin account can still be created with a username and password.
+> `OIDC_AUTO_REDIRECT` is ignored on first launch, so the admin account can still be created with a username and password. SSO cannot create accounts until that first account exists.
 
 > [!IMPORTANT]
 > Upgrading an SSO setup from 0.3 or earlier: the redirect URI changed to `/api/auth/callback/oidc`. The old `/api/auth/oauth2/callback` route no longer exists, so update it with your provider or sign-in breaks.
