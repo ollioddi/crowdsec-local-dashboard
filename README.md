@@ -132,7 +132,11 @@ See [Configuration](docs/configuration.md) for every variable, and [LAPI setup](
 docker compose up -d
 ```
 
-Open [http://localhost:3000](http://localhost:3000). On first launch you will be prompted to create your admin account.
+Open [http://localhost:3000](http://localhost:3000). On first launch you create your admin account with a one-time setup code, which the dashboard prints to its log:
+
+```sh
+docker compose logs dashboard | grep "setup code"
+```
 
 ---
 
