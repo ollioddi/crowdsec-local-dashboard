@@ -98,6 +98,16 @@ export const auth = betterAuth({
 		log: (level, message, ...args) => log[level](message, { args }),
 	},
 	databaseHooks: {
+		user: {
+			create: {
+				// Block SSO sign-up until first-run setup is done
+				before: async () => {
+					if ((await prisma.user.count()) > 0) return;
+					log.warn("SSO sign-up refused: finish first-run setup first");
+					return false;
+				},
+			},
+		},
 		session: {
 			create: {
 				after: async (session) => {
