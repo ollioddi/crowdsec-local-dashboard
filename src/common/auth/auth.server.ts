@@ -54,6 +54,8 @@ export const auth = betterAuth({
 	// an internal URL (e.g. http://localhost:3000) instead of the external one.
 	secret: env.BETTER_AUTH_SECRET,
 	database: prismaAdapter(prisma, { provider: "sqlite" }),
+	// Unused, and it tells anyone whether a username exists
+	disabledPaths: ["/is-username-available"],
 	advanced: {
 		// The dashboard runs behind a reverse proxy; without this the origin
 		// check compares against the container's own URL and rejects logins.

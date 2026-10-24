@@ -150,3 +150,17 @@ describe("sign-in rate limit", () => {
 		expect((await signIn(ip)).status).toBe(401);
 	});
 });
+
+it("does not tell anonymous visitors which usernames exist", async () => {
+	const response = await auth.handler(
+		new Request("http://localhost:3000/api/auth/is-username-available", {
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+				origin: "http://localhost:3000",
+			},
+			body: JSON.stringify({ username: "admin" }),
+		}),
+	);
+	expect(response.status).toBe(404);
+});
