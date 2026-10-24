@@ -9,7 +9,12 @@ export const env = createEnv({
 		// Set this only if you are behind a reverse proxy where the inferred origin
 		// would be incorrect (e.g. BETTER_AUTH_URL=https://dashboard.example.com).
 		BETTER_AUTH_URL: z.url().optional(),
-		BETTER_AUTH_SECRET: z.string().min(1),
+		BETTER_AUTH_SECRET: z
+			.string()
+			.min(
+				32,
+				"must be at least 32 characters. Generate one with: openssl rand -base64 32",
+			),
 		// Sign-in attempts per IP, per window in seconds
 		SIGN_IN_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(5),
 		SIGN_IN_RATE_LIMIT_WINDOW: z.coerce.number().int().positive().default(60),
