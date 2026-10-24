@@ -5,6 +5,8 @@ import { logger } from "@/common/lib/logging/logger";
 import type { AlertDetail } from "@/features/decisions/api/alert-detail";
 import type { DecisionsPayload } from "@/features/decisions/api/decisions.types";
 
+export const decisionIdSchema = z.number().int().positive();
+
 /**
  * Get all decisions from the database.
  * The background sync loop keeps the DB in sync with LAPI.
@@ -27,7 +29,7 @@ export const getDecisionsFn = createServerFn({ method: "GET" })
  */
 export const getDecisionAlertsFn = createServerFn({ method: "GET" })
 	.middleware([authMiddleware])
-	.validator(z.object({ decisionId: z.number() }))
+	.validator(z.object({ decisionId: decisionIdSchema }))
 	.handler(async ({ data }): Promise<AlertDetail[]> => {
 		const { prisma } = await import("@/common/lib/db");
 		const { alertDetailFromRow } = await import(
@@ -46,7 +48,7 @@ export const getDecisionAlertsFn = createServerFn({ method: "GET" })
  */
 export const deleteDecisionFn = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
-	.validator(z.object({ id: z.number() }))
+	.validator(z.object({ id: decisionIdSchema }))
 	.handler(async ({ data, context }) => {
 		const { prisma } = await import("@/common/lib/db");
 		const { getLapiClient } = await import(
@@ -57,15 +59,21 @@ export const deleteDecisionFn = createServerFn({ method: "POST" })
 		);
 		const log = logger("decisions");
 
+		// Only decisions shown in the dashboard can be deleted
 		const decision = await prisma.decision.findUnique({
 			where: { id: data.id },
 			select: { hostIp: true },
 		});
+		if (!decision) {
+			throw new Error(`Decision ${data.id} is not in the dashboard`);
+		}
+		const { user } = context.session;
 		const result = await getLapiClient().deleteDecisionById(data.id);
 		log.info("Decision {id} for {ip} removed by {by}", {
 			id: data.id,
-			ip: decision?.hostIp,
-			by: context.session.user.name,
+			ip: decision.hostIp,
+			by: user.username ?? user.id,
+			userId: user.id,
 			stillInLapi: result.deleted,
 		});
 
