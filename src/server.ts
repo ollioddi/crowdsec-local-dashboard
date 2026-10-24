@@ -1,4 +1,5 @@
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
+import { announceSetupCode } from "@/common/auth/setup-code.server";
 import { withPeerAddress } from "@/common/lib/client-address.server";
 import { configureDatabase, prisma } from "@/common/lib/db";
 import { env } from "@/common/lib/env";
@@ -90,6 +91,7 @@ async function boot() {
 			journalMode,
 		});
 	}
+	await announceSetupCode();
 	// Alerts stored before entry extraction existed never refresh on their own
 	await repairAlertExtracts();
 	startDecisionPolling();
