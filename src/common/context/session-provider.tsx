@@ -1,11 +1,11 @@
 import { createContext, type ReactNode, useContext } from "react";
-import type { Session } from "@/common/auth/auth.server";
+import type { ClientSession } from "@/common/auth/auth.functions";
 
-const SessionContext = createContext<Session | null>(null);
+const SessionContext = createContext<ClientSession | null>(null);
 
 interface SessionProviderProps {
 	children: ReactNode;
-	session: Session;
+	session: ClientSession;
 }
 
 export function SessionProvider({
@@ -22,7 +22,7 @@ export function SessionProvider({
 /**
  * Hook to access the current session, or null if outside SessionProvider.
  */
-export function useOptionalSession(): Session | null {
+export function useOptionalSession(): ClientSession | null {
 	return useContext(SessionContext);
 }
 
