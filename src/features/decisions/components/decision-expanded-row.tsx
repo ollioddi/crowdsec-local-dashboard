@@ -256,7 +256,7 @@ function Actions({
 				asChild
 			>
 				<a
-					href={`https://app.crowdsec.net/cti/${decision.hostIp}`}
+					href={`https://app.crowdsec.net/cti/${encodeURIComponent(decision.hostIp)}`}
 					target="_blank"
 					rel="noreferrer"
 				>

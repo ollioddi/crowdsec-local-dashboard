@@ -204,7 +204,7 @@ export function createColumns(
 							asChild
 						>
 							<a
-								href={`https://app.crowdsec.net/cti/${decision.hostIp}`}
+								href={`https://app.crowdsec.net/cti/${encodeURIComponent(decision.hostIp)}`}
 								target="_blank"
 								rel="noreferrer"
 								aria-label={`View ${decision.hostIp} in CrowdSec CTI`}
