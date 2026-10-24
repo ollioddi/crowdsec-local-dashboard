@@ -7,19 +7,26 @@ import { errorFields, logger } from "@/common/lib/logging/logger";
 
 const log = logger("auth");
 
-/**
- * Server function to get the current session.
- * Returns the session if authenticated, null otherwise.
- */
+/** Sent to the browser. No session token. */
+export type ClientSession = {
+	user: Pick<
+		Session["user"],
+		"id" | "name" | "username" | "displayUsername" | "email"
+	>;
+};
+
+/** The signed-in user, or null. */
 export const getSessionFn = createServerFn({ method: "GET" }).handler(
-	async (): Promise<Session | null> => {
+	async (): Promise<ClientSession | null> => {
 		const { auth, warnIfCookieNotSecure } = await import(
 			"@/common/auth/auth.server"
 		);
 		const headers = getRequestHeaders();
 		warnIfCookieNotSecure(headers);
 		const session = await auth.api.getSession({ headers });
-		return session;
+		if (!session) return null;
+		const { id, name, username, displayUsername, email } = session.user;
+		return { user: { id, name, username, displayUsername, email } };
 	},
 );
 
