@@ -1,4 +1,3 @@
-import { errorFields, logger } from "@/common/lib/logging/logger";
 import {
 	type AlertFilters,
 	type ConnectionHealth,
@@ -10,8 +9,6 @@ import {
 	LapiConfigSchema,
 	type WatcherAuthResponse,
 } from "./types";
-
-const log = logger("lapi");
 
 /** Query filters accepted by `GET /v1/decisions`. All fields are optional. */
 export type DecisionFilters = {
@@ -153,7 +150,7 @@ export class LapiClient {
 
 	/**
 	 * Verifies connectivity and API key validity by issuing a HEAD request.
-	 * Never throws — returns a structured `ConnectionHealth` result instead.
+	 * Never throws or logs; the caller decides how loudly to report a failure.
 	 */
 	public async checkConnectionHealth(): Promise<ConnectionHealth> {
 		try {
@@ -172,11 +169,7 @@ export class LapiClient {
 			}
 
 			return { status: "OK", error: null };
-		} catch (error) {
-			log.error(
-				"Could not connect to LAPI: {errorMessage}",
-				errorFields(error),
-			);
+		} catch {
 			return { status: "ERROR", error: "SECURITY_ENGINE_UNREACHABLE" };
 		}
 	}
