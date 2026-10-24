@@ -4,6 +4,7 @@ import { withPeerAddress } from "@/common/lib/client-address.server";
 import { configureDatabase, prisma } from "@/common/lib/db";
 import { env } from "@/common/lib/env";
 import { errorFields, initLogging, logger } from "@/common/lib/logging/logger";
+import { applyResponseHeaders } from "@/common/lib/response-headers.server";
 import { setServerReady } from "@/common/lib/server-state.server";
 import { closeAllSSEConnections } from "@/common/lib/sse.server";
 import { APP_VERSION } from "@/common/lib/version";
@@ -146,7 +147,7 @@ if (!globalThis.__serverBooted) {
 }
 
 export default createServerEntry({
-	fetch(request) {
-		return handler.fetch(withPeerAddress(request));
+	async fetch(request) {
+		return applyResponseHeaders(await handler.fetch(withPeerAddress(request)));
 	},
 });
