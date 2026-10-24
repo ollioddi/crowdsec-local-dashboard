@@ -4,6 +4,7 @@ import { firstAdminSchema, signInSchema } from "./credentials";
 describe("credential rules", () => {
 	it("rejects passwords under 12 characters for new accounts", () => {
 		const result = firstAdminSchema.safeParse({
+			setupCode: "ABCD-EFGH-JKMN",
 			username: "admin",
 			password: "short-pass",
 		});
@@ -14,6 +15,7 @@ describe("credential rules", () => {
 		"rejects the username %j",
 		(username) => {
 			const result = firstAdminSchema.safeParse({
+				setupCode: "ABCD-EFGH-JKMN",
 				username,
 				password: "a-long-enough-passphrase",
 			});
@@ -23,6 +25,7 @@ describe("credential rules", () => {
 
 	it("accepts mixed case usernames, which setup lowercases", () => {
 		const result = firstAdminSchema.safeParse({
+			setupCode: "ABCD-EFGH-JKMN",
 			username: "Oliver.R_1",
 			password: "a-long-enough-passphrase",
 		});

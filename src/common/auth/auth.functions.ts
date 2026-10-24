@@ -3,7 +3,7 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 import type { Session } from "@/common/auth/auth.server";
 import { firstAdminSchema } from "@/common/auth/credentials";
 import { SETUP_EMAIL_DOMAIN } from "@/common/auth/email-domains";
-import { logger } from "@/common/lib/logging/logger";
+import { errorFields, logger } from "@/common/lib/logging/logger";
 
 const log = logger("auth");
 
@@ -74,17 +74,32 @@ export const createFirstAdminFn = createServerFn({ method: "POST" })
 		const { createUserAccount } = await import(
 			"@/common/auth/create-user-account.server"
 		);
+		const { claimSetupCode } = await import("@/common/auth/setup-code.server");
 
 		if ((await prisma.user.count()) > 0) {
 			return { error: "Setup is already complete. Sign in instead." };
 		}
+		const restoreCode = claimSetupCode(data.setupCode);
+		if (!restoreCode) {
+			log.warn("First account refused: wrong setup code");
+			return { error: "That setup code is not right. Check the log again." };
+		}
 
 		const username = data.username.toLowerCase();
-		await createUserAccount(
-			username,
-			data.password,
-			`${username}${SETUP_EMAIL_DOMAIN}`,
-		);
+		try {
+			await createUserAccount(
+				username,
+				data.password,
+				`${username}${SETUP_EMAIL_DOMAIN}`,
+			);
+		} catch (error) {
+			restoreCode();
+			log.error(
+				"First account could not be created: {errorMessage}",
+				errorFields(error),
+			);
+			return { error: "The account could not be created. Try again." };
+		}
 		log.info("{username} is the first user and becomes admin", { username });
 		return { username };
 	});

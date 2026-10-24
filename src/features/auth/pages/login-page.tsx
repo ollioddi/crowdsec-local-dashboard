@@ -1,11 +1,13 @@
 import { useForm } from "@tanstack/react-form-start";
 import { useLoaderData, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
+import z from "zod";
 import { createFirstAdminFn } from "@/common/auth/auth.functions";
 import { authClient } from "@/common/auth/auth-client";
 import {
 	firstAdminSchema,
 	PASSWORD_HINT,
+	SETUP_CODE_HINT,
 	signInSchema,
 	USERNAME_HINT,
 } from "@/common/auth/credentials";
@@ -30,6 +32,9 @@ import { useTitle } from "@/common/hooks/use-title";
 import { describeRequestFailure } from "@/common/lib/request-error";
 import { useSignInCooldown } from "@/features/auth/hooks/use-sign-in-cooldown";
 
+// The setup code field is hidden when signing in
+const signInFormSchema = signInSchema.extend({ setupCode: z.string() });
+
 const signInWithOidc = () =>
 	authClient.signIn.social({ provider: "oidc", callbackURL: "/" });
 
@@ -48,14 +53,15 @@ export const LoginPage = () => {
 
 	const form = useForm({
 		defaultValues: {
+			setupCode: "",
 			username: "",
 			password: "",
 		},
 		validators: isFirstSetup
 			? { onChange: firstAdminSchema, onSubmit: firstAdminSchema }
-			: { onSubmit: signInSchema },
+			: { onSubmit: signInFormSchema },
 		onSubmit: async ({ value }) => {
-			const failure = await submit(value.username.trim(), value.password);
+			const failure = await submit(value);
 			if (failure === null) {
 				router.navigate({ to: "/" });
 			} else if ("retryAt" in failure) {
@@ -68,19 +74,25 @@ export const LoginPage = () => {
 	});
 	const cooldown = useSignInCooldown();
 
-	const submit = async (
-		username: string,
-		password: string,
-	): Promise<SignInFailure | null> => {
+	const submit = async (value: {
+		setupCode: string;
+		username: string;
+		password: string;
+	}): Promise<SignInFailure | null> => {
+		const username = value.username.trim();
 		if (!isFirstSetup) {
-			return signInWithPassword(username, password, signInWindowSeconds);
+			return signInWithPassword(username, value.password, signInWindowSeconds);
 		}
 		try {
 			const result = await createFirstAdminFn({
-				data: { username, password },
+				data: { ...value, username },
 			});
 			if (result.error !== undefined) return { error: result.error };
-			return signInWithPassword(result.username, password, signInWindowSeconds);
+			return signInWithPassword(
+				result.username,
+				value.password,
+				signInWindowSeconds,
+			);
 		} catch (error) {
 			return { error: describeRequestFailure(error) };
 		}
@@ -113,6 +125,36 @@ export const LoginPage = () => {
 							}}
 						>
 							<FieldGroup>
+								{isFirstSetup && (
+									<form.Field name="setupCode">
+										{(field) => {
+											const isInvalid =
+												field.state.meta.isTouched && !field.state.meta.isValid;
+											return (
+												<Field data-invalid={isInvalid}>
+													<FieldLabel htmlFor={field.name}>
+														Setup code
+													</FieldLabel>
+													<Input
+														id={field.name}
+														name={field.name}
+														value={field.state.value}
+														onBlur={field.handleBlur}
+														onChange={(e) => field.handleChange(e.target.value)}
+														aria-invalid={isInvalid}
+														placeholder="ABCD-EFGH-JKMN"
+														autoComplete="one-time-code"
+														className="font-mono uppercase"
+													/>
+													<FieldDescription>{SETUP_CODE_HINT}</FieldDescription>
+													{isInvalid && (
+														<FieldError errors={field.state.meta.errors} />
+													)}
+												</Field>
+											);
+										}}
+									</form.Field>
+								)}
 								<form.Field name="username">
 									{(field) => {
 										const isInvalid =

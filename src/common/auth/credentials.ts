@@ -37,7 +37,11 @@ export const signInSchema = z.object({
 		.max(PASSWORD_MAX_LENGTH, "Invalid username or password"),
 });
 
+export const SETUP_CODE_HINT =
+	"Printed in the dashboard's log when it starts, e.g. docker logs crowdsec-dashboard.";
+
 export const firstAdminSchema = z.object({
+	setupCode: z.string().trim().min(1, "Setup code is required").max(32),
 	username: usernameSchema,
 	password: newPasswordSchema,
 });
