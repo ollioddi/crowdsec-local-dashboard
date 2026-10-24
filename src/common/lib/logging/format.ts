@@ -93,7 +93,18 @@ export function formatHuman(entry: LogEntry, options: HumanOptions): string {
 		options.stacks && typeof entry.fields.stack === "string"
 			? `\n${entry.fields.stack}`
 			: "";
-	return `${time} ${level} ${logger} ${entry.message}${data}${stack}`;
+	return `${time} ${level} ${logger} ${escapeControl(entry.message)}${data}${stack}`;
+}
+
+// biome-ignore lint/suspicious/noControlCharactersInRegex: matching them is the point
+const CONTROL_CHARS = /[\u0000-\u001f\u007f-\u009f]/g;
+
+/** Escapes control characters, so visitor text can't send terminal codes. */
+function escapeControl(text: string): string {
+	return text.replace(
+		CONTROL_CHARS,
+		(char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`,
+	);
 }
 
 function renderPairs(fields: Fields, alreadyShown: Set<string>): string {
@@ -109,10 +120,11 @@ function renderPairs(fields: Fields, alreadyShown: Set<string>): string {
 /** Quoted only when a string would otherwise run into the next pair. */
 export function renderValue(value: unknown): string {
 	if (typeof value === "string") {
-		return /[\s"]/.test(value) ? JSON.stringify(value) : value;
+		const quoted = /[\s"]/.test(value) ? JSON.stringify(value) : value;
+		return escapeControl(quoted);
 	}
 	const isObject = typeof value === "object" && value !== null;
-	return isObject ? JSON.stringify(value) : String(value);
+	return escapeControl(isObject ? JSON.stringify(value) : String(value));
 }
 
 const MS_PER_MINUTE = 60_000;
