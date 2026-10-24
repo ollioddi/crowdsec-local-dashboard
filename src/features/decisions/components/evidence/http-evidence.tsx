@@ -85,9 +85,10 @@ function RequestLine({ event }: Readonly<{ event: EventOf<"traefik-http"> }>) {
 				</>
 			}
 		>
+			{/* Visitor text: bdi stops a bidi override in one reordering the other */}
 			<p className="break-all">
-				{fqdn && <span className="text-muted-foreground">{fqdn}</span>}
-				{fields.path ?? "-"}
+				{fqdn && <bdi className="text-muted-foreground">{fqdn}</bdi>}
+				<bdi>{fields.path ?? "-"}</bdi>
 			</p>
 		</Line>
 	);

@@ -45,7 +45,9 @@ export function Labeled({
 	return (
 		<span className={cn("inline-flex min-w-0 max-w-full gap-1", className)}>
 			<span className="shrink-0 text-muted-foreground">{label}</span>
-			<span className="min-w-0 wrap-anywhere">{children}</span>
+			<span className="min-w-0 wrap-anywhere [unicode-bidi:isolate]">
+				{children}
+			</span>
 		</span>
 	);
 }
