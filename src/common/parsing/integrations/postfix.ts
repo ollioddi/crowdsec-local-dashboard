@@ -5,13 +5,20 @@ import type {
 	PostfixEventFields,
 } from "../types";
 
-/**
- * What the client sent, without the line ending Postfix logs escaped as a
- * literal `\r` or `\n`.
- */
+/** Drops a trailing escaped `\r` or `\n`. A loop, because a regex was slow on long input. */
+function stripEscapedEndings(line: string): string {
+	let end = line.length;
+	while (end >= 2 && /[rn]/.test(line[end - 1]) && line[end - 2] === "\\") {
+		end -= 1;
+		while (end > 0 && line[end - 1] === "\\") end -= 1;
+	}
+	return line.slice(0, end);
+}
+
+/** What the client sent, without its escaped line ending. */
 function clientLines(alertMeta: MetaView, key: string): string[] | undefined {
 	return alertMeta.list(key)?.map((line) => {
-		const withoutEnding = line.replace(/(\\+[rn])+$/, "");
+		const withoutEnding = stripEscapedEndings(line);
 		// A line break can be the entire pre-greeting violation. Keep it visible.
 		return withoutEnding || line;
 	});
