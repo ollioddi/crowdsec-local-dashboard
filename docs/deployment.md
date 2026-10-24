@@ -42,9 +42,25 @@ SQLite runs in WAL mode, so `app.db-wal` and `app.db-shm` appear next to `app.db
 
 ## Behind a reverse proxy
 
-For HTTPS, set `BETTER_AUTH_URL` to the public URL so the session cookie is marked `Secure`. If sign-in fails with “Invalid origin”, check that this URL matches the address used in the browser.
+Set `BETTER_AUTH_URL` to the public URL for any proxied deployment. It marks the session cookie `Secure` over HTTPS and fixes the origin that sign-in checks against. If sign-in fails with “Invalid origin”, check that this URL matches the address used in the browser.
 
 The dashboard holds a Server-Sent Events stream open for live updates and sends a `ping` event every 20 seconds. Turn response buffering off for it and keep the read timeout above 20 seconds, or the Live indicator flaps as the proxy drops the connection.
+
+### Exposing the dashboard
+
+Once a proxy is in front, make the proxy the only way in:
+
+- Publish the port on loopback only (`127.0.0.1:3000:3000`), or drop `ports:` and put the dashboard on the proxy's Docker network. Docker-published ports bypass ufw and firewalld, so `3000:3000` stays reachable from the network even when the firewall says otherwise.
+- Never port-forward `3000` from your router. Plain HTTP skips TLS, the `Secure` cookie and anything the proxy enforces.
+- Do not route `/livez`, `/healthz` and `/readyz` publicly. Docker and Kubernetes reach them directly, and `/readyz` checks LAPI on every request.
+- Set HSTS and a request body limit at the proxy. The dashboard never receives large uploads, so 1 MB is plenty:
+  - nginx: `client_max_body_size 1m;` (also the nginx default)
+  - Caddy: `request_body { max_size 1MB }`
+  - Traefik: the `buffering` middleware with `maxRequestBodyBytes: 1048576`. It also buffers responses, which breaks the live stream, so attach it to a router that excludes `/sse/`.
+
+### LAPI over HTTPS
+
+The bouncer key and machine password travel to LAPI on every sync. If LAPI is not on the same host, serve it over HTTPS and use an `https://` `LAPI_URL`. For a certificate from a private CA, mount the CA file and point `NODE_EXTRA_CA_CERTS` at it.
 
 ## Upgrading from 0.5 or earlier
 
