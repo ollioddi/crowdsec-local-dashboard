@@ -13,7 +13,7 @@ The image ships a `HEALTHCHECK` that polls `/healthz`. The probe is baked into t
 
 - `GET /livez`: returns `200` when the HTTP server can respond. Use this for Kubernetes liveness probes.
 - `GET /healthz`: returns `200` after auth initializes, or `503` if auth initialization fails or configured OIDC was skipped. Docker polls this endpoint; it does not repeat OIDC discovery.
-- `GET /readyz`: returns `200` only after startup completes, auth is healthy, the database responds, and configured LAPI sync has succeeded without a current error. It also checks LAPI connectivity and, when watcher credentials are configured, that alerts can be fetched. Use this for Kubernetes readiness probes. It returns `503` during startup, shutdown, or dependency failure. Unconfigured optional integrations do not block readiness.
+- `GET /readyz`: returns `200` only after startup completes, auth is healthy, the database responds, and configured LAPI sync has succeeded without a current error. It also checks LAPI connectivity and, when watcher credentials are configured, that alerts can be fetched. The LAPI result is reused for 30 seconds, so probing it often does not add LAPI traffic. Use this for Kubernetes readiness probes. It returns `503` during startup, shutdown, or dependency failure. Unconfigured optional integrations do not block readiness.
 
 `/api/health` has been removed.
 

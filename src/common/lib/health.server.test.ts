@@ -99,7 +99,26 @@ beforeEach(async () => {
 	vi.stubGlobal("fetch", mocks.fetch);
 });
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+	vi.useRealTimers();
+	vi.unstubAllGlobals();
+});
+
+function syncHealthy() {
+	Object.assign(mocks.sync, {
+		configured: true,
+		lastSuccessAt: new Date().toISOString(),
+	});
+}
+
+/** Only Date is faked; better-auth's own timers keep running. */
+function startClock() {
+	vi.useFakeTimers({ toFake: ["Date"] });
+}
+
+function passProbeWindow() {
+	vi.setSystemTime(Date.now() + 30_001);
+}
 
 function configureOidc() {
 	Object.assign(mocks.env, {
@@ -230,26 +249,23 @@ describe("dashboard readiness", () => {
 	);
 
 	it("checks LAPI connectivity after sync succeeds and detects a later outage", async () => {
-		Object.assign(mocks.sync, {
-			configured: true,
-			lastSuccessAt: new Date().toISOString(),
-		});
+		startClock();
+		syncHealthy();
 		const { getReadinessResponse } = await import("./health.server");
 		expect((await getReadinessResponse()).status).toBe(200);
 		mocks.lapi.checkConnectionHealth.mockResolvedValue({
 			status: "ERROR",
 			error: "INVALID_API_TOKEN",
 		});
+		passProbeWindow();
 		const response = await getReadinessResponse();
 		expect(response.status).toBe(503);
 		expect(await response.json()).toMatchObject({ reason: "lapi_unavailable" });
 	});
 
 	it("verifies configured watcher credentials even when there are no decisions", async () => {
-		Object.assign(mocks.sync, {
-			configured: true,
-			lastSuccessAt: new Date().toISOString(),
-		});
+		startClock();
+		syncHealthy();
 		mocks.lapi.canFetchAlerts = true;
 		mocks.lapi.getAlerts.mockRejectedValueOnce(
 			new Error("Watcher login failed"),
@@ -261,6 +277,46 @@ describe("dashboard readiness", () => {
 			reason: "lapi_watcher_unavailable",
 		});
 		expect(mocks.lapi.getAlerts).toHaveBeenCalledWith({ limit: 1 });
+		passProbeWindow();
+		expect((await getReadinessResponse()).status).toBe(200);
+	});
+
+	it("shares one LAPI probe between concurrent and repeated callers in a window", async () => {
+		startClock();
+		syncHealthy();
+		mocks.lapi.canFetchAlerts = true;
+		const { getReadinessResponse } = await import("./health.server");
+		const responses = await Promise.all(
+			Array.from({ length: 20 }, () => getReadinessResponse()),
+		);
+		expect(responses.every((response) => response.status === 200)).toBe(true);
+		await getReadinessResponse();
+		expect(mocks.lapi.checkConnectionHealth).toHaveBeenCalledTimes(1);
+		expect(mocks.lapi.getAlerts).toHaveBeenCalledTimes(1);
+
+		passProbeWindow();
+		await getReadinessResponse();
+		expect(mocks.lapi.checkConnectionHealth).toHaveBeenCalledTimes(2);
+	});
+
+	it("keeps reporting a cached LAPI failure until the window passes", async () => {
+		startClock();
+		syncHealthy();
+		mocks.lapi.checkConnectionHealth.mockResolvedValue({
+			status: "ERROR",
+			error: "SECURITY_ENGINE_UNREACHABLE",
+		});
+		const { getReadinessResponse } = await import("./health.server");
+		for (let i = 0; i < 5; i++) {
+			expect((await getReadinessResponse()).status).toBe(503);
+		}
+		expect(mocks.lapi.checkConnectionHealth).toHaveBeenCalledTimes(1);
+
+		mocks.lapi.checkConnectionHealth.mockResolvedValue({
+			status: "OK",
+			error: null,
+		});
+		passProbeWindow();
 		expect((await getReadinessResponse()).status).toBe(200);
 	});
 });
