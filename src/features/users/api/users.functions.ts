@@ -88,7 +88,8 @@ export const deleteUserFn = createServerFn({ method: "POST" })
 		});
 		logger("users").info("User {username} deleted by {by}", {
 			username: deleted.username,
-			by: context.session.user.name,
+			by: context.session.user.username ?? context.session.user.id,
+			userId: context.session.user.id,
 		});
 		return { success: true };
 	});
