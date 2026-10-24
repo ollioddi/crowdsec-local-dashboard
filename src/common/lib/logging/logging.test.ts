@@ -92,4 +92,15 @@ describe("errorFields", () => {
 	it("stringifies a thrown non-error", () => {
 		expect(errorFields("nope")).toEqual({ errorMessage: "nope" });
 	});
+
+	it("escapes terminal control characters in human lines", () => {
+		initLogging({ format: "human" });
+		const forged = "bob\x1b[2K\x1b[1Ginfo admin signed in";
+		logger("auth").warn("Failed sign-in for {username}", {
+			username: forged,
+			attempt: forged,
+		});
+		expect(lines[0].line).not.toContain("\x1b");
+		expect(lines[0].line).toContain("bob\\u001b[2K");
+	});
 });
