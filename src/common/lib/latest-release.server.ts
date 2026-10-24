@@ -1,6 +1,6 @@
 import { env } from "@/common/lib/env";
 import { errorFields, logger } from "@/common/lib/logging/logger";
-import { APP_VERSION, GITHUB_REPO } from "./version";
+import { APP_VERSION, GITHUB_REPO, RELEASES_URL } from "./version";
 
 const log = logger("update-check");
 const RELEASES_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=5`;
@@ -49,5 +49,14 @@ async function fetchLatestRelease(): Promise<LatestRelease | null> {
 	const releases: { tag_name: string; html_url: string; draft: boolean }[] =
 		await res.json();
 	const release = releases.find((r) => !r.draft);
-	return release ? { version: release.tag_name, url: release.html_url } : null;
+	return release
+		? { version: release.tag_name, url: releasePageUrl(release.html_url) }
+		: null;
+}
+
+/** Only links to this repo's releases. */
+export function releasePageUrl(htmlUrl: unknown): string {
+	const isOurs =
+		typeof htmlUrl === "string" && htmlUrl.startsWith(`${RELEASES_URL}/`);
+	return isOurs ? htmlUrl : RELEASES_URL;
 }
