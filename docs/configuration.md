@@ -12,6 +12,8 @@ Every setting is an environment variable. The shipped [`.env.example`](../.env.e
 | `DATABASE_URL` | | `file:/data/app.db` | SQLite path. Defaults to the persistent volume, so there is no need to change it. |
 | `BETTER_AUTH_SECRET` | | _(generated)_ | Secret used to sign sessions. The container generates one on first start and keeps it in the volume at `/data/auth-secret`. Set it to choose your own, and always set it for `pnpm dev`. Generate with `openssl rand -base64 32`. |
 | `BETTER_AUTH_URL` | | _(inferred from the proxy headers)_ | The public URL of the dashboard, e.g. `https://dashboard.example.com`. Leave it unset for plain HTTP at `http://<host>:3000`. Set it when you serve over HTTPS, so the session cookie is marked `Secure`. The flag is picked at startup, so without this it stays unmarked even behind an HTTPS proxy, and the dashboard warns when it notices. Also set it if logins fail with "Invalid origin". |
+| `SIGN_IN_RATE_LIMIT_MAX` | | `5` | Password sign-in attempts allowed per client IP in each window. Further attempts get "Too many sign-in attempts" and a countdown. |
+| `SIGN_IN_RATE_LIMIT_WINDOW` | | `60` | Length of that window in seconds. |
 
 ## CrowdSec LAPI
 

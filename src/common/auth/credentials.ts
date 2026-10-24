@@ -24,6 +24,19 @@ export const newPasswordSchema = z
 	.min(PASSWORD_MIN_LENGTH, `Use at least ${PASSWORD_MIN_LENGTH} characters`)
 	.max(PASSWORD_MAX_LENGTH, `Use at most ${PASSWORD_MAX_LENGTH} characters`);
 
+// Only length caps, so older accounts can still sign in
+export const signInSchema = z.object({
+	username: z
+		.string()
+		.trim()
+		.min(1, "Username is required")
+		.max(USERNAME_MAX_LENGTH, "Invalid username or password"),
+	password: z
+		.string()
+		.min(1, "Password is required")
+		.max(PASSWORD_MAX_LENGTH, "Invalid username or password"),
+});
+
 export const firstAdminSchema = z.object({
 	username: usernameSchema,
 	password: newPasswordSchema,

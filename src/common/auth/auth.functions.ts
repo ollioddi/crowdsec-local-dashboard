@@ -1,16 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import z from "zod";
 import type { Session } from "@/common/auth/auth.server";
+import { firstAdminSchema } from "@/common/auth/credentials";
 import { SETUP_EMAIL_DOMAIN } from "@/common/auth/email-domains";
 import { logger } from "@/common/lib/logging/logger";
 
 const log = logger("auth");
-
-export const loginSchema = z.object({
-	username: z.string().min(1, "Username is required"),
-	password: z.string().min(4, "Password is required"),
-});
 
 /**
  * Server function to get the current session.
@@ -25,6 +20,14 @@ export const getSessionFn = createServerFn({ method: "GET" }).handler(
 		warnIfCookieNotSecure(headers);
 		const session = await auth.api.getSession({ headers });
 		return session;
+	},
+);
+
+/** Rate limit window, for the login countdown. */
+export const getSignInWindowFn = createServerFn({ method: "GET" }).handler(
+	async (): Promise<number> => {
+		const { env } = await import("@/common/lib/env");
+		return env.SIGN_IN_RATE_LIMIT_WINDOW;
 	},
 );
 
@@ -63,51 +66,25 @@ export const getOidcConfigFn = createServerFn({ method: "GET" }).handler(
 	},
 );
 
-/**
- * Ensures at least one admin user exists, then signs in.
- * On first login: creates the user with the given credentials.
- * On subsequent logins: signs in with existing credentials.
- */
-export const ensureAdminAndSignInFn = createServerFn({ method: "POST" })
-	.validator(loginSchema)
+/** Creates the first account. The client signs in afterwards. */
+export const createFirstAdminFn = createServerFn({ method: "POST" })
+	.validator(firstAdminSchema)
 	.handler(async ({ data }) => {
-		const { auth } = await import("@/common/auth/auth.server");
 		const { prisma } = await import("@/common/lib/db");
 		const { createUserAccount } = await import(
 			"@/common/auth/create-user-account.server"
 		);
 
-		const headers = getRequestHeaders();
-		const { username, password } = data;
-
-		const userCount = await prisma.user.count();
-
-		if (userCount === 0) {
-			// First user — create admin account directly via Prisma,
-			// bypassing signUpEmail which requires a valid email.
-			await createUserAccount(
-				username,
-				password,
-				`${username}${SETUP_EMAIL_DOMAIN}`,
-			);
-			log.info("{username} is the first user and becomes admin", { username });
+		if ((await prisma.user.count()) > 0) {
+			return { error: "Setup is already complete. Sign in instead." };
 		}
 
-		// Sign in with username. better-auth throws an APIError on bad credentials
-		// rather than returning null, so translate that into a form error.
-		const { APIError } = await import("better-auth/api");
-		try {
-			await auth.api.signInUsername({
-				body: { username, password },
-				headers,
-			});
-		} catch (error) {
-			if (error instanceof APIError) {
-				log.warn("Failed sign-in for {username}", { username });
-				return { error: "Invalid credentials" };
-			}
-			throw error;
-		}
-
-		return { success: true };
+		const username = data.username.toLowerCase();
+		await createUserAccount(
+			username,
+			data.password,
+			`${username}${SETUP_EMAIL_DOMAIN}`,
+		);
+		log.info("{username} is the first user and becomes admin", { username });
+		return { username };
 	});

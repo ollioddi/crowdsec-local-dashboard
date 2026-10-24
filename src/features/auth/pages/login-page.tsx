@@ -1,11 +1,15 @@
 import { useForm } from "@tanstack/react-form-start";
 import { useLoaderData, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
-import {
-	ensureAdminAndSignInFn,
-	loginSchema,
-} from "@/common/auth/auth.functions";
+import { createFirstAdminFn } from "@/common/auth/auth.functions";
 import { authClient } from "@/common/auth/auth-client";
+import {
+	firstAdminSchema,
+	PASSWORD_HINT,
+	signInSchema,
+	USERNAME_HINT,
+} from "@/common/auth/credentials";
+import { type SignInFailure, signInWithPassword } from "@/common/auth/sign-in";
 import { Button } from "@/common/components/ui/button";
 import {
 	Card,
@@ -16,6 +20,7 @@ import {
 } from "@/common/components/ui/card";
 import {
 	Field,
+	FieldDescription,
 	FieldError,
 	FieldGroup,
 	FieldLabel,
@@ -23,13 +28,16 @@ import {
 import { Input } from "@/common/components/ui/input";
 import { useTitle } from "@/common/hooks/use-title";
 import { describeRequestFailure } from "@/common/lib/request-error";
+import { useSignInCooldown } from "@/features/auth/hooks/use-sign-in-cooldown";
 
 const signInWithOidc = () =>
 	authClient.signIn.social({ provider: "oidc", callbackURL: "/" });
 
 export const LoginPage = () => {
 	const router = useRouter();
-	const { isFirstSetup, oidcConfig } = useLoaderData({ from: "/login" });
+	const { isFirstSetup, oidcConfig, signInWindowSeconds } = useLoaderData({
+		from: "/login",
+	});
 	useTitle(isFirstSetup ? "Create admin account" : "Login");
 
 	useEffect(() => {
@@ -43,26 +51,45 @@ export const LoginPage = () => {
 			username: "",
 			password: "",
 		},
-		validators: {
-			onSubmit: loginSchema,
-		},
+		validators: isFirstSetup
+			? { onChange: firstAdminSchema, onSubmit: firstAdminSchema }
+			: { onSubmit: signInSchema },
 		onSubmit: async ({ value }) => {
-			try {
-				const result = await ensureAdminAndSignInFn({
-					data: value,
-				});
-				if ("error" in result && result.error) {
-					form.setErrorMap({ onSubmit: { form: result.error, fields: {} } });
-				} else {
-					router.navigate({ to: "/" });
-				}
-			} catch (error) {
-				form.setErrorMap({
-					onSubmit: { form: describeRequestFailure(error), fields: {} },
-				});
+			const failure = await submit(value.username.trim(), value.password);
+			if (failure === null) {
+				router.navigate({ to: "/" });
+			} else if ("retryAt" in failure) {
+				form.setErrorMap({ onSubmit: undefined });
+				cooldown.start(failure.retryAt);
+			} else {
+				form.setErrorMap({ onSubmit: { form: failure.error, fields: {} } });
 			}
 		},
 	});
+	const cooldown = useSignInCooldown();
+
+	const submit = async (
+		username: string,
+		password: string,
+	): Promise<SignInFailure | null> => {
+		if (!isFirstSetup) {
+			return signInWithPassword(username, password, signInWindowSeconds);
+		}
+		try {
+			const result = await createFirstAdminFn({
+				data: { username, password },
+			});
+			if (result.error !== undefined) return { error: result.error };
+			return signInWithPassword(result.username, password, signInWindowSeconds);
+		} catch (error) {
+			return { error: describeRequestFailure(error) };
+		}
+	};
+
+	const submitLabel = isFirstSetup ? "Create account & sign in" : "Sign in";
+	const submittingLabel = isFirstSetup
+		? "Creating account..."
+		: "Signing in...";
 
 	return (
 		<div className="flex min-h-screen items-center justify-center">
@@ -101,8 +128,11 @@ export const LoginPage = () => {
 													onChange={(e) => field.handleChange(e.target.value)}
 													aria-invalid={isInvalid}
 													placeholder="johndoe"
-													autoComplete="off"
+													autoComplete="username"
 												/>
+												{isFirstSetup && (
+													<FieldDescription>{USERNAME_HINT}</FieldDescription>
+												)}
 												{isInvalid && (
 													<FieldError errors={field.state.meta.errors} />
 												)}
@@ -126,8 +156,13 @@ export const LoginPage = () => {
 													onChange={(e) => field.handleChange(e.target.value)}
 													aria-invalid={isInvalid}
 													placeholder="••••••••"
-													autoComplete="off"
+													autoComplete={
+														isFirstSetup ? "new-password" : "current-password"
+													}
 												/>
+												{isFirstSetup && (
+													<FieldDescription>{PASSWORD_HINT}</FieldDescription>
+												)}
 												{isInvalid && (
 													<FieldError errors={field.state.meta.errors} />
 												)}
@@ -138,32 +173,35 @@ export const LoginPage = () => {
 								<form.Subscribe selector={(state) => state.errors}>
 									{(errors) =>
 										errors.length > 0 && (
-											<p className="text-sm text-red-500">
-												<div className="flex flex-col gap-1">
-													{errors
-														.map((e) => (typeof e === "string" ? e : undefined))
-														.filter(Boolean)
-														.map((m) => (
-															<div key={m} className="text-sm text-red-500">
-																{m}
-															</div>
-														))}
-												</div>
-											</p>
+											<div role="alert" className="flex flex-col gap-1">
+												{errors
+													.filter((e) => typeof e === "string")
+													.map((message) => (
+														<p key={message} className="text-sm text-red-500">
+															{message}
+														</p>
+													))}
+											</div>
 										)
 									}
 								</form.Subscribe>
+								{cooldown.secondsLeft > 0 && (
+									<p role="status" className="text-sm text-red-500">
+										Too many sign-in attempts. Try again in{" "}
+										{cooldown.secondsLeft === 1
+											? "1 second"
+											: `${cooldown.secondsLeft} seconds`}
+										.
+									</p>
+								)}
 								<Field>
 									<form.Subscribe selector={(state) => state.isSubmitting}>
 										{(isSubmitting) => (
-											<Button type="submit" disabled={isSubmitting}>
-												{isSubmitting
-													? isFirstSetup
-														? "Creating account..."
-														: "Signing in..."
-													: isFirstSetup
-														? "Create account & sign in"
-														: "Sign in"}
+											<Button
+												type="submit"
+												disabled={isSubmitting || cooldown.secondsLeft > 0}
+											>
+												{isSubmitting ? submittingLabel : submitLabel}
 											</Button>
 										)}
 									</form.Subscribe>

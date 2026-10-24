@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { createAuthMiddleware, isAPIError } from "better-auth/api";
 import { genericOAuth } from "better-auth/plugins";
 import type { GenericOAuthConfig } from "better-auth/plugins/generic-oauth";
 import { username } from "better-auth/plugins/username";
@@ -65,6 +66,28 @@ export const auth = betterAuth({
 		disableSignUp: true,
 		minPasswordLength: PASSWORD_MIN_LENGTH,
 		maxPasswordLength: PASSWORD_MAX_LENGTH,
+	},
+	// On in every environment, counted in memory
+	rateLimit: {
+		enabled: true,
+		customRules: {
+			"/sign-in/username": {
+				window: env.SIGN_IN_RATE_LIMIT_WINDOW,
+				max: env.SIGN_IN_RATE_LIMIT_MAX,
+			},
+		},
+	},
+	hooks: {
+		after: createAuthMiddleware(async (ctx) => {
+			if (ctx.path !== "/sign-in/username") return;
+			if (!isAPIError(ctx.context.returned)) return;
+			log.warn("Failed sign-in for {username}", {
+				username: String(ctx.body?.username ?? "").slice(
+					0,
+					USERNAME_MAX_LENGTH,
+				),
+			});
+		}),
 	},
 	logger: {
 		level: "warn",
