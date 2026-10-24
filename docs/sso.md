@@ -14,6 +14,15 @@ Note the client ID, client secret and issuer URL it gives you.
 
 The provider must be reachable when Better Auth initializes OIDC discovery. If discovery fails and the provider is skipped, `/healthz` and `/readyz` return `503` and Docker reports the dashboard as unhealthy. Restore the provider's availability, then restart the dashboard to retry discovery. Local username and password login remains available when the OIDC provider is skipped.
 
+### Who can sign in
+
+The dashboard creates an account for anyone your identity provider authenticates for this application, so access is decided at the provider. Restrict the application there before turning SSO on:
+
+- **Authentik:** open the application, then **Policy / Group / User Bindings**, and bind the group that should have access. An application with no bindings is open to every Authentik user, including self-enrolled ones.
+- **Keycloak:** a client is open to every user in its realm. Override the client's browser flow with one that denies users without a given role (a **Condition - user role** step followed by **Deny access**), or keep the client in a realm that only contains your users.
+
+Deleting a user in the dashboard does not keep them out: their next SSO sign-in creates the account again. Remove their access at the provider instead.
+
 ## 2. Set the environment variables
 
 ```env
