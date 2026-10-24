@@ -1,4 +1,5 @@
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
+import { withPeerAddress } from "@/common/lib/client-address.server";
 import { configureDatabase, prisma } from "@/common/lib/db";
 import { env } from "@/common/lib/env";
 import { errorFields, initLogging, logger } from "@/common/lib/logging/logger";
@@ -144,6 +145,6 @@ if (!globalThis.__serverBooted) {
 
 export default createServerEntry({
 	fetch(request) {
-		return handler.fetch(request);
+		return handler.fetch(withPeerAddress(request));
 	},
 });
