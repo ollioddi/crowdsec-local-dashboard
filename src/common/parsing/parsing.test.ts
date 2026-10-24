@@ -490,6 +490,21 @@ describe("captured mailcow alerts", () => {
 		});
 	});
 
+	it("strips escaped line endings in linear time", () => {
+		const backslashes = "\\".repeat(100_000);
+		const started = performance.now();
+		const parsed = parseAlert({
+			...postfixCommandAlert,
+			meta: meta({
+				client_sent: JSON.stringify([`${backslashes}x`, "QUIT\\\\r\\n"]),
+			}),
+		});
+		expect(performance.now() - started).toBeLessThan(500);
+		expect(parsed.aggregates).toMatchObject({
+			clientSent: [`${backslashes}x`, "QUIT"],
+		});
+	});
+
 	it("drops per-attempt detail from Dovecot reasons", () => {
 		const parsed = parseAlert({
 			...dovecotAlert,
