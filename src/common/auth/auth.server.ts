@@ -4,6 +4,12 @@ import { genericOAuth } from "better-auth/plugins";
 import type { GenericOAuthConfig } from "better-auth/plugins/generic-oauth";
 import { username } from "better-auth/plugins/username";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
+import {
+	PASSWORD_MAX_LENGTH,
+	PASSWORD_MIN_LENGTH,
+	USERNAME_MAX_LENGTH,
+	USERNAME_MIN_LENGTH,
+} from "@/common/auth/credentials";
 import { prisma } from "@/common/lib/db";
 import { env } from "@/common/lib/env";
 import { logger } from "@/common/lib/logging/logger";
@@ -57,6 +63,8 @@ export const auth = betterAuth({
 		enabled: true,
 		// Local accounts are created by first-time setup or authenticated users.
 		disableSignUp: true,
+		minPasswordLength: PASSWORD_MIN_LENGTH,
+		maxPasswordLength: PASSWORD_MAX_LENGTH,
 	},
 	logger: {
 		level: "warn",
@@ -79,7 +87,10 @@ export const auth = betterAuth({
 	},
 	plugins: [
 		tanstackStartCookies(),
-		username(),
+		username({
+			minUsernameLength: USERNAME_MIN_LENGTH,
+			maxUsernameLength: USERNAME_MAX_LENGTH,
+		}),
 		genericOAuth({ config: oidcConfig }),
 	],
 });

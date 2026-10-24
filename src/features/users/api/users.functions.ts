@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import z from "zod";
 import { authMiddleware } from "@/common/auth/auth.middleware";
+import { newPasswordSchema, usernameSchema } from "@/common/auth/credentials";
 import { LOCAL_EMAIL_DOMAIN } from "@/common/auth/email-domains";
 import { logger } from "@/common/lib/logging/logger";
 
@@ -26,9 +27,9 @@ export const getUsersFn = createServerFn({ method: "GET" })
 export type UserRow = Awaited<ReturnType<typeof getUsersFn>>[number];
 
 export const createUserSchema = z.object({
-	username: z.string().min(1, "Username is required"),
-	password: z.string().min(4, "Password must be at least 4 characters"),
-	email: z.union([z.email("Invalid email address"), z.literal("")]),
+	username: usernameSchema,
+	password: newPasswordSchema,
+	email: z.union([z.email("Invalid email address").max(254), z.literal("")]),
 });
 
 export const createUserFn = createServerFn({ method: "POST" })
@@ -42,18 +43,19 @@ export const createUserFn = createServerFn({ method: "POST" })
 		const { username, password, email } = data;
 		const usernameLower = username.toLowerCase();
 
+		const resolvedEmail = email || `${usernameLower}${LOCAL_EMAIL_DOMAIN}`;
 		const existing = await prisma.user.findFirst({
-			where: { username: usernameLower },
+			where: { OR: [{ username: usernameLower }, { email: resolvedEmail }] },
+			select: { username: true },
 		});
-		if (existing) {
+		if (existing?.username === usernameLower) {
 			return { error: "Username already exists" };
 		}
+		if (existing) {
+			return { error: "Another user already has that email" };
+		}
 
-		await createUserAccount(
-			usernameLower,
-			password,
-			email || `${usernameLower}${LOCAL_EMAIL_DOMAIN}`,
-		);
+		await createUserAccount(usernameLower, password, resolvedEmail);
 
 		return { success: true, username: usernameLower };
 	});

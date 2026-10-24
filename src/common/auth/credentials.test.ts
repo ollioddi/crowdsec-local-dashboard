@@ -1,0 +1,31 @@
+import { describe, expect, it } from "vitest";
+import { firstAdminSchema } from "./credentials";
+
+describe("credential rules", () => {
+	it("rejects passwords under 12 characters for new accounts", () => {
+		const result = firstAdminSchema.safeParse({
+			username: "admin",
+			password: "short-pass",
+		});
+		expect(result.success).toBe(false);
+	});
+
+	it.each(["ab", "has space", "x".repeat(31), "evil<script>"])(
+		"rejects the username %j",
+		(username) => {
+			const result = firstAdminSchema.safeParse({
+				username,
+				password: "a-long-enough-passphrase",
+			});
+			expect(result.success).toBe(false);
+		},
+	);
+
+	it("accepts mixed case usernames, which setup lowercases", () => {
+		const result = firstAdminSchema.safeParse({
+			username: "Oliver.R_1",
+			password: "a-long-enough-passphrase",
+		});
+		expect(result.success).toBe(true);
+	});
+});
