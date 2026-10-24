@@ -2,6 +2,7 @@ import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 import { configureDatabase, prisma } from "@/common/lib/db";
 import { env } from "@/common/lib/env";
 import { errorFields, initLogging, logger } from "@/common/lib/logging/logger";
+import { setServerReady } from "@/common/lib/server-state.server";
 import { closeAllSSEConnections } from "@/common/lib/sse.server";
 import { APP_VERSION } from "@/common/lib/version";
 import { repairAlertExtracts } from "@/features/sync/lib/db";
@@ -110,6 +111,7 @@ function hookShutdown() {
 		process.on(signal, async () => {
 			if (shuttingDown) return;
 			shuttingDown = true;
+			setServerReady(false);
 			log.info("Received {signal}, shutting down", { signal });
 			clearInterval(pollTimer);
 			closeAllSSEConnections();
@@ -129,8 +131,10 @@ if (!globalThis.__shutdownHooked) {
 }
 if (!globalThis.__serverBooted) {
 	globalThis.__serverBooted = true;
+	setServerReady(false);
 	try {
 		await boot();
+		setServerReady(true);
 	} catch (err) {
 		globalThis.__serverBooted = false;
 		log.fatal("Boot failed: {errorMessage}", errorFields(err));
