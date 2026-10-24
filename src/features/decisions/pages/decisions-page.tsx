@@ -67,6 +67,7 @@ export function DecisionsPage() {
 				};
 			});
 		},
+		refetch,
 	);
 
 	const {
