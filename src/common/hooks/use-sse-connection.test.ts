@@ -76,3 +76,13 @@ it("closes offline and reconnects when the network returns", () => {
 	});
 	expect(FakeEventSource.instances).toHaveLength(2);
 });
+
+it("reports reopened streams but not the first open", () => {
+	const onReconnect = vi.fn();
+	renderHook(() => useSSEConnection("/sse/test", () => {}, onReconnect));
+	act(() => FakeEventSource.instances[0].open());
+	expect(onReconnect).not.toHaveBeenCalled();
+	act(() => vi.advanceTimersByTime(50_000));
+	act(() => FakeEventSource.instances[1].open());
+	expect(onReconnect).toHaveBeenCalledTimes(1);
+});

@@ -30,20 +30,31 @@ export function HostsPage() {
 	} = useQuery(hostsQueryOptions);
 	useTitle(`Hosts (${hosts.length})`);
 
-	const status = useSSEConnection<HostWithCount[]>("/sse/hosts", (incoming) => {
-		queryClient.setQueryData<HostWithCount[]>(["hosts"], (old) => {
-			if (old) {
-				const knownIps = new Set(old.map((h) => h.ip));
-				for (const host of incoming) {
-					if (!knownIps.has(host.ip)) {
-						toast.success("New host discovered", { description: host.ip });
+	const refresh = async () => {
+		await Promise.all([
+			refetch(),
+			queryClient.invalidateQueries({ queryKey: ["host-activity"] }),
+		]);
+	};
+
+	const status = useSSEConnection<HostWithCount[]>(
+		"/sse/hosts",
+		(incoming) => {
+			queryClient.setQueryData<HostWithCount[]>(["hosts"], (old) => {
+				if (old) {
+					const knownIps = new Set(old.map((h) => h.ip));
+					for (const host of incoming) {
+						if (!knownIps.has(host.ip)) {
+							toast.success("New host discovered", { description: host.ip });
+						}
 					}
 				}
-			}
-			return incoming;
-		});
-		void queryClient.invalidateQueries({ queryKey: ["host-activity"] });
-	});
+				return incoming;
+			});
+			void queryClient.invalidateQueries({ queryKey: ["host-activity"] });
+		},
+		refresh,
+	);
 
 	const bannedNow = hosts.filter((h) => h._count.decisions > 0).length;
 	const repeatOffenders = hosts.filter((h) => h.totalBans > 1).length;
@@ -68,12 +79,7 @@ export function HostsPage() {
 				searchPlaceholder="Search IP…"
 				emptyState="No hosts discovered yet."
 				renderSubComponent={(row) => <HostExpandedRow row={row} />}
-				onRefresh={async () => {
-					await Promise.all([
-						refetch(),
-						queryClient.invalidateQueries({ queryKey: ["host-activity"] }),
-					]);
-				}}
+				onRefresh={refresh}
 			/>
 		</div>
 	);

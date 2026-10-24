@@ -11,17 +11,21 @@ export type SSEStatus = "connecting" | "live" | "down";
 /**
  * Opens the stream and reports its state. An idle stream on a dead network
  * never errors, so missed pings count as down, and the browser's own offline
- * verdict closes it outright.
+ * verdict closes it outright. The server only pushes changes, so anything
+ * sent while the stream was down is lost; onReconnect lets the caller refetch.
  */
 export function useSSEConnection<T>(
 	url: string,
 	onMessage: (data: T) => void,
+	onReconnect?: () => void,
 ): SSEStatus {
 	const [status, setStatus] = useState<SSEStatus>("connecting");
 	const online = useOnline();
 	const source = useRef<EventSource | null>(null);
 	const lastSeen = useRef(0);
+	const hasOpened = useRef(false);
 	const handleMessage = useEffectEvent((data: T) => onMessage(data));
+	const handleReconnect = useEffectEvent(() => onReconnect?.());
 
 	const connect = useEffectEvent((reconnecting = false) => {
 		source.current?.close();
@@ -31,6 +35,8 @@ export function useSSEConnection<T>(
 		eventSource.onopen = () => {
 			lastSeen.current = Date.now();
 			setStatus("live");
+			if (hasOpened.current) handleReconnect();
+			hasOpened.current = true;
 		};
 		eventSource.onerror = () => setStatus("down");
 		eventSource.addEventListener("ping", () => {

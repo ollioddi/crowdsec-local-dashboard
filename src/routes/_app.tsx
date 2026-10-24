@@ -52,7 +52,15 @@ const AppShell = ({ children }: Readonly<{ children: ReactNode }>) => {
 		(status: SyncStatus) => queryClient.setQueryData(["sync-status"], status),
 		[queryClient],
 	);
-	useSSEConnection<SyncStatus>("/sse/sync-status", handleSyncStatus);
+	const refetchSyncStatus = useCallback(
+		() => queryClient.invalidateQueries({ queryKey: ["sync-status"] }),
+		[queryClient],
+	);
+	useSSEConnection<SyncStatus>(
+		"/sse/sync-status",
+		handleSyncStatus,
+		refetchSyncStatus,
+	);
 
 	// Route components are code-split; fetching them now means a page never
 	// visited still opens offline instead of failing on its chunk
