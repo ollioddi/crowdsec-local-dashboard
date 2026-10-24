@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/common/auth/auth.middleware";
-import { logger } from "@/common/lib/logging/logger";
+import { errorFields, logger } from "@/common/lib/logging/logger";
 import type { AlertDetail } from "@/features/decisions/api/alert-detail";
 import type { DecisionsPayload } from "@/features/decisions/api/decisions.types";
 
@@ -68,7 +68,18 @@ export const deleteDecisionFn = createServerFn({ method: "POST" })
 			throw new Error(`Decision ${data.id} is not in the dashboard`);
 		}
 		const { user } = context.session;
-		const result = await getLapiClient().deleteDecisionById(data.id);
+		const result = await getLapiClient()
+			.deleteDecisionById(data.id)
+			.catch((error: unknown) => {
+				// Details go to the log, not the UI
+				log.error("Deleting decision {id} failed: {errorMessage}", {
+					id: data.id,
+					...errorFields(error),
+				});
+				throw new Error(
+					"Could not delete the decision in CrowdSec LAPI. See the server log.",
+				);
+			});
 		log.info("Decision {id} for {ip} removed by {by}", {
 			id: data.id,
 			ip: decision.hostIp,

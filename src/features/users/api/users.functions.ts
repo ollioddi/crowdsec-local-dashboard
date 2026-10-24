@@ -82,10 +82,15 @@ export const deleteUserFn = createServerFn({ method: "POST" })
 			return { error: "Cannot delete the admin user" };
 		}
 
-		const deleted = await prisma.user.delete({
+		// deleteMany doesn't throw when the user is already gone
+		const deleted = await prisma.user.findUnique({
 			where: { id: data.id },
 			select: { username: true },
 		});
+		const { count } = await prisma.user.deleteMany({ where: { id: data.id } });
+		if (!deleted || count === 0) {
+			return { error: "That user no longer exists" };
+		}
 		logger("users").info("User {username} deleted by {by}", {
 			username: deleted.username,
 			by: context.session.user.username ?? context.session.user.id,
