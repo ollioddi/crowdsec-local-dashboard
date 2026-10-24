@@ -3,6 +3,8 @@ services:
     image: ghcr.io/ollioddi/crowdsec-local-dashboard:0.7.0-beta
     # build: .  # Uncomment to build from source instead of using the pre-built image
     container_name: crowdsec-dashboard
+    # Behind a reverse proxy, use "127.0.0.1:3000:3000" or drop ports entirely.
+    # See "Exposing the dashboard" in docs/deployment.md.
     ports:
       - "3000:3000"
     volumes:
