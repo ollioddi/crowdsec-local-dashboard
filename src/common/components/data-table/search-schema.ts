@@ -24,7 +24,7 @@ export function dataTableSearchSchema(defaults: DataTableDefaults = {}) {
 			.number()
 			.int()
 			.positive()
-			.default(defaults.pageSize ?? 10),
+			.default(defaults.pageSize ?? 50),
 		sort: defaults.sort
 			? sortSchema.default(defaults.sort)
 			: sortSchema.optional(),
