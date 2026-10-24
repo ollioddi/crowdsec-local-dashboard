@@ -50,7 +50,7 @@ const serverEnv: NodeJS.ProcessEnv = {
 	// Left unset on purpose: with no LAPI the poller never overwrites the demo data.
 	LAPI_URL: "",
 	LAPI_BOUNCER_API_TOKEN: "",
-	// Enough for the login shot to show the SSO button; discovery only runs on click
+	// Shows the SSO button in the login shot; this is a placeholder provider.
 	OIDC_CLIENT_ID: "demo-client",
 	OIDC_CLIENT_SECRET: "demo-secret",
 	OIDC_ISSUER_URL: "https://sso.example.com/application/o/crowdsec-dashboard/",
@@ -128,7 +128,7 @@ async function seed() {
 
 async function startServer() {
 	// Something already listening would quietly serve stale pages for the run.
-	const inUse = await fetch(`${origin}/api/health`).then(
+	const inUse = await fetch(`${origin}/livez`).then(
 		() => true,
 		() => false,
 	);
@@ -144,7 +144,8 @@ async function startServer() {
 	const deadline = Date.now() + 30_000;
 	while (Date.now() < deadline) {
 		try {
-			const response = await fetch(`${origin}/api/health`);
+			// The demo's placeholder OIDC provider intentionally fails health checks.
+			const response = await fetch(`${origin}/livez`);
 			if (response.ok) return child;
 		} catch {
 			// not listening yet

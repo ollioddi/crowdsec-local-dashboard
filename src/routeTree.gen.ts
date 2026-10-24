@@ -10,12 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as HealthzRouteImport } from './routes/healthz'
+import { Route as LivezRouteImport } from './routes/livez'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ReadyzRouteImport } from './routes/readyz'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppDecisionsRouteImport } from './routes/_app/decisions'
 import { Route as AppHostsRouteImport } from './routes/_app/hosts'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
-import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as SseDecisionsRouteImport } from './routes/sse/decisions'
 import { Route as SseHostsRouteImport } from './routes/sse/hosts'
 import { Route as SseSyncStatusRouteImport } from './routes/sse/sync-status'
@@ -25,9 +27,24 @@ const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HealthzRoute = HealthzRouteImport.update({
+  id: '/healthz',
+  path: '/healthz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LivezRoute = LivezRouteImport.update({
+  id: '/livez',
+  path: '/livez',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReadyzRoute = ReadyzRouteImport.update({
+  id: '/readyz',
+  path: '/readyz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -49,11 +66,6 @@ const AppUsersRoute = AppUsersRouteImport.update({
   id: '/users',
   path: '/users',
   getParentRoute: () => AppRoute,
-} as any)
-const ApiHealthRoute = ApiHealthRouteImport.update({
-  id: '/api/health',
-  path: '/api/health',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const SseDecisionsRoute = SseDecisionsRouteImport.update({
   id: '/sse/decisions',
@@ -78,22 +90,26 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/healthz': typeof HealthzRoute
+  '/livez': typeof LivezRoute
   '/login': typeof LoginRoute
+  '/readyz': typeof ReadyzRoute
   '/decisions': typeof AppDecisionsRoute
   '/hosts': typeof AppHostsRoute
   '/users': typeof AppUsersRoute
-  '/api/health': typeof ApiHealthRoute
   '/sse/decisions': typeof SseDecisionsRoute
   '/sse/hosts': typeof SseHostsRoute
   '/sse/sync-status': typeof SseSyncStatusRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
+  '/healthz': typeof HealthzRoute
+  '/livez': typeof LivezRoute
   '/login': typeof LoginRoute
+  '/readyz': typeof ReadyzRoute
   '/decisions': typeof AppDecisionsRoute
   '/hosts': typeof AppHostsRoute
   '/users': typeof AppUsersRoute
-  '/api/health': typeof ApiHealthRoute
   '/sse/decisions': typeof SseDecisionsRoute
   '/sse/hosts': typeof SseHostsRoute
   '/sse/sync-status': typeof SseSyncStatusRoute
@@ -103,11 +119,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/healthz': typeof HealthzRoute
+  '/livez': typeof LivezRoute
   '/login': typeof LoginRoute
+  '/readyz': typeof ReadyzRoute
   '/_app/decisions': typeof AppDecisionsRoute
   '/_app/hosts': typeof AppHostsRoute
   '/_app/users': typeof AppUsersRoute
-  '/api/health': typeof ApiHealthRoute
   '/sse/decisions': typeof SseDecisionsRoute
   '/sse/hosts': typeof SseHostsRoute
   '/sse/sync-status': typeof SseSyncStatusRoute
@@ -118,22 +136,26 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/healthz'
+    | '/livez'
     | '/login'
+    | '/readyz'
     | '/decisions'
     | '/hosts'
     | '/users'
-    | '/api/health'
     | '/sse/decisions'
     | '/sse/hosts'
     | '/sse/sync-status'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/healthz'
+    | '/livez'
     | '/login'
+    | '/readyz'
     | '/decisions'
     | '/hosts'
     | '/users'
-    | '/api/health'
     | '/sse/decisions'
     | '/sse/hosts'
     | '/sse/sync-status'
@@ -142,11 +164,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/healthz'
+    | '/livez'
     | '/login'
+    | '/readyz'
     | '/_app/decisions'
     | '/_app/hosts'
     | '/_app/users'
-    | '/api/health'
     | '/sse/decisions'
     | '/sse/hosts'
     | '/sse/sync-status'
@@ -156,8 +180,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  HealthzRoute: typeof HealthzRoute
+  LivezRoute: typeof LivezRoute
   LoginRoute: typeof LoginRoute
-  ApiHealthRoute: typeof ApiHealthRoute
+  ReadyzRoute: typeof ReadyzRoute
   SseDecisionsRoute: typeof SseDecisionsRoute
   SseHostsRoute: typeof SseHostsRoute
   SseSyncStatusRoute: typeof SseSyncStatusRoute
@@ -173,11 +199,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/healthz': {
+      id: '/healthz'
+      path: '/healthz'
+      fullPath: '/healthz'
+      preLoaderRoute: typeof HealthzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/livez': {
+      id: '/livez'
+      path: '/livez'
+      fullPath: '/livez'
+      preLoaderRoute: typeof LivezRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/readyz': {
+      id: '/readyz'
+      path: '/readyz'
+      fullPath: '/readyz'
+      preLoaderRoute: typeof ReadyzRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -207,13 +254,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/users'
       preLoaderRoute: typeof AppUsersRouteImport
       parentRoute: typeof AppRoute
-    }
-    '/api/health': {
-      id: '/api/health'
-      path: '/api/health'
-      fullPath: '/api/health'
-      preLoaderRoute: typeof ApiHealthRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/sse/decisions': {
       id: '/sse/decisions'
@@ -264,8 +304,10 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  HealthzRoute: HealthzRoute,
+  LivezRoute: LivezRoute,
   LoginRoute: LoginRoute,
-  ApiHealthRoute: ApiHealthRoute,
+  ReadyzRoute: ReadyzRoute,
   SseDecisionsRoute: SseDecisionsRoute,
   SseHostsRoute: SseHostsRoute,
   SseSyncStatusRoute: SseSyncStatusRoute,
