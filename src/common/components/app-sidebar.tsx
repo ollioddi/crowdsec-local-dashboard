@@ -1,4 +1,5 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
 	ChevronUp,
 	Monitor,
@@ -56,13 +57,15 @@ export function AppSidebar() {
 	const currentPath = router.location.pathname;
 	const session = useAppSession();
 	const { open } = useSidebar();
-	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 
 	const handleSignOut = () => {
 		signOut({
 			fetchOptions: {
 				onSuccess: () => {
-					navigate({ to: "/login" });
+					queryClient.clear();
+					// Full reload, so no data stays in memory
+					window.location.replace("/login");
 				},
 			},
 		});
