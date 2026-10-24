@@ -7,7 +7,7 @@ import {
 
 export const Route = createFileRoute("/_app/hosts")({
 	validateSearch: dataTableSearchSchema({
-		sort: { field: "activeDecisions", order: "desc" },
+		sort: { field: "lastSeen", order: "desc" },
 	}),
 	loader: async ({ context }) => {
 		await context.queryClient.query({
