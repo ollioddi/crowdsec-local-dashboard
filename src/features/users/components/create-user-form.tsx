@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { PASSWORD_HINT, USERNAME_HINT } from "@/common/auth/credentials";
 import { Button } from "@/common/components/ui/button";
 import {
 	Card,
@@ -21,6 +22,7 @@ import {
 } from "@/common/components/ui/drawer";
 import {
 	Field,
+	FieldDescription,
 	FieldError,
 	FieldGroup,
 	FieldLabel,
@@ -43,6 +45,7 @@ function CreateUserForm({ onCreated }: Readonly<{ onCreated?: () => void }>) {
 			email: "",
 		},
 		validators: {
+			onChange: createUserSchema,
 			onSubmit: createUserSchema,
 		},
 		onSubmit: async ({ value }) => {
@@ -91,6 +94,7 @@ function CreateUserForm({ onCreated }: Readonly<{ onCreated?: () => void }>) {
 									placeholder="johndoe"
 									autoComplete="off"
 								/>
+								<FieldDescription>{USERNAME_HINT}</FieldDescription>
 								{isInvalid && <FieldError errors={field.state.meta.errors} />}
 							</Field>
 						);
@@ -112,8 +116,9 @@ function CreateUserForm({ onCreated }: Readonly<{ onCreated?: () => void }>) {
 									onChange={(e) => field.handleChange(e.target.value)}
 									aria-invalid={isInvalid}
 									placeholder="••••••••"
-									autoComplete="off"
+									autoComplete="new-password"
 								/>
+								<FieldDescription>{PASSWORD_HINT}</FieldDescription>
 								{isInvalid && <FieldError errors={field.state.meta.errors} />}
 							</Field>
 						);
