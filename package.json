@@ -42,7 +42,7 @@
     "better-auth": "^1.7.12",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
-    "cn": "^0.4.0",
+    "cn": "^0.5.0",
     "geoip-country": "^5.0.202610210158",
     "lucide-react": "^1.61.0",
     "moment": "^2.31.0",
@@ -55,7 +55,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.15",
+    "@biomejs/biome": "2.6.2",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/devtools-vite": "^0.8.5",
     "@tanstack/react-devtools": "^0.10.13",
@@ -74,7 +74,7 @@
     "git-cliff": "2.14.2",
     "jsdom": "^30.1.3",
     "nitro": "npm:nitro-nightly@latest",
-    "oxc-transform-react": "^0.154.0",
+    "oxc-transform-react": "^0.155.0",
     "playwright": "^1.64.1",
     "prisma-zod-generator": "^3.3.1",
     "tailwindcss": "^4.3.3",
